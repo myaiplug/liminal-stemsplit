@@ -1,0 +1,9 @@
+body{font-family:Inter,system-ui,sans-serif;background:#020617;color:#e2e8f0;line-height:1.7;margin:0;padding:2rem}
+.wrap{max-width:720px;margin:0 auto}
+a{color:#22d3ee}
+h1{font-size:1.75rem;margin-bottom:0.5rem}
+.meta{color:#64748b;font-size:0.875rem;margin-bottom:2rem}
+h2{font-size:1.125rem;margin-top:2rem;color:#f8fafc}
+p,li{color:#94a3b8;font-size:0.9375rem}
+nav{margin-bottom:2rem;font-size:0.875rem}
+nav a{margin-right:1rem}

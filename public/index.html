@@ -156,7 +156,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 <div class="email-bar" id="emailBar">
   <button class="close-bar" onclick="dismissBar()">✕</button>
   <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-3">
-    <span class="text-sm font-medium whitespace-nowrap">🎧 <span class="gradient-text font-bold">Free</span> stem separation preview — no credit card</span>
+    <span class="text-sm font-medium whitespace-nowrap">📬 Get the <span class="gradient-text font-bold">free producer guide</span> + demo updates</span>
     <div class="flex gap-2 flex-1 w-full sm:w-auto">
       <input type="email" id="barEmail" placeholder="your@email.com" class="flex-1 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-liminal-500 transition-colors" required>
       <button onclick="captureEmail()" class="btn-primary text-sm !py-2 !px-5 whitespace-nowrap">Get Access</button>
@@ -174,10 +174,13 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
     <div class="hidden md:flex items-center gap-8">
       <a href="#demo" class="text-sm text-white/50 hover:text-white transition-colors">Demo</a>
       <a href="#features" class="text-sm text-white/50 hover:text-white transition-colors">Features</a>
+      <a href="#download" class="text-sm text-white/50 hover:text-white transition-colors">Download</a>
       <a href="#pricing" class="text-sm text-white/50 hover:text-white transition-colors">Pricing</a>
+      <a href="#faq" class="text-sm text-white/50 hover:text-white transition-colors">FAQ</a>
     </div>
     <div class="flex items-center gap-3">
-      <a href="#demo" class="btn-primary text-sm !py-2 !px-5">Try Live Demo →</a>
+      <a href="#download" class="hidden sm:inline-flex btn-secondary text-sm !py-2 !px-4">Download</a>
+      <a href="#demo" class="btn-primary text-sm !py-2 !px-5">Try Demo →</a>
     </div>
   </div>
 </nav>
@@ -218,12 +221,12 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   </div>
 </section>
 
-<!-- SOCIAL PROOF BAR -->
+<!-- TRUST BAR -->
 <div class="social-bar">
-  <span class="social-bar-item"><span class="text-liminal-400 font-bold" id="userCount">12,847</span> stems isolated</span>
-  <span class="social-bar-item"><span class="text-liminal-400 font-bold">4.9★</span> producer rated</span>
-  <span class="social-bar-item"><span class="text-liminal-400 font-bold">30-day</span> money-back</span>
-  <span class="social-bar-item">✦ <span class="text-liminal-400">Used by producers</span> on BeatStars, SoundCloud, Spotify</span>
+  <span class="social-bar-item"><span class="text-liminal-400 font-bold">100%</span> local desktop processing</span>
+  <span class="social-bar-item"><span class="text-liminal-400 font-bold">$49</span> one-time — no subscription</span>
+  <span class="social-bar-item"><span class="text-liminal-400 font-bold">30-day</span> money-back guarantee</span>
+  <span class="social-bar-item">✦ <span class="text-liminal-400">1 free split</span> in the desktop demo</span>
 </div>
 
 <!-- INTERACTIVE STEM DEMO -->
@@ -231,7 +234,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   <div class="max-w-4xl mx-auto text-center mb-8 reveal">
     <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">LIVE INTERACTIVE DEMO</span>
     <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Hear Each <span class="gradient-text">Stem</span></h2>
-    <p class="text-white/40 max-w-lg mx-auto">We separated "bz_onit" in real-time. Solo, mute, and compare each stem below.</p>
+    <p class="text-white/40 max-w-lg mx-auto">Pre-separated stems from "bz_onit" — solo, mute, and compare each part below. The desktop app splits your own tracks locally.</p>
   </div>
 
   <div class="stem-container reveal">
@@ -256,9 +259,9 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
     <!-- CTA -->
     <div class="mt-6 pt-4 border-t border-white/5 text-center">
       <p class="text-xs text-white/30 mb-3">Want to split your own tracks?</p>
-      <button onclick="document.getElementById('emailBar').classList.add('visible')" class="btn-primary text-sm !py-2 !px-6">
-        Get the Full Desktop App →
-      </button>
+      <a href="#download" class="btn-primary text-sm !py-2 !px-6 inline-flex">
+        Download Free Desktop Demo →
+      </a>
     </div>
   </div>
 </section>
@@ -292,30 +295,27 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   </div>
 </section>
 
-<!-- TESTIMONIALS -->
-<section class="stem-player" style="padding-bottom:4rem">
+<!-- DOWNLOAD -->
+<section class="stem-player" id="download" style="padding-bottom:4rem">
   <div class="max-w-4xl mx-auto reveal">
     <div class="text-center mb-8">
-      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Trusted by <span class="gradient-text">Producers</span></h2>
+      <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">FREE DESKTOP DEMO</span>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Download <span class="gradient-text">Liminal</span></h2>
+      <p class="text-white/40 max-w-lg mx-auto mt-3">Install the Windows app free. Try 1 Spleeter 2-stem split, then upgrade to Pro for unlimited access.</p>
     </div>
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-full bg-liminal-500/20 flex items-center justify-center text-sm">🎧</div>
-          <div><div class="font-semibold text-sm">BeatMaker X</div><div class="text-xs text-white/30">7 years producing</div></div>
-        </div>
-        <p class="text-sm text-white/60">"Switched from lalal.ai. Same quality, zero upload wait, and I own it forever. The batch processing alone saves me 10+ hours a week."</p>
-        <div class="flex gap-1 mt-2 text-liminal-400 text-sm">★★★★★</div>
-      </div>
-      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
-        <div class="flex items-center gap-3 mb-3">
-          <div class="w-10 h-10 rounded-full bg-liminal-500/20 flex items-center justify-center text-sm">🎹</div>
-          <div><div class="font-semibold text-sm">Studio Phantom</div><div class="text-xs text-white/30">Mixing engineer</div></div>
-        </div>
-        <p class="text-sm text-white/60">"The stem quality from the MDX engine is unreal. I use it for remix projects daily. Clients can't tell it's AI separated."</p>
-        <div class="flex gap-1 mt-2 text-liminal-400 text-sm">★★★★★</div>
-      </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl mx-auto">
+      <a id="windowsDownload" href="https://github.com/myaiplug/StemSplit1/releases/latest" target="_blank" rel="noopener" class="p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
+        <div class="text-2xl mb-2">🪟</div>
+        <div class="font-semibold">Windows Installer</div>
+        <div class="text-xs text-white/40 mt-1">Free demo • 1 split included</div>
+      </a>
+      <a id="macDownload" href="https://github.com/myaiplug/StemSplit1/releases/latest" target="_blank" rel="noopener" class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.08] hover:border-white/20 transition-colors text-center">
+        <div class="text-2xl mb-2">🍎</div>
+        <div class="font-semibold">macOS</div>
+        <div class="text-xs text-white/40 mt-1">See latest release assets</div>
+      </a>
     </div>
+    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Windows may show a SmartScreen notice for new independent software. Liminal runs local audio processing and does not bundle third-party offers. Choose "More info" → "Run anyway" if prompted.</p>
   </div>
 </section>
 
@@ -336,8 +336,8 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
       <div class="text-3xl font-bold mb-1">$0</div>
       <p class="text-white/40 text-sm mb-6">Try in your browser</p>
       <ul class="space-y-3 mb-8">
-        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Interactive demo with bz_onit</li>
-        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Interactive demo with bz_onit</li>
+        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Interactive browser demo (bz_onit)</li>
+        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Free desktop demo: 1 Spleeter 2-stem split</li>
         <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Solo, mute, and compare 4 stems</li>
         <li class="flex items-start gap-2 text-sm text-white/40"><span class="text-white/20 mt-0.5">✗</span> Full 4-6 stem export</li>
         <li class="flex items-start gap-2 text-sm text-white/40"><span class="text-white/20 mt-0.5">✗</span> Desktop app</li>
@@ -365,6 +365,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
         <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> YouTube import</li>
         <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> Free updates forever</li>
       </ul>
+      <a href="#download" class="btn-secondary w-full justify-center mb-3" onclick="trackClick('pricing_download')">Download Demo First</a>
       <a href="#" class="btn-primary w-full justify-center" onclick="checkoutPro(event)">
         Buy Pro — $49
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
@@ -384,11 +385,12 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   </div>
   <div class="reveal">
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">How does stem separation work? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Liminal uses state-of-the-art AI models (Demucs, MDX, Roformer) trained on millions of songs. Each model analyzes the frequency and time patterns to isolate individual instruments. The desktop app runs these models locally on your own GPU/CPU.</div></div>
-    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is my audio sent to the cloud? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">No. The desktop app processes everything on your computer. Your audio never touches the internet. The web demo also processes entirely in-browser using Web Audio API. Privacy by design.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is my audio sent to the cloud? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">No. The desktop app processes everything on your computer. Your audio never touches the internet for separation. The website demo only streams pre-separated preview audio in your browser — it does not upload your files.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What's the quality compared to lalal.ai / Splitter.ai? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Independent benchmarks show Liminal matches or exceeds cloud services on most tracks. With Demucs + MDX ensemble mode, you get studio-grade separation. And since it's local, there's no file size limit, no upload queue, and no monthly cap.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What are the system requirements? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Windows 10+ or macOS 12+. 8GB RAM recommended (16GB for large batches). NVIDIA GPU with 4GB+ VRAM for fastest processing. CPU-only mode works but is slower. The app auto-detects your hardware and chooses the best settings.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is it really one-time payment? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Yes. $49 and you own Liminal Pro forever. All updates included. No subscriptions, no "Pro+" tiers, no recurring fees. We believe in building tools producers actually want to own.</div></div>
-    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Can I get a refund? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Absolutely. 30-day money-back guarantee. If Liminal doesn't meet your needs, email us and we'll refund every cent. No questions asked. We're that confident in the product.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Can I get a refund? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Yes. 30-day money-back guarantee. Email <a href="mailto:myaiplug.com@gmail.com" class="text-liminal-400">myaiplug.com@gmail.com</a> within 30 days of purchase. See our <a href="/refund.html" class="text-liminal-400">refund policy</a>.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Windows shows a security warning on install? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">New independent Windows apps may trigger Microsoft SmartScreen until reputation builds. Liminal is not signed with an EV certificate yet. The installer does not bundle third-party software. Click More info → Run anyway, or verify the download from our official GitHub releases page.</div></div>
   </div>
 </section>
 
@@ -398,6 +400,13 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
     <div class="flex items-center justify-center gap-2 mb-3">
       <div class="w-5 h-5 rounded bg-gradient-to-br from-liminal-500 to-liminal-700 flex items-center justify-center text-[7px] font-bold">L</div>
       <span class="font-bold text-xs">Liminal <span class="text-liminal-400 font-light">StemSplit</span></span>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-4 mb-3 text-xs text-white/40">
+      <a href="/privacy.html" class="hover:text-liminal-400 transition-colors">Privacy</a>
+      <a href="/terms.html" class="hover:text-liminal-400 transition-colors">Terms</a>
+      <a href="/refund.html" class="hover:text-liminal-400 transition-colors">Refund</a>
+      <a href="mailto:myaiplug.com@gmail.com" class="hover:text-liminal-400 transition-colors">Support</a>
+      <a href="https://github.com/myaiplug/StemSplit1/releases" target="_blank" rel="noopener" class="hover:text-liminal-400 transition-colors">Downloads</a>
     </div>
     <p class="text-white/20 text-xs">© 2026 Liminal by <a href="https://myaiplug.com" class="text-liminal-400/50 hover:text-liminal-400 transition-colors">MyAiPlug</a>. Built for producers who own their tools.</p>
   </div>
@@ -409,12 +418,8 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 // ========================
 function trackClick(label) { try { localStorage.setItem('liminal_click_' + Date.now(), label); } catch(e) {} }
 
-// Social proof counter
-let stemCount = 12842;
-setInterval(() => {
-  stemCount += Math.floor(Math.random() * 5) + 2;
-  document.getElementById('userCount').textContent = stemCount.toLocaleString();
-}, 10000);
+const SUPPORT_EMAIL = 'myaiplug.com@gmail.com';
+const RELEASES_URL = 'https://github.com/myaiplug/StemSplit1/releases/latest';
 
 // Nav scroll
 document.getElementById('nav').addEventListener('scroll', () => {
@@ -922,12 +927,13 @@ async function checkoutPro(e) {
       localStorage.setItem('liminal_sales', JSON.stringify(sales));
     } catch(err) {}
   } catch (err) {
-    showToast('⚠️ ' + (err.message || 'Checkout failed. Configure Stripe in .env'));
+    showToast('⚠️ Checkout is temporarily unavailable. Email ' + SUPPORT_EMAIL + ' or try again shortly.');
   }
 }
 
 if (new URLSearchParams(window.location.search).get('checkout') === 'success') {
-  showToast('✅ Payment received. Check your email for the StemSplit Pro access password.');
+  showToast('✅ Payment received! Check your email for the access password, then download and activate Pro in the app.');
+  setTimeout(() => { window.location.hash = 'download'; }, 1200);
 }
 
 // Init on interaction
@@ -939,10 +945,7 @@ document.addEventListener('click', () => {
   }
 }, { once: true });
 
-console.log('🏆 Liminal StemSplit v2.0 — Income System Active');
-console.log('🎵 Demo: bz_onit (4 stems)');
-console.log('💳 Stripe checkout ready');
-console.log('🎯 Goal: $1,000 in 30 days');
+
 </script>
 </body>
 </html>
