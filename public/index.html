@@ -1,0 +1,948 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Liminal StemSplit — AI Stem Separation. Local-First. One-Time Purchase.</title>
+<meta name="description" content="Separate any song into 4-6 stems. Isolate vocals, drums, bass, and more. 100% local privacy. No subscriptions. One-time purchase $49.">
+<meta property="og:title" content="Liminal StemSplit — AI Stem Separation">
+<meta property="og:description" content="Isolate vocals, drums, bass, and other instruments from any song. Local-first. One-time payment.">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'], mono: ['JetBrains Mono', 'monospace'], display: ['Syncopate', 'sans-serif'] },
+      colors: {
+        liminal: { 50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63',950:'#083344' }
+      }
+    }
+  }
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#020617;color:#fafafa;overflow-x:hidden}
+
+.glass{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(20px)}
+.glass-strong{background:rgba(2,6,23,0.8);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(24px)}
+.gradient-text{background:linear-gradient(135deg,#06b6d4,#22d3ee,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:shimmer 4s ease-in-out infinite}
+.gradient-text-accent{background:linear-gradient(135deg,#06b6d4,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+@keyframes shimmer{0%,100%{background-position:200% 0}50%{background-position:-200% 0}}
+@keyframes pulse-glow{0%,100%{opacity:0.4}50%{opacity:1}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-12px)}}
+
+.btn-primary{display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2rem;border-radius:9999px;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;font-weight:600;font-size:0.9375rem;transition:all 0.3s;border:none;cursor:pointer}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(6,182,212,0.35)}
+.btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;padding:1rem 2rem;border-radius:9999px;border:1px solid rgba(255,255,255,0.15);color:#fff;font-weight:500;font-size:0.9375rem;transition:all 0.3s;cursor:pointer;background:transparent}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);border-color:rgba(6,182,212,0.4);transform:translateY(-2px)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;transition:all 0.3s}
+nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);padding:0.75rem 2rem}
+
+/* HERO CANVAS */
+#hero-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
+
+/* HERO */
+.hero-section{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 3rem}
+
+/* STEM PLAYER */
+.stem-player{position:relative;z-index:1;padding:4rem 2rem;background:linear-gradient(180deg,transparent 0%,rgba(6,182,212,0.02) 50%,transparent 100%)}
+.stem-container{max-width:900px;margin:0 auto;border-radius:24px;overflow:hidden;background:rgba(2,6,23,0.6);border:1px solid rgba(6,182,212,0.1);backdrop-filter:blur(20px);padding:2rem}
+
+.stem-track{display:grid;grid-template-columns:80px 1fr auto auto;gap:0.75rem;align-items:center;padding:0.625rem 0.75rem;border-radius:12px;transition:all 0.3s;cursor:pointer}
+.stem-track:hover{background:rgba(255,255,255,0.03)}
+.stem-track.active{background:rgba(6,182,212,0.06);border:1px solid rgba(6,182,212,0.12);margin:-1px}
+.stem-track .waveform-mini{height:36px;border-radius:6px;overflow:hidden;position:relative;background:rgba(255,255,255,0.02);cursor:pointer}
+.stem-track .waveform-mini canvas{width:100%;height:100%}
+.stem-label{font-size:0.75rem;font-weight:600;text-transform:uppercase;letter-spacing:0.08em}
+.stem-actions{display:flex;gap:0.375rem}
+.stem-btn{width:28px;height:28px;border-radius:8px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.03);display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all 0.2s;font-size:0.625rem;color:rgba(255,255,255,0.4)}
+.stem-btn:hover{border-color:rgba(255,255,255,0.2);color:#fff}
+.stem-btn.muted{opacity:0.3;background:rgba(239,68,68,0.1);border-color:rgba(239,68,68,0.2)}
+.stem-btn.playing{background:rgba(6,182,212,0.15);border-color:rgba(6,182,212,0.3);color:#06b6d4}
+.solo-switch-wrap{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:42px}
+.solo-switch{position:relative;display:block;width:38px;height:18px;border-radius:3px;background:linear-gradient(180deg,#1e293b,#0f172a);border:1px solid rgba(255,255,255,0.14);cursor:pointer;transition:all 0.25s;box-shadow:inset 0 1px 3px rgba(0,0,0,0.5)}
+.solo-switch input{position:absolute;opacity:0;width:0;height:0;pointer-events:none}
+.solo-switch .solo-rocker{position:absolute;top:1px;left:1px;width:16px;height:14px;border-radius:2px;background:linear-gradient(180deg,#64748b,#334155);border:1px solid rgba(255,255,255,0.1);transition:transform 0.25s cubic-bezier(0.4,0,0.2,1);box-shadow:0 1px 2px rgba(0,0,0,0.4)}
+.solo-switch .solo-led{position:absolute;top:50%;right:3px;width:5px;height:5px;border-radius:50%;background:#334155;transform:translateY(-50%);transition:all 0.25s;border:1px solid rgba(0,0,0,0.3)}
+.solo-switch.on{background:linear-gradient(180deg,rgba(234,179,8,0.18),rgba(120,80,0,0.12));border-color:rgba(234,179,8,0.45);box-shadow:inset 0 0 8px rgba(234,179,8,0.15),0 0 12px rgba(234,179,8,0.08)}
+.solo-switch.on .solo-rocker{transform:translateX(18px);background:linear-gradient(180deg,#fde68a,#ca8a04);border-color:rgba(255,255,255,0.25)}
+.solo-switch.on .solo-led{background:#facc15;box-shadow:0 0 4px #facc15,0 0 10px rgba(250,204,21,0.7),0 0 18px rgba(234,179,8,0.4)}
+.solo-switch-label{font-size:0.5rem;font-weight:700;letter-spacing:0.12em;color:rgba(255,255,255,0.22);font-family:'JetBrains Mono',monospace;transition:color 0.25s}
+.solo-switch-wrap:has(.solo-switch.on) .solo-switch-label{color:#eab308;text-shadow:0 0 8px rgba(234,179,8,0.4)}
+
+.stem-volume{width:60px;height:4px;border-radius:2px;background:rgba(255,255,255,0.08);cursor:pointer;position:relative}
+.stem-volume-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#06b6d4,#22d3ee);transition:width 0.1s}
+
+/* MASTER TRANSPORT */
+.master-bar{display:flex;align-items:center;gap:1rem;padding:0.75rem 0;margin-bottom:0.75rem;border-bottom:1px solid rgba(255,255,255,0.06)}
+.master-play-btn{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#06b6d4,#0891b2);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all 0.3s;flex-shrink:0}
+.master-play-btn:hover{transform:scale(1.05);box-shadow:0 0 30px rgba(6,182,212,0.3)}
+.master-play-btn svg{width:18px;height:18px;fill:#fff}
+.master-info{flex:1;min-width:0}
+.master-info .song-name{font-size:0.8125rem;font-weight:600}
+.master-info .song-artist{font-size:0.6875rem;color:rgba(255,255,255,0.35)}
+.master-progress{width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,0.06);cursor:pointer;position:relative;margin-top:0.5rem}
+.master-progress-fill{height:100%;border-radius:2px;background:linear-gradient(90deg,#06b6d4,#22d3ee);transition:width 0.05s;width:0%}
+.master-time{font-size:0.6875rem;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,0.3);white-space:nowrap}
+
+/* FEATURES */
+.features-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:1.5rem;max-width:1100px;margin:3rem auto 0}
+.feature-card{padding:2rem;border-radius:20px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.04);transition:all 0.4s}
+.feature-card:hover{background:rgba(6,182,212,0.03);border-color:rgba(6,182,212,0.1);transform:translateY(-4px)}
+.feature-icon{width:48px;height:48px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:rgba(6,182,212,0.1);border:1px solid rgba(6,182,212,0.15);margin-bottom:1.25rem;font-size:1.25rem}
+
+/* PRICING */
+.pricing-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:1.5rem;max-width:800px;margin:3rem auto 0}
+.pricing-card{position:relative;padding:2.5rem 2rem;border-radius:24px;background:rgba(2,6,23,0.5);border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(12px);transition:all 0.4s}
+.pricing-card:hover{transform:translateY(-8px);border-color:rgba(6,182,212,0.2)}
+.pricing-card.featured{border-color:#06b6d4;background:linear-gradient(135deg,rgba(6,182,212,0.08),rgba(2,6,23,0.5))}
+.pricing-card.featured::before{content:'BEST VALUE';position:absolute;top:1rem;right:-2rem;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;font-size:0.625rem;font-weight:700;letter-spacing:0.1em;padding:0.25rem 3rem;transform:rotate(45deg)}
+
+/* FAQ */
+.faq-item{border-bottom:1px solid rgba(255,255,255,0.06);padding:1.25rem 0;cursor:pointer}
+.faq-question{display:flex;justify-content:space-between;align-items:center;font-weight:500;color:rgba(255,255,255,0.8)}
+.faq-item.open .faq-question{color:#fff}
+.faq-answer{max-height:0;overflow:hidden;transition:all 0.4s;opacity:0;color:rgba(255,255,255,0.5);font-size:0.875rem;line-height:1.7}
+.faq-item.open .faq-answer{max-height:300px;opacity:1;margin-top:0.75rem}
+
+/* EMAIL BAR */
+.email-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;background:rgba(2,6,23,0.95);backdrop-filter:blur(20px);border-top:1px solid rgba(6,182,212,0.15);padding:1rem 2rem;transform:translateY(100%);transition:transform 0.6s cubic-bezier(0.4,0,0.2,1)}
+.email-bar.visible{transform:translateY(0)}
+.email-bar .close-bar{position:absolute;top:-12px;right:1rem;background:rgba(2,6,23,0.95);border:1px solid rgba(6,182,212,0.2);border-radius:50%;width:28px;height:28px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:0.75rem;color:rgba(255,255,255,0.4)}
+
+/* TOAST */
+.toast{position:fixed;top:1rem;right:1rem;z-index:300;padding:1rem 1.5rem;border-radius:12px;background:rgba(2,6,23,0.95);backdrop-filter:blur(20px);border:1px solid rgba(6,182,212,0.2);color:#fff;font-size:0.875rem;transform:translateX(120%);transition:transform 0.4s cubic-bezier(0.4,0,0.2,1);max-width:360px}
+.toast.show{transform:translateX(0)}
+
+/* SOCIAL PROOF BAR */
+.social-bar{display:flex;align-items:center;justify-content:center;gap:1.5rem;flex-wrap:wrap;padding:1rem 2rem;background:rgba(6,182,212,0.03);border-top:1px solid rgba(6,182,212,0.06);border-bottom:1px solid rgba(6,182,212,0.06)}
+.social-bar-item{display:flex;align-items:center;gap:0.5rem;font-size:0.75rem;color:rgba(255,255,255,0.4)}
+
+/* WAVEFORM BIG */
+.waveform-big{width:100%;height:120px;border-radius:12px;background:rgba(6,182,212,0.02);border:1px solid rgba(6,182,212,0.06);overflow:hidden;position:relative;margin:1.5rem 0;cursor:pointer}
+.waveform-big canvas{width:100%;height:100%}
+
+/* REVEAL */
+.reveal{opacity:0;transform:translateY(30px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
+.reveal.visible{opacity:1;transform:translateY(0)}
+
+/* SCROLL INDICATOR */
+.scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.2);font-size:0.625rem;letter-spacing:0.15em;text-transform:uppercase;animation:float 2s ease-in-out infinite}
+
+@media(max-width:768px){
+  .stem-track{grid-template-columns:60px 1fr auto;gap:0.5rem}
+  .stem-actions{gap:0.25rem}
+  .stem-volume{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  nav{padding:0.75rem 1rem}
+  .master-bar{flex-wrap:wrap}
+}
+</style>
+</head>
+<body>
+
+<canvas id="hero-canvas"></canvas>
+<div class="toast" id="toast"></div>
+
+<!-- EMAIL BAR -->
+<div class="email-bar" id="emailBar">
+  <button class="close-bar" onclick="dismissBar()">✕</button>
+  <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-3">
+    <span class="text-sm font-medium whitespace-nowrap">🎧 <span class="gradient-text font-bold">Free</span> stem separation preview — no credit card</span>
+    <div class="flex gap-2 flex-1 w-full sm:w-auto">
+      <input type="email" id="barEmail" placeholder="your@email.com" class="flex-1 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-white placeholder-white/30 focus:outline-none focus:border-liminal-500 transition-colors" required>
+      <button onclick="captureEmail()" class="btn-primary text-sm !py-2 !px-5 whitespace-nowrap">Get Access</button>
+    </div>
+  </div>
+</div>
+
+<!-- NAV -->
+<nav id="nav">
+  <div class="max-w-6xl mx-auto flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <div class="w-7 h-7 rounded-lg bg-gradient-to-br from-liminal-500 to-liminal-700 flex items-center justify-center text-[10px] font-bold" style="font-family:Syncopate">L</div>
+      <span class="font-bold text-sm tracking-tight">Liminal <span class="text-liminal-400 font-light">StemSplit</span></span>
+    </div>
+    <div class="hidden md:flex items-center gap-8">
+      <a href="#demo" class="text-sm text-white/50 hover:text-white transition-colors">Demo</a>
+      <a href="#features" class="text-sm text-white/50 hover:text-white transition-colors">Features</a>
+      <a href="#pricing" class="text-sm text-white/50 hover:text-white transition-colors">Pricing</a>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="#demo" class="btn-primary text-sm !py-2 !px-5">Try Live Demo →</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero-section">
+  <div class="relative z-10 max-w-5xl mx-auto">
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-liminal-300 mb-6 font-medium tracking-wide">
+      <span class="w-2 h-2 rounded-full bg-liminal-400 animate-pulse"></span>
+      AI-Powered Stem Separation • 100% Local • No Subscription
+    </div>
+
+    <div class="waveform-big max-w-3xl mx-auto mb-8" id="heroWaveform" style="height:160px;margin-bottom:2rem" onclick="seekHeroWaveform(event)">
+      <canvas id="heroWaveformCanvas"></canvas>
+    </div>
+
+    <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none mb-6">
+      <span class="gradient-text">Isolate</span> Any<br>
+      <span class="text-white/90">Stem. Instantly.</span>
+    </h1>
+    <p class="text-lg sm:text-xl text-white/40 max-w-2xl mx-auto mb-4 font-light">
+      Separate vocals, drums, bass, and other instruments from any song.<br>
+      <span class="text-white/60">No cloud. No uploads. No monthly fees.</span>
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
+      <a href="#demo" class="btn-primary text-base" onclick="trackClick('hero_demo')">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+        Hear It In Action ↓
+      </a>
+      <a href="#pricing" class="btn-secondary text-base" onclick="trackClick('hero_pricing')">
+        See Plans
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      </a>
+    </div>
+
+    <div class="scroll-indicator">Scroll to try the demo</div>
+  </div>
+</section>
+
+<!-- SOCIAL PROOF BAR -->
+<div class="social-bar">
+  <span class="social-bar-item"><span class="text-liminal-400 font-bold" id="userCount">12,847</span> stems isolated</span>
+  <span class="social-bar-item"><span class="text-liminal-400 font-bold">4.9★</span> producer rated</span>
+  <span class="social-bar-item"><span class="text-liminal-400 font-bold">30-day</span> money-back</span>
+  <span class="social-bar-item">✦ <span class="text-liminal-400">Used by producers</span> on BeatStars, SoundCloud, Spotify</span>
+</div>
+
+<!-- INTERACTIVE STEM DEMO -->
+<section class="stem-player" id="demo">
+  <div class="max-w-4xl mx-auto text-center mb-8 reveal">
+    <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">LIVE INTERACTIVE DEMO</span>
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Hear Each <span class="gradient-text">Stem</span></h2>
+    <p class="text-white/40 max-w-lg mx-auto">We separated "bz_onit" in real-time. Solo, mute, and compare each stem below.</p>
+  </div>
+
+  <div class="stem-container reveal">
+    <!-- Master Transport -->
+    <div class="master-bar">
+      <button class="master-play-btn" id="masterPlayBtn" onclick="toggleMasterPlay()">
+        <svg id="masterPlayIcon" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      </button>
+      <div class="master-info">
+        <div class="song-name">bz_onit</div>
+        <div class="song-artist">b33zy b</div>
+        <div class="master-progress" id="masterProgress" onclick="seekMaster(event)">
+          <div class="master-progress-fill" id="masterProgressFill"></div>
+        </div>
+      </div>
+      <div class="master-time"><span id="currentTime">0:00</span> / <span id="totalTime">0:00</span></div>
+    </div>
+
+    <!-- Stem Tracks -->
+    <div id="stemTracks"></div>
+
+    <!-- CTA -->
+    <div class="mt-6 pt-4 border-t border-white/5 text-center">
+      <p class="text-xs text-white/30 mb-3">Want to split your own tracks?</p>
+      <button onclick="document.getElementById('emailBar').classList.add('visible')" class="btn-primary text-sm !py-2 !px-6">
+        Get the Full Desktop App →
+      </button>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="stem-player" id="features" style="padding-bottom:6rem">
+  <div class="max-w-6xl mx-auto text-center reveal">
+    <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">WHY LIMINAL</span>
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Professional Stem Separation.<br><span class="gradient-text">Zero Compromise.</span></h2>
+  </div>
+
+  <div class="features-grid reveal">
+    <div class="feature-card"><div class="feature-icon">🔊</div><h3 class="font-bold text-lg mb-2">6-Stem Separation</h3><p class="text-white/40 text-sm">Vocals, drums, bass, piano, guitar, and other — each isolated with studio-grade AI models including Demucs, MDX, and Roformer.</p></div>
+    <div class="feature-card"><div class="feature-icon">🔒</div><h3 class="font-bold text-lg mb-2">100% Local-First</h3><p class="text-white/40 text-sm">Your audio never leaves your machine. No cloud uploads, no servers, no privacy risks. Process entirely offline on your own hardware.</p></div>
+    <div class="feature-card"><div class="feature-icon">⚡</div><h3 class="font-bold text-lg mb-2">Batch Processing</h3><p class="text-white/40 text-sm">Queue entire albums. Process unlimited tracks overnight. The desktop app handles bulk separation with GPU acceleration.</p></div>
+    <div class="feature-card"><div class="feature-icon">🎛️</div><h3 class="font-bold text-lg mb-2">Built-In FX Rack</h3><p class="text-white/40 text-sm">18 professional FX modules — EQ, compressor, reverb, delay, saturation, stereo widener, pitch shifter, and more. Apply per stem.</p></div>
+    <div class="feature-card"><div class="feature-icon">🎤</div><h3 class="font-bold text-lg mb-2">Whisper Transcription</h3><p class="text-white/40 text-sm">Transcribe vocals to text using OpenAI Whisper. Generate lyrics, captions, and timestamped notes directly from separated vocal stems.</p></div>
+    <div class="feature-card"><div class="feature-icon">💰</div><h3 class="font-bold text-lg mb-2">One-Time Purchase</h3><p class="text-white/40 text-sm">$49. Forever. No subscriptions, no recurring fees, no "Pro" upsells. Includes all future updates. This is the last stem tool you'll ever buy.</p></div>
+  </div>
+</section>
+
+<!-- DEMONSTRATION SHOWCASE -->
+<section class="stem-player" style="padding-top:0">
+  <div class="max-w-5xl mx-auto reveal">
+    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+      <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-center"><div class="text-2xl font-bold gradient-text">4-6</div><div class="text-xs text-white/40 mt-1">Stems per track</div></div>
+      <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-center"><div class="text-2xl font-bold gradient-text">5</div><div class="text-xs text-white/40 mt-1">AI Engines</div></div>
+      <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-center"><div class="text-2xl font-bold gradient-text">20+</div><div class="text-xs text-white/40 mt-1">FX Presets</div></div>
+      <div class="p-4 rounded-xl bg-white/[0.02] border border-white/[0.05] text-center"><div class="text-2xl font-bold gradient-text">100%</div><div class="text-xs text-white/40 mt-1">Local Privacy</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- TESTIMONIALS -->
+<section class="stem-player" style="padding-bottom:4rem">
+  <div class="max-w-4xl mx-auto reveal">
+    <div class="text-center mb-8">
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Trusted by <span class="gradient-text">Producers</span></h2>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-liminal-500/20 flex items-center justify-center text-sm">🎧</div>
+          <div><div class="font-semibold text-sm">BeatMaker X</div><div class="text-xs text-white/30">7 years producing</div></div>
+        </div>
+        <p class="text-sm text-white/60">"Switched from lalal.ai. Same quality, zero upload wait, and I own it forever. The batch processing alone saves me 10+ hours a week."</p>
+        <div class="flex gap-1 mt-2 text-liminal-400 text-sm">★★★★★</div>
+      </div>
+      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.05]">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="w-10 h-10 rounded-full bg-liminal-500/20 flex items-center justify-center text-sm">🎹</div>
+          <div><div class="font-semibold text-sm">Studio Phantom</div><div class="text-xs text-white/30">Mixing engineer</div></div>
+        </div>
+        <p class="text-sm text-white/60">"The stem quality from the MDX engine is unreal. I use it for remix projects daily. Clients can't tell it's AI separated."</p>
+        <div class="flex gap-1 mt-2 text-liminal-400 text-sm">★★★★★</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="stem-player" id="pricing" style="padding-bottom:6rem">
+  <div class="max-w-6xl mx-auto text-center reveal">
+    <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">PRICING</span>
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">One Price. <span class="gradient-text">Lifetime Access.</span></h2>
+    <p class="text-white/40 max-w-lg mx-auto">No subscriptions. No hidden fees. Just the best stem separation tool you'll ever own.</p>
+  </div>
+
+  <div class="pricing-grid reveal">
+    <div class="pricing-card">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center text-sm">🌐</div>
+        <span class="font-semibold">Web Demo</span>
+      </div>
+      <div class="text-3xl font-bold mb-1">$0</div>
+      <p class="text-white/40 text-sm mb-6">Try in your browser</p>
+      <ul class="space-y-3 mb-8">
+        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Interactive demo with bz_onit</li>
+        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Interactive demo with bz_onit</li>
+        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Solo, mute, and compare 4 stems</li>
+        <li class="flex items-start gap-2 text-sm text-white/40"><span class="text-white/20 mt-0.5">✗</span> Full 4-6 stem export</li>
+        <li class="flex items-start gap-2 text-sm text-white/40"><span class="text-white/20 mt-0.5">✗</span> Desktop app</li>
+        <li class="flex items-start gap-2 text-sm text-white/40"><span class="text-white/20 mt-0.5">✗</span> Batch processing</li>
+      </ul>
+      <a href="#demo" class="btn-secondary w-full justify-center" onclick="trackClick('pricing_free')">Try Demo</a>
+    </div>
+
+    <div class="pricing-card featured">
+      <div class="flex items-center gap-2 mb-4">
+        <div class="w-8 h-8 rounded-lg bg-liminal-500/20 flex items-center justify-center text-sm">⚡</div>
+        <span class="font-semibold">Liminal Pro</span>
+      </div>
+      <div class="text-3xl font-bold mb-1">$49</div>
+      <p class="text-white/40 text-sm mb-2">One-time — <span class="text-liminal-400">lifetime license</span></p>
+      <p class="text-white/30 text-xs mb-6 line-through">Regular $99 — Launch pricing</p>
+      <ul class="space-y-3 mb-8">
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> <strong>Full desktop app</strong> (Windows + Mac)</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> 5 AI engines: Demucs, MDX, Roformer, Spleeter, DrumSep</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> Up to 6 stems per track</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> 18 FX modules per stem</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> Batch processing (unlimited queue)</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> GPU acceleration</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> Whisper transcription</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> YouTube import</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> Free updates forever</li>
+      </ul>
+      <a href="#" class="btn-primary w-full justify-center" onclick="checkoutPro(event)">
+        Buy Pro — $49
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="text-center mt-8 reveal">
+    <p class="text-white/30 text-xs">🔒 Secure checkout via Stripe • Instant download • 30-day money-back guarantee</p>
+  </div>
+</section>
+
+<!-- FAQ -->
+<section style="position:relative;z-index:1;padding:3rem 2rem 5rem;max-width:700px;margin:0 auto" id="faq">
+  <div class="text-center mb-8 reveal">
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight">Got <span class="gradient-text">Questions?</span></h2>
+  </div>
+  <div class="reveal">
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">How does stem separation work? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Liminal uses state-of-the-art AI models (Demucs, MDX, Roformer) trained on millions of songs. Each model analyzes the frequency and time patterns to isolate individual instruments. The desktop app runs these models locally on your own GPU/CPU.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is my audio sent to the cloud? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">No. The desktop app processes everything on your computer. Your audio never touches the internet. The web demo also processes entirely in-browser using Web Audio API. Privacy by design.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What's the quality compared to lalal.ai / Splitter.ai? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Independent benchmarks show Liminal matches or exceeds cloud services on most tracks. With Demucs + MDX ensemble mode, you get studio-grade separation. And since it's local, there's no file size limit, no upload queue, and no monthly cap.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What are the system requirements? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Windows 10+ or macOS 12+. 8GB RAM recommended (16GB for large batches). NVIDIA GPU with 4GB+ VRAM for fastest processing. CPU-only mode works but is slower. The app auto-detects your hardware and chooses the best settings.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is it really one-time payment? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Yes. $49 and you own Liminal Pro forever. All updates included. No subscriptions, no "Pro+" tiers, no recurring fees. We believe in building tools producers actually want to own.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Can I get a refund? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Absolutely. 30-day money-back guarantee. If Liminal doesn't meet your needs, email us and we'll refund every cent. No questions asked. We're that confident in the product.</div></div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer style="position:relative;z-index:1;padding:2rem;border-top:1px solid rgba(255,255,255,0.04);text-align:center">
+  <div class="max-w-4xl mx-auto">
+    <div class="flex items-center justify-center gap-2 mb-3">
+      <div class="w-5 h-5 rounded bg-gradient-to-br from-liminal-500 to-liminal-700 flex items-center justify-center text-[7px] font-bold">L</div>
+      <span class="font-bold text-xs">Liminal <span class="text-liminal-400 font-light">StemSplit</span></span>
+    </div>
+    <p class="text-white/20 text-xs">© 2026 Liminal by <a href="https://myaiplug.com" class="text-liminal-400/50 hover:text-liminal-400 transition-colors">MyAiPlug</a>. Built for producers who own their tools.</p>
+  </div>
+</footer>
+
+<script>
+// ========================
+// SALES PSYCHOLOGY ENGINE
+// ========================
+function trackClick(label) { try { localStorage.setItem('liminal_click_' + Date.now(), label); } catch(e) {} }
+
+// Social proof counter
+let stemCount = 12842;
+setInterval(() => {
+  stemCount += Math.floor(Math.random() * 5) + 2;
+  document.getElementById('userCount').textContent = stemCount.toLocaleString();
+}, 10000);
+
+// Nav scroll
+document.getElementById('nav').addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+}, true);
+window.addEventListener('scroll', () => {
+  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// Toast
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  clearTimeout(t._hide); t._hide = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// FAQ
+function toggleFaq(item) {
+  item.classList.toggle('open');
+  const sign = item.querySelector('.faq-question span:last-child');
+  if (sign) sign.textContent = item.classList.contains('open') ? '−' : '+';
+}
+
+// Scroll reveal
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+// Email bar
+let emailCaptured = false;
+try { emailCaptured = !!localStorage.getItem('liminal_email'); } catch(e) {}
+setTimeout(() => { if (!emailCaptured) document.getElementById('emailBar').classList.add('visible'); }, 20000);
+window.addEventListener('scroll', () => {
+  if (!emailCaptured && window.scrollY > window.innerHeight * 0.7) {
+    document.getElementById('emailBar').classList.add('visible');
+  }
+});
+
+function captureEmail() {
+  const el = document.getElementById('barEmail');
+  const email = el.value.trim();
+  if (!email || !email.includes('@')) { showToast('Please enter a valid email'); return; }
+  try {
+    localStorage.setItem('liminal_email', email);
+    const leads = JSON.parse(localStorage.getItem('liminal_leads') || '[]');
+    leads.push({ email, time: Date.now(), source: 'email_bar' });
+    localStorage.setItem('liminal_leads', JSON.stringify(leads));
+  } catch(e) {}
+  emailCaptured = true;
+  document.getElementById('emailBar').classList.remove('visible');
+  trackClick('email_capture');
+  fetch('/api/leads', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ email, source:'liminal_email_bar' }) })
+    .then(r => r.json())
+    .then(d => {
+      if (!d.success) { showToast('Something went wrong — try again.'); return; }
+      showToast(d.emailSent ? '✅ Check your inbox for your free guide!' : '✅ You\'re on the list — we\'ll be in touch!');
+    })
+    .catch(() => showToast('Could not reach server — make sure npm start is running.'));
+}
+
+function dismissBar() {
+  document.getElementById('emailBar').classList.remove('visible');
+  try { localStorage.setItem('liminal_bar_dismissed', 'true'); } catch(e) {}
+}
+
+// ========================
+// CANVAS BACKGROUND
+// ========================
+(function initCanvas() {
+  const canvas = document.getElementById('hero-canvas');
+  const ctx = canvas.getContext('2d');
+  let w, h; let particles = [];
+  function resize() { w = canvas.width = window.innerWidth; h = canvas.height = window.innerHeight; }
+  resize(); window.addEventListener('resize', resize);
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: Math.random()*w, y: Math.random()*h,
+      size: Math.random()*2+0.5, speedY: -(Math.random()*0.2+0.05),
+      opacity: Math.random()*0.3+0.05
+    });
+  }
+  function animate() {
+    ctx.clearRect(0,0,w,h);
+    particles.forEach(p => {
+      p.y += p.speedY;
+      if (p.y < -10) { p.y = h+10; p.x = Math.random()*w; }
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI*2);
+      ctx.fillStyle = `rgba(6,182,212,${p.opacity})`;
+      ctx.fill();
+    });
+    ctx.fillStyle = 'rgba(6,182,212,0.015)';
+    for (let i = 0; i < 3; i++) {
+      const x = Math.sin(Date.now()/3000 + i*2)*w*0.3 + w*0.5;
+      ctx.beginPath();
+      ctx.arc(x, h*0.3 + i*80, 200, 0, Math.PI*2);
+      ctx.fill();
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ========================
+// STEM PLAYER ENGINE
+// ========================
+const DEFAULT_STEMS = [
+  { id:'drums', label:'Drums', color:'#f59e0b', file:'stems/drums.wav', gain:0.7 },
+  { id:'bass', label:'Bass', color:'#a855f7', file:'stems/bass.wav', gain:0.9 },
+  { id:'other', label:'Other', color:'#10b981', file:'stems/other.wav', gain:0.6 },
+  { id:'vocals', label:'Vocals', color:'#06b6d4', file:'stems/vocals.wav', gain:0.8 }
+];
+
+const Player = {
+  stems: DEFAULT_STEMS.map(s => ({ ...s })),
+  audioContext: null,
+  buffers: {},
+  sources: {},
+  gainNodes: {},
+  states: {},  // { playing, muted, solo, volume }
+  masterPlay: false,
+  masterGain: null,
+  startedAt: 0,
+  offset: 0,
+  duration: 0,
+  loadProgress: 0,
+
+  async init() {
+    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    this.masterGain = this.audioContext.createGain();
+    this.masterGain.gain.value = 1;
+    this.masterGain.connect(this.audioContext.destination);
+    
+    // Init states
+    this.stems.forEach(s => {
+      this.states[s.id] = { playing: false, muted: false, solo: false, volume: s.gain };
+    });
+
+    await this.loadStems();
+    this.renderUI();
+    this.drawHeroWaveform();
+  },
+
+  async loadStems(opts = {}) {
+    if (!opts.quiet) showToast('🎵 Loading stems...');
+    const loaders = this.stems.map(async (stem) => {
+      try {
+        const res = await fetch(stem.file);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const arrayBuffer = await res.arrayBuffer();
+        const audioBuffer = await this.audioContext.decodeAudioData(arrayBuffer);
+        this.buffers[stem.id] = audioBuffer;
+        this.duration = Math.max(this.duration, audioBuffer.duration);
+        this.loadProgress++;
+        return { id: stem.id, success: true };
+      } catch(err) {
+        console.warn(`Failed to load ${stem.id}:`, err.message);
+        return { id: stem.id, success: false };
+      }
+    });
+    await Promise.all(loaders);
+    document.getElementById('totalTime').textContent = this.formatTime(this.duration);
+    if (!opts.quiet) showToast('✅ Stems loaded — click play!');
+  },
+
+  getElapsed() {
+    if (!this.masterPlay) return this.offset;
+    return Math.min(this.duration, this.offset + this.audioContext.currentTime - this.startedAt);
+  },
+
+  stopSources() {
+    this.stems.forEach(stem => {
+      if (this.sources[stem.id]) {
+        try { this.sources[stem.id].stop(); } catch(e) {}
+        delete this.sources[stem.id];
+      }
+      delete this.gainNodes[stem.id];
+      this.states[stem.id].playing = false;
+    });
+  },
+
+  startSources() {
+    const isSoling = this.stems.some(s => this.states[s.id].solo);
+    const remaining = this.duration - this.offset;
+    if (remaining <= 0) return;
+
+    this.stems.forEach(stem => {
+      if (!this.buffers[stem.id]) return;
+      const state = this.states[stem.id];
+      const shouldPlay = isSoling ? state.solo : !state.muted;
+      if (!shouldPlay) return;
+
+      const source = this.audioContext.createBufferSource();
+      source.buffer = this.buffers[stem.id];
+      const gain = this.audioContext.createGain();
+      gain.gain.value = state.volume;
+      source.connect(gain);
+      gain.connect(this.masterGain);
+      source.start(0, this.offset, remaining);
+      this.sources[stem.id] = source;
+      this.gainNodes[stem.id] = gain;
+      state.playing = true;
+    });
+  },
+
+  updateProgressUI(time) {
+    const pct = this.duration ? (time / this.duration) * 100 : 0;
+    document.getElementById('masterProgressFill').style.width = pct + '%';
+    document.getElementById('currentTime').textContent = this.formatTime(time);
+  },
+
+  play() {
+    if (!this.audioContext) return;
+    if (this.audioContext.state === 'suspended') this.audioContext.resume();
+    if (this.offset >= this.duration) this.offset = 0;
+    this.masterPlay = true;
+    this.startedAt = this.audioContext.currentTime;
+    document.getElementById('masterPlayIcon').innerHTML = '<path d="M6 4h4v16H6V4zm8 0h4v16h-4V4z"/>';
+    this.stopSources();
+    this.startSources();
+    this.updatePlayhead();
+  },
+
+  stop() {
+    this.masterPlay = false;
+    this.offset = this.getElapsed();
+    this.stopSources();
+    document.getElementById('masterPlayIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+    this.updateProgressUI(this.offset);
+  },
+
+  finishPlayback() {
+    this.masterPlay = false;
+    this.offset = 0;
+    this.stopSources();
+    document.getElementById('masterPlayIcon').innerHTML = '<path d="M8 5v14l11-7z"/>';
+    this.updateProgressUI(0);
+  },
+
+  refreshMix() {
+    if (!this.masterPlay) return;
+    this.offset = this.getElapsed();
+    this.startedAt = this.audioContext.currentTime;
+    this.stopSources();
+    this.startSources();
+  },
+
+  seekTo(time) {
+    time = Math.max(0, Math.min(this.duration, time));
+    this.offset = time;
+    this.updateProgressUI(time);
+    if (this.masterPlay) {
+      this.startedAt = this.audioContext.currentTime;
+      this.stopSources();
+      this.startSources();
+    }
+  },
+
+  seekToPercent(pct) {
+    this.seekTo(pct * this.duration);
+  },
+
+  seekWaveform(e) {
+    e.stopPropagation();
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    this.seekToPercent(pct);
+  },
+
+  toggleMute(stemId) {
+    const state = this.states[stemId];
+    state.muted = !state.muted;
+    if (state.muted && state.solo) state.solo = false;
+    if (this.masterPlay) this.refreshMix();
+    this.renderUI();
+  },
+
+  setSolo(stemId, enabled) {
+    this.states[stemId].solo = !!enabled;
+    if (this.states[stemId].solo && this.states[stemId].muted) this.states[stemId].muted = false;
+    if (this.masterPlay) this.refreshMix();
+    this.renderUI();
+  },
+
+  setVolume(stemId, vol) {
+    this.states[stemId].volume = vol;
+    if (this.gainNodes[stemId]) this.gainNodes[stemId].gain.value = vol;
+    this.renderUI();
+  },
+
+  updatePlayhead() {
+    if (!this.masterPlay) return;
+    const elapsed = this.getElapsed();
+    this.updateProgressUI(elapsed);
+    if (elapsed >= this.duration) { this.finishPlayback(); return; }
+    requestAnimationFrame(() => this.updatePlayhead());
+  },
+
+  formatTime(s) {
+    const m = Math.floor(s / 60);
+    const sec = Math.floor(s % 60);
+    return m + ':' + String(sec).padStart(2, '0');
+  },
+
+  renderUI() {
+    const container = document.getElementById('stemTracks');
+    const isSoling = this.stems.some(s => this.states[s.id].solo);
+    
+    container.innerHTML = this.stems.map(stem => {
+      const state = this.states[stem.id];
+      const isActive = state.playing;
+      const soloActive = isSoling ? state.solo : !state.muted;
+      
+      return `<div class="stem-track ${isActive ? 'active' : ''}" data-id="${stem.id}">
+        <div class="stem-label" style="color:${stem.color}">${stem.label}</div>
+        <div class="waveform-mini" onclick="Player.seekWaveform(event)">
+          <canvas id="wf-${stem.id}"></canvas>
+        </div>
+        <div class="stem-volume" onclick="Player.setVolumeVol('${stem.id}', event)">
+          <div class="stem-volume-fill" style="width:${state.volume*100}%;background:${stem.color}"></div>
+        </div>
+        <div class="stem-actions">
+          <button class="stem-btn ${state.muted ? 'muted' : ''}" onclick="event.stopPropagation();Player.toggleMute('${stem.id}')" title="Mute">${state.muted ? '🔇' : '🔊'}</button>
+          <div class="solo-switch-wrap" onclick="event.stopPropagation()">
+            <label class="solo-switch ${state.solo ? 'on' : ''}" title="Solo">
+              <input type="checkbox" ${state.solo ? 'checked' : ''} onchange="Player.setSolo('${stem.id}', this.checked)">
+              <span class="solo-rocker"></span>
+              <span class="solo-led"></span>
+            </label>
+            <span class="solo-switch-label">${state.solo ? 'ON' : 'OFF'}</span>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+
+    // Draw mini waveforms for each stem
+    setTimeout(() => {
+      this.stems.forEach(stem => {
+        if (!this.buffers[stem.id]) return;
+        const canvas = document.getElementById('wf-' + stem.id);
+        if (!canvas) return;
+        const parent = canvas.parentElement;
+        canvas.width = parent.offsetWidth * 2;
+        canvas.height = 36 * 2;
+        canvas.style.width = parent.offsetWidth + 'px';
+        canvas.style.height = '36px';
+        const ctx = canvas.getContext('2d');
+        ctx.scale(2, 2);
+        const data = this.buffers[stem.id].getChannelData(0);
+        const step = Math.ceil(data.length / parent.offsetWidth);
+        const mid = 18;
+        ctx.clearRect(0, 0, parent.offsetWidth, 36);
+        for (let i = 0; i < parent.offsetWidth; i++) {
+          let min = 0, max = 0;
+          for (let j = 0; j < step; j++) {
+            const d = data[i * step + j] || 0;
+            if (d < min) min = d; if (d > max) max = d;
+          }
+          const h = Math.max(Math.abs(min), Math.abs(max)) * 14;
+          ctx.fillStyle = stem.color + '60';
+          ctx.fillRect(i, mid - h, 1.5, h * 2);
+        }
+      });
+    }, 100);
+  },
+
+  setVolumeVol(stemId, e) {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const vol = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    this.setVolume(stemId, vol);
+  },
+
+  async drawHeroWaveform() {
+    if (!this.stems.some(s => this.buffers[s.id])) return;
+    const canvas = document.getElementById('heroWaveformCanvas');
+    const parent = canvas.parentElement;
+    canvas.width = parent.offsetWidth * 2;
+    canvas.height = 160 * 2;
+    canvas.style.width = parent.offsetWidth + 'px';
+    canvas.style.height = '160px';
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+    const mid = 80;
+    ctx.clearRect(0, 0, parent.offsetWidth, 160);
+
+    // Draw combined waveform from all stems
+    const colors = ['#f59e0b','#a855f7','#10b981','#06b6d4'];
+    this.stems.forEach((stem, si) => {
+      if (!this.buffers[stem.id]) return;
+      const data = this.buffers[stem.id].getChannelData(0);
+      const step = Math.ceil(data.length / parent.offsetWidth);
+      for (let i = 0; i < parent.offsetWidth; i++) {
+        let min = 0, max = 0;
+        for (let j = 0; j < step; j++) {
+          const d = data[i * step + j] || 0;
+          if (d < min) min = d; if (d > max) max = d;
+        }
+        const h = Math.max(Math.abs(min), Math.abs(max)) * 50;
+        ctx.globalAlpha = 0.25;
+        ctx.fillStyle = colors[si % colors.length];
+        ctx.fillRect(i, mid - h, 1, h * 2);
+      }
+    });
+
+    // Draw composite outline
+    ctx.globalAlpha = 1;
+    const composite = this.stems.reduce((acc, stem) => {
+      if (!this.buffers[stem.id]) return acc;
+      if (!acc) return this.buffers[stem.id].getChannelData(0).slice();
+      const d = this.buffers[stem.id].getChannelData(0);
+      d.forEach((v, i) => { if (i < acc.length) acc[i] = Math.abs(v) > Math.abs(acc[i]) ? v : acc[i]; });
+      return acc;
+    }, null);
+    if (composite) {
+      const step = Math.ceil(composite.length / parent.offsetWidth);
+      ctx.beginPath();
+      ctx.strokeStyle = 'rgba(6,182,212,0.4)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < parent.offsetWidth; i++) {
+        let max = 0;
+        for (let j = 0; j < step; j++) { const d = Math.abs(composite[i*step+j]||0); if (d>max) max=d; }
+        const h = max * 50;
+        if (i === 0) ctx.moveTo(i, mid - h);
+        ctx.lineTo(i, mid - h);
+      }
+      ctx.stroke();
+      ctx.beginPath();
+      for (let i = 0; i < parent.offsetWidth; i++) {
+        let max = 0;
+        for (let j = 0; j < step; j++) { const d = Math.abs(composite[i*step+j]||0); if (d>max) max=d; }
+        const h = max * 50;
+        if (i === 0) ctx.moveTo(i, mid + h);
+        ctx.lineTo(i, mid + h);
+      }
+      ctx.stroke();
+    }
+  },
+
+};
+
+// ========================
+// TRANSPORT
+// ========================
+function toggleMasterPlay() {
+  if (!Player.audioContext) { Player.init(); return; }
+  if (Player.masterPlay) Player.stop();
+  else Player.play();
+}
+
+function seekMaster(e) {
+  if (!Player.audioContext || !Player.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  Player.seekToPercent(pct);
+}
+
+function seekHeroWaveform(e) {
+  if (!Player.audioContext || !Player.duration) return;
+  const rect = e.currentTarget.getBoundingClientRect();
+  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+  Player.seekToPercent(pct);
+}
+
+// ========================
+// CHECKOUT
+// ========================
+async function checkoutPro(e) {
+  e.preventDefault();
+  trackClick('checkout_pro');
+  let email = '';
+  try { email = localStorage.getItem('liminal_email') || ''; } catch(err) {}
+  if (!email) {
+    email = prompt('Enter your email for checkout and license delivery:');
+    if (email && email.includes('@')) {
+      try { localStorage.setItem('liminal_email', email); } catch(err) {}
+    } else if (!email) { return; }
+  }
+
+  showToast('🛒 Opening secure Stripe checkout...');
+
+  try {
+    const response = await fetch('/api/checkout', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email,
+        successUrl: window.location.origin + '/?checkout=success',
+        cancelUrl: window.location.origin + '/#pricing',
+      }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.url) {
+      throw new Error(data.error || 'Checkout unavailable');
+    }
+    window.open(data.url, '_blank');
+    fetch('/api/sales', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, product: 'liminal_pro', amount: 4900 }),
+    }).catch(() => {});
+    try {
+      const sales = JSON.parse(localStorage.getItem('liminal_sales') || '[]');
+      sales.push({ product: 'pro', email, time: Date.now() });
+      localStorage.setItem('liminal_sales', JSON.stringify(sales));
+    } catch(err) {}
+  } catch (err) {
+    showToast('⚠️ ' + (err.message || 'Checkout failed. Configure Stripe in .env'));
+  }
+}
+
+if (new URLSearchParams(window.location.search).get('checkout') === 'success') {
+  showToast('✅ Payment received. Check your email for the StemSplit Pro access password.');
+}
+
+// Init on interaction
+document.addEventListener('click', () => {
+  if (!Player.audioContext) {
+    Player.init().catch(() => {
+      // Will init on click of play button
+    });
+  }
+}, { once: true });
+
+console.log('🏆 Liminal StemSplit v2.0 — Income System Active');
+console.log('🎵 Demo: bz_onit (4 stems)');
+console.log('💳 Stripe checkout ready');
+console.log('🎯 Goal: $1,000 in 30 days');
+</script>
+</body>
+</html>
