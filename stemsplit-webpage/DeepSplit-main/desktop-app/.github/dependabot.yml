@@ -1,0 +1,22 @@
+version: 2
+
+updates:
+  - package-ecosystem: "npm"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+
+  - package-ecosystem: "cargo"
+    directory: "/src-tauri"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    ignore:
+      # glib advisory (GHSA) — affects glib < 0.20.0 via Linux GTK chain:
+      #   tauri v2 -> wry -> webkit2gtk -> gtk -> glib 0.18.x
+      # StemSplit ships Windows-only; no Linux GTK stack in production.
+      # Upstream fix requires gtk crate to adopt glib ^0.20; tracked in
+      # https://github.com/gtk-rs/gtk-rs-core — suppress until patched upstream.
+      - dependency-name: "glib"
+        update-types: ["version-update:semver-patch", "version-update:semver-minor"]

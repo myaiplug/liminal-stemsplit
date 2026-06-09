@@ -1,0 +1,443 @@
+Inno Setup 6 Command-Line Compiler
+Copyright (C) 1997-2026 Jordan Russell. All rights reserved.
+Portions Copyright (C) 2000-2026 Martijn Laan. All rights reserved.
+Portions Copyright (C) 2001-2004 Alex Yackimoff. All rights reserved.
+https://www.innosetup.com
+
+Compiler engine version: Inno Setup 6.7.0
+Non-commercial use only
+
+Preprocessing
+   Reading file: C:\Program Files (x86)\Inno Setup 6\ISPPBuiltins.iss
+Parsing [Setup] section, line 14
+Parsing [Setup] section, line 15
+Parsing [Setup] section, line 16
+Parsing [Setup] section, line 17
+Parsing [Setup] section, line 18
+Parsing [Setup] section, line 19
+Parsing [Setup] section, line 20
+Parsing [Setup] section, line 21
+Parsing [Setup] section, line 22
+Parsing [Setup] section, line 23
+Parsing [Setup] section, line 24
+Parsing [Setup] section, line 25
+Parsing [Setup] section, line 26
+Parsing [Setup] section, line 27
+Parsing [Setup] section, line 29
+Reading file (WizardImageFile)
+Reading file (WizardSmallImageFile)
+Preparing Setup program executable
+   Verification successful
+   Updating icons (Setup.e32)
+   Updating version info (Setup.e32)
+Determining language code pages
+Parsing [Languages] section, line 32
+   Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
+   Messages in script file
+Reading default messages from Default.isl
+Parsing [Languages] section, line 32
+   Reading file: C:\Program Files (x86)\Inno Setup 6\Default.isl
+Parsing [LangOptions], [Messages], and [CustomMessages] sections
+   Messages in script file
+Reading [Code] section
+Parsing [Tasks] section, line 35
+Parsing [Icons] section, line 62
+Parsing [Icons] section, line 63
+Parsing [Run] section, line 66
+Parsing [Files] section, line 39
+Parsing [Files] section, line 42
+   Reading version info: E:\Projects\1_StemSplit\scripts\apply_fx.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\hardware.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\license_generator.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\preview_vst.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\publish_release.ps1
+   Reading version info: E:\Projects\1_StemSplit\scripts\sign_windows_release.ps1
+   Reading version info: E:\Projects\1_StemSplit\scripts\splitter.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\.license_keys\private_key.pem
+   Reading version info: E:\Projects\1_StemSplit\scripts\.license_keys\public_key.pem
+   Reading version info: E:\Projects\1_StemSplit\scripts\ci\generate_release_manifest.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\ci\installer_quality_gate.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\ci\release_preflight.py
+   Reading version info: E:\Projects\1_StemSplit\scripts\ci\smoke_test_installer.ps1
+   Reading version info: E:\Projects\1_StemSplit\scripts\ci\smoke_test_mac_installer.sh
+   Reading version info: E:\Projects\1_StemSplit\scripts\ci\validate_model_payloads.py
+Parsing [Files] section, line 45
+   Reading version info: E:\Projects\1_StemSplit\drumsep-main\drumsep
+   Reading version info: E:\Projects\1_StemSplit\drumsep-main\model\49469ca8.th
+Parsing [Files] section, line 46
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\.gitignore
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\inference.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\requirements.txt
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\demucs.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\hdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\htdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\spec.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\states.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\transformer.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\utils.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\demucs.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\hdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\htdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\spec.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\states.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\transformer.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\utils.py
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\models\.gitkeep
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\models\04573f0d-f3cf25b2.th
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\models\Kim_Inst.onnx
+   Reading version info: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\models\Kim_Vocal_2.onnx
+Parsing [Files] section, line 47
+Parsing [Files] section, line 50
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\04573f0d-f3cf25b2.th
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\92cfc3b6-ef3bcb9c.th
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\d12395a8-e57c48e6.th
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\download_checks.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\f7e0c4bc-ba3fe64a.th
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\htdemucs_ft.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\mdx_model_data.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\model_bs_roformer_ep_317_sdr_12.9755.ckpt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\model_bs_roformer_ep_317_sdr_12.9755.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR_MDXNET_KARA_2.onnx
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\vr_model_data.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\drumsep-main\drumsep
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\drumsep-main\drumsepInstall
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\drumsep-main\LICENSE
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\drumsep-main\README.md
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\drumsep-main\model\49469ca8.th
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\.gitignore
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\gui.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\inference.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\README.md
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\requirements.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\web-ui.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\demucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\hdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\htdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\spec.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\states.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\transformer.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs3\utils.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\demucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\hdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\htdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\spec.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\states.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\transformer.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\demucs4\utils.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\images\MVSep-Window.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\models\.gitkeep
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\models\04573f0d-f3cf25b2.th
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\models\Kim_Inst.onnx
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\models\Kim_Vocal_2.onnx
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\__pycache__\inference.cpython-310.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\MVSEP-MDX23-music-separation-model-main\__pycache__\inference.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\install_packages.sh
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\README.md
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\requirements.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\separate.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\ss2.ico
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\UVR.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\__version__.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\apply.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\demucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\filtering.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\hdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\htdemucs.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\model.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\model_v2.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\pretrained.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\repo.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\spec.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\states.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\tasnet.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\tasnet_v2.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\transformer.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\utils.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__init__.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__main__.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\apply.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\demucs.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\filtering.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\hdemucs.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\model.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\model_v2.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\pretrained.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\repo.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\spec.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\states.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\tasnet_v2.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\utils.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\demucs\__pycache__\__init__.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\app_size_values.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\change_log.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\complete_chime.wav
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\constants.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\error_handling.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\fail_chime.wav
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\model_manual_download.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\old_data_check.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\own_font.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\fonts\centurygothic\GOTHIC.ttf
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\fonts\Montserrat\Montserrat.ttf
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\fonts\other\own_font_goes_here.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\clear.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\copy.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\credits.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\donate.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\down.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\download.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\File.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\GUI-Icon.ico
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\GUI-Icon.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\help.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\key.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\left.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\pause.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\play.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\right.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\splash.bmp
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\stop.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\stop_player.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\up.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\UVR-banner.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\UVR.icns
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\img\UVR_v5.6.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\saved_ensembles\saved_ensembles_go_here.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\saved_settings\saved_settings_go_here.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\sun-valley.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\sun-valley_darwin.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\__init__.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\arrow-down.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\arrow-right.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\arrow-up.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-accent-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-accent-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-accent-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-accent-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-close-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-close-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-titlebar-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\button-titlebar-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\card.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-tri-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-tri-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-tri-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-tri-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-unsel-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-unsel-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-unsel-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\check-unsel-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\combo-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\empty.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\entry-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\entry-focus.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\entry-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\entry-invalid.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\entry-rest-combo.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\entry-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\notebook-border.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\notebook.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\progress-pbar-hor.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\progress-pbar-vert.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\progress-trough-hor.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\progress-trough-vert.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-unsel-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-unsel-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-unsel-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\radio-unsel-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scale-thumb-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scale-thumb-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scale-thumb-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scale-thumb-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scale-trough-hor.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scale-trough-vert.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-down.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-hor-thumb.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-hor-trough.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-left.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-right.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-up.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-vert-thumb.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\scroll-vert-trough.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\separator.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\sizegrip.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-off-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-off-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-off-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-off-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-on-disabled.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-on-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-on-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\switch-on-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\tab-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\tab-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\tab-selected.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\treeheading-hover.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\treeheading-pressed.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\sv_ttk\theme\dark\treeheading-rest.png
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\TkinterDnD.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\__init__.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\libtkdnd2.9.2.so
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\pkgIndex.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd_compat.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd_generic.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd_macosx.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd_unix.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd_utils.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\linux64\tkdnd_windows.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\libtkdnd2.9.2.dylib
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\pkgIndex.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd_compat.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd_generic.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd_macosx.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd_unix.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd_utils.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx64\tkdnd_windows.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\libtkdnd2.9.3.dylib
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\pkgIndex.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd_compat.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd_generic.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd_macosx.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd_unix.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd_utils.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\osx_arm\tkdnd_windows.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\libtkdnd2.9.2.dll
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\pkgIndex.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd2.9.2.lib
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd_compat.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd_generic.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd_macosx.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd_unix.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd_utils.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\tkinterdnd2\tkdnd\win64\tkdnd_windows.tcl
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\__pycache__\constants.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\gui_data\__pycache__\error_handling.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\mdxnet.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\mixer.ckpt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\modules.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\pyrb.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\results.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\spec_utils.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\tfc_tdf_v3.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\layers.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\layers_new.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\model_param_init.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\nets.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\nets_new.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__init__.py
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr16000_hl512.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr32000_hl512.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr33075_hl384.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr44100_hl1024.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr44100_hl256.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr44100_hl512.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr44100_hl512_cut.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\1band_sr44100_hl512_nf1024.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\2band_32000.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\2band_44100_lofi.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\2band_48000.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\3band_44100.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\3band_44100_mid.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\3band_44100_msb2.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_44100.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_44100_mid.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_44100_msb.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_44100_msb2.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_44100_reverse.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_44100_sw.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_v2.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_v2_sn.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_v3.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\4band_v3_sn.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\modelparams\ensemble.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__pycache__\layers.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__pycache__\layers_new.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__pycache__\model_param_init.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__pycache__\nets.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__pycache__\nets_new.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\vr_network\__pycache__\__init__.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\__pycache__\mdxnet.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\__pycache__\modules.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\__pycache__\pyrb.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\__pycache__\spec_utils.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\lib_v5\__pycache__\tfc_tdf_v3.cpython-39.pyc
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\Demucs_Models\model_data\model_name_mapper.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\Demucs_Models\v3_v4_repo\demucs_models.txt
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\model_data.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\model_name_mapper.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model1.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model2.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model3.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\modelA.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\modelB.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model_2_stem_061321.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model_2_stem_full_band.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model_2_stem_full_band_2.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model_2_stem_full_band_3.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model_2_stem_full_band_4.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\model_2_stem_full_band_8k.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\MDX_Net_Models\model_data\mdx_c_configs\sndfx.yaml
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\VR_Models\UVR-DeNoise-Lite.pth
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\models\VR_Models\model_data\model_data.json
+   Reading version info: E:\Projects\1_StemSplit\Stem Split Models\audio-separator-models\UVR\__pycache__\separate.cpython-39.pyc
+Parsing [Files] section, line 53
+Parsing [Files] section, line 56
+Parsing [Files] section, line 59
+Compiling [Code] section
+Creating setup files
+   Verification successful
+   Updating icons (Setup.exe)
+   Compressing: E:\Projects\1_StemSplit\src-tauri\target\release\stem-split.exe
+   Compressing: E:\Projects\1_StemSplit\scripts\apply_fx.py
+   Compressing: E:\Projects\1_StemSplit\scripts\hardware.py
+   Compressing: E:\Projects\1_StemSplit\scripts\license_generator.py
+   Compressing: E:\Projects\1_StemSplit\scripts\preview_vst.py
+   Compressing: E:\Projects\1_StemSplit\scripts\publish_release.ps1
+   Compressing: E:\Projects\1_StemSplit\scripts\sign_windows_release.ps1
+   Compressing: E:\Projects\1_StemSplit\scripts\splitter.py
+   Compressing: E:\Projects\1_StemSplit\scripts\.license_keys\private_key.pem
+   Compressing: E:\Projects\1_StemSplit\scripts\.license_keys\public_key.pem
+   Compressing: E:\Projects\1_StemSplit\scripts\ci\generate_release_manifest.py
+   Compressing: E:\Projects\1_StemSplit\scripts\ci\installer_quality_gate.py
+   Compressing: E:\Projects\1_StemSplit\scripts\ci\release_preflight.py
+   Compressing: E:\Projects\1_StemSplit\scripts\ci\smoke_test_installer.ps1
+   Compressing: E:\Projects\1_StemSplit\scripts\ci\smoke_test_mac_installer.sh
+   Compressing: E:\Projects\1_StemSplit\scripts\ci\validate_model_payloads.py
+   Compressing: E:\Projects\1_StemSplit\drumsep-main\drumsep
+   Compressing: E:\Projects\1_StemSplit\drumsep-main\model\49469ca8.th
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\.gitignore
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\inference.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\requirements.txt
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\demucs.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\hdemucs.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\htdemucs.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\spec.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\states.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\transformer.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs3\utils.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\demucs.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\hdemucs.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\htdemucs.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\spec.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\states.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\transformer.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\demucs4\utils.py
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\models\.gitkeep
+   Compressing: E:\Projects\1_StemSplit\MVSEP-MDX23-music-separation-model-main\models\04573f0d-f3cf25b2.th

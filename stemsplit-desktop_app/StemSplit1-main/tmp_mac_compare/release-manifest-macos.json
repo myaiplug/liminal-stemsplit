@@ -1,0 +1,17 @@
+{
+  "generated_utc": "2026-03-26T02:32:12.363363+00:00",
+  "platform": "macos",
+  "artifact_count": 2,
+  "artifacts": [
+    {
+      "path": "installers/StemSplit_Online_Setup_macOS_AppleSilicon.dmg",
+      "size_bytes": 4834089,
+      "sha256": "4ca282ddfb01919fcc51a76f5686c2a88a208907c85d17a790b5c16fcf8f552c"
+    },
+    {
+      "path": "installers/checksums-mac.sha256",
+      "size_bytes": 112,
+      "sha256": "76fe9e4922f1a5f9357921183747107ff96fbec0b75deefa0687e12e932d3c0a"
+    }
+  ]
+}

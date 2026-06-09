@@ -1,0 +1,13 @@
+{
+  "platform": "macos",
+  "passed": true,
+  "installer_path": "installers/StemSplit_Online_Setup_macOS_AppleSilicon.dmg",
+  "mount_point": "/Volumes/StemSplit Installer",
+  "checks": {
+    "app_bundle_present": true,
+    "applications_symlink_present": true,
+    "checksum_match": true
+  },
+  "message": "DMG smoke tests passed",
+  "exit_code": 0
+}

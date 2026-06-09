@@ -1,0 +1,52 @@
+{
+  "manifest": "./scripts/ci/model_payload_manifest.json",
+  "repo_root": "/Users/runner/work/StemSplit1/StemSplit1",
+  "passed": true,
+  "payloads": [
+    {
+      "name": "drumsep-main",
+      "root": "drumsep-main",
+      "exists": false,
+      "passed": true,
+      "required_ok": true,
+      "forbidden_ok": true,
+      "forbidden_mode": "warn",
+      "size_ok": true,
+      "file_count": 0,
+      "size_mb": 0.0,
+      "missing_required": [],
+      "forbidden_found": [],
+      "details": "missing (optional)"
+    },
+    {
+      "name": "mvsep-mdx23",
+      "root": "MVSEP-MDX23-music-separation-model-main",
+      "exists": false,
+      "passed": true,
+      "required_ok": true,
+      "forbidden_ok": true,
+      "forbidden_mode": "warn",
+      "size_ok": true,
+      "file_count": 0,
+      "size_mb": 0.0,
+      "missing_required": [],
+      "forbidden_found": [],
+      "details": "missing (optional)"
+    },
+    {
+      "name": "uvr",
+      "root": "UVR",
+      "exists": false,
+      "passed": true,
+      "required_ok": true,
+      "forbidden_ok": true,
+      "forbidden_mode": "warn",
+      "size_ok": true,
+      "file_count": 0,
+      "size_mb": 0.0,
+      "missing_required": [],
+      "forbidden_found": [],
+      "details": "missing (optional)"
+    }
+  ]
+}

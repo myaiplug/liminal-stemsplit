@@ -1,0 +1,49 @@
+{
+  "metadata": {
+    "platform": "macos",
+    "installer_glob": "installers/StemSplit_Online_Setup_macOS_AppleSilicon.dmg",
+    "installer_path": "installers/StemSplit_Online_Setup_macOS_AppleSilicon.dmg",
+    "installer_size_mb": 4.61,
+    "total_score": 100,
+    "threshold": 90,
+    "passed": true
+  },
+  "checks": [
+    {
+      "name": "artifact_exists",
+      "weight": 25,
+      "passed": true,
+      "details": "installers/StemSplit_Online_Setup_macOS_AppleSilicon.dmg"
+    },
+    {
+      "name": "size_sanity",
+      "weight": 10,
+      "passed": true,
+      "details": "4.61 MB"
+    },
+    {
+      "name": "checksum_manifest_present",
+      "weight": 15,
+      "passed": true,
+      "details": "installers/checksums-mac.sha256"
+    },
+    {
+      "name": "checksum_match",
+      "weight": 15,
+      "passed": true,
+      "details": "match (StemSplit_Online_Setup_macOS_AppleSilicon.dmg)"
+    },
+    {
+      "name": "smoke_tests_passed",
+      "weight": 20,
+      "passed": true,
+      "details": "DMG smoke tests passed"
+    },
+    {
+      "name": "release_hardening_files_present",
+      "weight": 15,
+      "passed": true,
+      "details": "payload report indicates pass"
+    }
+  ]
+}

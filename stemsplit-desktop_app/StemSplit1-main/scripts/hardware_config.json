@@ -1,0 +1,10 @@
+{
+  "device": "cuda",
+  "split_strategy": "fast",
+  "overlap": 0.1,
+  "segment_size": 0,
+  "mkl_threads": 1,
+  "cpu_cores": 12,
+  "gpu_vram": 8.0,
+  "status": "High-end GPU detected (8.00GB VRAM). Using CUDA fast strategy."
+}

@@ -1,0 +1,81 @@
+name: Billing Preflight CI
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - 'release/**'
+    paths:
+      - 'billing-service/**'
+      - 'scripts/ci/release_preflight.py'
+      - 'docs/AUTH_BILLING_SETUP.md'
+      - 'package.json'
+      - '.github/workflows/billing-preflight.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  billing-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    env:
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}
+      GUMROAD_WEBHOOK_SECRET: ${{ secrets.GUMROAD_WEBHOOK_SECRET }}
+      BILLING_ADMIN_TOKEN: ${{ secrets.BILLING_ADMIN_TOKEN }}
+      STRIPE_SIGNATURE_TOLERANCE_SEC: '300'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Run release preflight with billing smoke gate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          export STRIPE_WEBHOOK_SECRET="${STRIPE_WEBHOOK_SECRET:-whsec_ci_smoke}"
+          export GUMROAD_WEBHOOK_SECRET="${GUMROAD_WEBHOOK_SECRET:-gumroad_ci_smoke}"
+          export BILLING_ADMIN_TOKEN="${BILLING_ADMIN_TOKEN:-admin_ci_smoke}"
+
+          node ./billing-service/server.mjs > /tmp/billing-webhook.log 2>&1 &
+          BILLING_PID=$!
+          trap 'kill ${BILLING_PID} || true' EXIT
+
+          # Wait for the webhook server to become reachable.
+          for i in {1..20}; do
+            if curl -fsS http://127.0.0.1:8787/health > /dev/null; then
+              break
+            fi
+            sleep 1
+          done
+
+          python ./scripts/ci/release_preflight.py \
+            --repo-root . \
+            --json-out ./installers/release-preflight.billing.ci.json \
+            --md-out ./installers/release-preflight.billing.ci.md \
+            --run-billing-smoke
+
+      - name: Upload billing preflight reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: billing-preflight-report
+          path: |
+            installers/release-preflight.billing.ci.json
+            installers/release-preflight.billing.ci.md
+            billing-service/data/licenses.json
+          if-no-files-found: warn
+          retention-days: 14

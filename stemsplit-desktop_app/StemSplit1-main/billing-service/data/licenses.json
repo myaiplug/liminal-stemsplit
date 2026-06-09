@@ -1,0 +1,103 @@
+{
+  "licenses": [
+    {
+      "email": "smoke.stripe@example.com",
+      "source": "stripe",
+      "plan": "pro",
+      "credentialHash": "6cdac239873956ed57661096e21aabd8b3b854e80a4a4e62f12689c1ad5d202a",
+      "purchaseDate": "2026-04-04T04:54:50.329Z",
+      "createdAt": "2026-04-04T04:38:06.149Z",
+      "updatedAt": "2026-04-04T04:54:50.329Z",
+      "gumroadLicenseKey": null,
+      "metadata": {
+        "sessionId": "cs_smoke_1775278490318"
+      }
+    },
+    {
+      "email": "smoke.gumroad@example.com",
+      "source": "gumroad",
+      "plan": "pro",
+      "credentialHash": "fffaba6cab6cd4f0be21e9c5fb4ccb9bd8224c02826dd5ad48c9f2c8268fb319",
+      "purchaseDate": "2026-04-04T04:54:50.340Z",
+      "createdAt": "2026-04-04T04:38:06.162Z",
+      "updatedAt": "2026-04-04T04:54:50.343Z",
+      "gumroadLicenseKey": null,
+      "metadata": {
+        "saleId": "sale_smoke_1775278490340"
+      }
+    },
+    {
+      "email": "stripe@example.com",
+      "source": "stripe",
+      "plan": "pro",
+      "credentialHash": "062842a28f4712f50cb70ed8a4a7bfb12b27a1ead1e1e93e423714a3cfff7f48",
+      "purchaseDate": "2026-06-09T02:19:30.101Z",
+      "createdAt": "2026-06-09T01:32:15.094Z",
+      "updatedAt": "2026-06-09T02:19:30.102Z",
+      "gumroadLicenseKey": null,
+      "metadata": {
+        "sessionId": "cs_test_a1lGiZrqdduZ8ZYvAhHv82HWeiDlLmXz056TmMqjbQpjTAReh5vczvJNCC"
+      }
+    }
+  ],
+  "webhookEvents": [
+    {
+      "key": "stripe:evt_smoke_1775277486137",
+      "source": "stripe",
+      "processedAt": "2026-04-04T04:38:06.150Z",
+      "metadata": {
+        "eventId": "evt_smoke_1775277486137",
+        "sessionId": "cs_smoke_1775277486137",
+        "email": "smoke.stripe@example.com"
+      }
+    },
+    {
+      "key": "gumroad:sale:sale_smoke_1775277486158",
+      "source": "gumroad",
+      "processedAt": "2026-04-04T04:38:06.162Z",
+      "metadata": {
+        "saleId": "sale_smoke_1775277486158",
+        "email": "smoke.gumroad@example.com"
+      }
+    },
+    {
+      "key": "stripe:evt_smoke_1775278490318",
+      "source": "stripe",
+      "processedAt": "2026-04-04T04:54:50.330Z",
+      "metadata": {
+        "eventId": "evt_smoke_1775278490318",
+        "sessionId": "cs_smoke_1775278490318",
+        "email": "smoke.stripe@example.com"
+      }
+    },
+    {
+      "key": "gumroad:sale:sale_smoke_1775278490340",
+      "source": "gumroad",
+      "processedAt": "2026-04-04T04:54:50.344Z",
+      "metadata": {
+        "saleId": "sale_smoke_1775278490340",
+        "email": "smoke.gumroad@example.com"
+      }
+    },
+    {
+      "key": "stripe:evt_1TgEWYGmNxnIcRMNKlGh9qEt",
+      "source": "stripe",
+      "processedAt": "2026-06-09T01:32:15.108Z",
+      "metadata": {
+        "eventId": "evt_1TgEWYGmNxnIcRMNKlGh9qEt",
+        "sessionId": "cs_test_a1E2CGrQDxWX5g0jqlTPrNtSot5hesnaY7aYZba41MojoEBfb7YlVXYhbj",
+        "email": "stripe@example.com"
+      }
+    },
+    {
+      "key": "stripe:evt_1TgFGHGmNxnIcRMNTyGRFQeH",
+      "source": "stripe",
+      "processedAt": "2026-06-09T02:19:30.103Z",
+      "metadata": {
+        "eventId": "evt_1TgFGHGmNxnIcRMNTyGRFQeH",
+        "sessionId": "cs_test_a1lGiZrqdduZ8ZYvAhHv82HWeiDlLmXz056TmMqjbQpjTAReh5vczvJNCC",
+        "email": "stripe@example.com"
+      }
+    }
+  ]
+}
