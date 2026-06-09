@@ -26,6 +26,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(billingRouter);
 app.use(express.static(path.join(__dirname, 'public')));
+app.use('/funnel', express.static(path.join(__dirname, 'funnel')));
+app.get('/funnel', (req, res) => res.sendFile(path.join(__dirname, 'funnel', 'index.html')));
 
 app.use('/stems', express.static(path.join(__dirname, 'public', 'stems'), {
   acceptRanges: true,

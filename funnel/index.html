@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Free AI Stem Split — Liminal</title>
+<meta name="description" content="Separate any song into 4 stems free. Isolate vocals, drums, bass, and more. No subscription. 100% local privacy.">
+<meta property="og:title" content="Free AI Stem Split — Liminal">
+<meta property="og:description" content="Isolate vocals, drums, bass, and other instruments from any song. Free demo. No account required.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+tailwind.config = {
+  theme: {
+    extend: {
+      fontFamily: { sans: ['Inter', 'sans-serif'] },
+      colors: {
+        liminal: { 50:'#ecfeff',100:'#cffafe',200:'#a5f3fc',300:'#67e8f9',400:'#22d3ee',500:'#06b6d4',600:'#0891b2',700:'#0e7490',800:'#155e75',900:'#164e63',950:'#083344' }
+      }
+    }
+  }
+}
+</script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#020617;color:#fafafa;overflow-x:hidden}
+.glass{background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.06);backdrop-filter:blur(20px)}
+.glass-strong{background:rgba(2,6,23,0.8);border:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(24px)}
+.gradient-text{background:linear-gradient(135deg,#06b6d4,#22d3ee,#0891b2);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-size:200% 200%;animation:shimmer 4s ease-in-out infinite}
+@keyframes shimmer{0%,100%{background-position:200% 0}50%{background-position:-200% 0}}
+@keyframes pulse-glow{0%,100%{opacity:0.4}50%{opacity:1}}
+.btn-primary{display:inline-flex;align-items:center;gap:0.5rem;padding:0.875rem 2rem;border-radius:9999px;background:linear-gradient(135deg,#0891b2,#06b6d4);color:#fff;font-weight:600;font-size:0.9375rem;transition:all 0.3s;border:none;cursor:pointer}
+.btn-primary:hover{transform:translateY(-2px);box-shadow:0 20px 60px rgba(6,182,212,0.35)}
+.btn-secondary{display:inline-flex;align-items:center;gap:0.5rem;padding:0.875rem 2rem;border-radius:9999px;border:1px solid rgba(255,255,255,0.15);color:#fff;font-weight:500;font-size:0.9375rem;transition:all 0.3s;cursor:pointer;background:transparent}
+.btn-secondary:hover{background:rgba(255,255,255,0.05);border-color:rgba(6,182,212,0.4);transform:translateY(-2px)}
+#fade-in{animation:fadeIn 0.8s ease-out}
+@keyframes fadeIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+</style>
+</head>
+<body>
+  <nav class="fixed top-0 left-0 right-0 z-50 p-4" id="nav">
+    <div class="max-w-6xl mx-auto flex items-center justify-between">
+      <a href="/" class="text-lg font-bold tracking-tight text-liminal-400">liminal</a>
+      <div class="flex items-center gap-4">
+        <a href="/" class="text-sm text-white/60 hover:text-white/90 transition-colors">Home</a>
+        <a href="/funnel/pro.html" class="btn-primary text-sm py-2 px-5">Get Pro</a>
+      </div>
+    </div>
+  </nav>
+
+  <main class="min-h-screen pt-24">
+    <section class="max-w-3xl mx-auto px-6 text-center pt-16 pb-12" id="fade-in">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-liminal-300 mb-6 font-medium tracking-wide">
+        <span class="w-2 h-2 rounded-full bg-liminal-400 animate-pulse"></span>
+        Free Demo • No Account Required
+      </div>
+      <h1 class="text-5xl md:text-6xl font-bold tracking-tight leading-tight">
+        Try <span class="gradient-text">Stem Split</span><br>Before You Buy
+      </h1>
+      <p class="text-white/40 text-lg mt-6 max-w-xl mx-auto leading-relaxed">
+        Upload a track and hear what Liminal can do. Isolate vocals, drums, bass, and other instruments in seconds. No credit card. No download required.
+      </p>
+      <div class="flex flex-wrap justify-center gap-4 mt-10">
+        <a href="/#demo" class="btn-primary text-base">Try the Demo →</a>
+        <a href="/funnel/pro.html" class="btn-secondary text-base">See Pro Features</a>
+      </div>
+    </section>
+
+    <section class="max-w-4xl mx-auto px-6 pb-16">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-center">
+        <div class="glass rounded-2xl p-8">
+          <div class="text-3xl mb-3 text-liminal-400 font-bold">1.</div>
+          <h3 class="font-semibold mb-2">Upload or Paste URL</h3>
+          <p class="text-white/40 text-sm">Drop any audio file or YouTube link. We handle the rest.</p>
+        </div>
+        <div class="glass rounded-2xl p-8">
+          <div class="text-3xl mb-3 text-liminal-400 font-bold">2.</div>
+          <h3 class="font-semibold mb-2">AI Separates</h3>
+          <p class="text-white/40 text-sm">Demucs + MDX models split into vocals, drums, bass, other.</p>
+        </div>
+        <div class="glass rounded-2xl p-8">
+          <div class="text-3xl mb-3 text-liminal-400 font-bold">3.</div>
+          <h3 class="font-semibold mb-2">Solo, Mute, Download</h3>
+          <p class="text-white/40 text-sm">Play with each stem. Download your stems. Export and create.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="max-w-2xl mx-auto px-6 pb-24">
+      <div class="glass rounded-3xl p-8 md:p-12 text-center">
+        <h2 class="text-2xl md:text-3xl font-bold">Get Early Access to the Desktop App</h2>
+        <p class="text-white/40 mt-3">Be the first to know when the full local app launches. No spam. Unsubscribe anytime.</p>
+        <form id="funnelLead" class="mt-8 flex flex-col sm:flex-row gap-3 max-w-md mx-auto">
+          <input type="email" name="email" placeholder="your@email.com" required class="flex-1 px-5 py-3 rounded-xl bg-white/5 border border-white/10 text-white placeholder:text-white/30 focus:outline-none focus:border-liminal-500/50 transition-colors text-sm">
+          <button type="submit" class="btn-primary whitespace-nowrap justify-center">Get Early Access</button>
+        </form>
+        <p class="text-white/30 text-xs mt-4">Join producers, engineers, and remixers already on the list.</p>
+        <div id="funnelMessage" class="mt-4 text-sm text-liminal-400 hidden"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="border-t border-white/5 py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p class="text-white/30 text-sm">© 2026 Liminal. All rights reserved.</p>
+      <div class="flex gap-6 text-sm text-white/40">
+        <a href="/privacy.html" class="hover:text-white/70 transition-colors">Privacy</a>
+        <a href="/terms.html" class="hover:text-white/70 transition-colors">Terms</a>
+        <a href="/refund.html" class="hover:text-white/70 transition-colors">Refund</a>
+      </div>
+    </div>
+  </footer>
+
+<script>
+document.getElementById('funnelLead')?.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const email = e.target.email.value.trim();
+  const msg = document.getElementById('funnelMessage');
+  msg.classList.add('hidden');
+  try {
+    const res = await fetch('/api/leads', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, source: 'funnel_free' })
+    });
+    if (!res.ok) throw new Error('Failed');
+    msg.textContent = '✓ You\'re on the list! Check your inbox for a welcome message.';
+    msg.classList.remove('hidden');
+    e.target.reset();
+  } catch {
+    msg.textContent = 'Something went wrong. Try again or email us directly.';
+    msg.classList.remove('hidden');
+  }
+});
+</script>
+</body>
+</html>
