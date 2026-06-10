@@ -14,13 +14,19 @@ export default function UpdateModal() {
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null);
   const [isOpen, setIsOpen] = useState(false);
 
+  const parseSemver = (version: string): number[] | null => {
+    const match = version.trim().replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)/);
+    if (!match) return null;
+    return [Number(match[1]), Number(match[2]), Number(match[3])];
+  };
+
   const isNewerVersion = (current: string, latest: string) => {
-    const normalize = (v: string) => v.split(/(?=[a-z])/i).join('.').split(/[.-]/).map(n => parseInt(n) || 0);
-    const c = normalize(current);
-    const l = normalize(latest);
-    for (let i = 0; i < Math.max(c.length, l.length); i++) {
-      if ((l[i] || 0) > (c[i] || 0)) return true;
-      if ((c[i] || 0) > (l[i] || 0)) return false;
+    const c = parseSemver(current);
+    const l = parseSemver(latest);
+    if (!c || !l) return false;
+    for (let i = 0; i < 3; i++) {
+      if (l[i] > c[i]) return true;
+      if (l[i] < c[i]) return false;
     }
     return false;
   };
@@ -45,10 +51,12 @@ export default function UpdateModal() {
         if (!response.ok) return;
         
         const data = await response.json();
-        const latestTag = data.tag_name as string; // usually like 'v0.1.1'
-        const latestVersion = latestTag.replace(/^v/, ''); // remove 'v'
+        const latestTag = data.tag_name as string; // e.g. v0.4.7
+        const latestVersion = latestTag.replace(/^v/i, '');
 
-        // Basic version comparison
+        // Ignore non-semver release tags (e.g. v1.0-next16-security-upgrade).
+        if (!parseSemver(latestVersion)) return;
+
         if (latestVersion !== currentVersion && isNewerVersion(currentVersion, latestVersion)) {
           setUpdateInfo({
             version: latestVersion,
@@ -90,7 +98,8 @@ export default function UpdateModal() {
           </div>
           <div className="ml-4 flex-1">
             <h3 className="text-lg font-semibold text-white">Update Available!</h3>
-            <p className="text-sm text-gray-400 mt-1">NoDAW Liminal version <strong>{updateInfo.version}</strong> is now available.</p>
+            <p className="text-sm text-gray-400 mt-1">NoDAW Liminal version <strong>{updateInfo.version}</strong> is available on GitHub.</p>
+            <p className="text-xs text-gray-500 mt-2">This opens the release page in your browser. It does not auto-install or change your Python models.</p>
           </div>
         </div>
         

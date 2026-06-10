@@ -237,8 +237,18 @@ def validate_variant(
     }
 
 
+RUNNABLE_STATUSES = {
+    "ready",
+    "ready_local",
+    "auto_download",
+    "hf_auto_download",
+    "msst_auto_download",
+}
+
+
 def main() -> int:
     emit_json = "--json" in sys.argv
+    require_all_runnable = "--require-all-runnable" in sys.argv
     catalog_ids = parse_catalog_ids()
     registry_ids = set(MODEL_VARIANTS.keys())
     as_catalog = load_audio_separator_filenames()
@@ -307,6 +317,19 @@ def main() -> int:
         )
         print("-" * 72)
         print(f"Runnable (ready + local + auto-download + MSST/HF): {ready} / {len(results)}")
+        if require_all_runnable and ready != len(results):
+            print(
+                f"FAIL: --require-all-runnable set but only {ready}/{len(results)} models are runnable.",
+                file=sys.stderr,
+            )
+
+    not_runnable = [r for r in results if r["status"] not in RUNNABLE_STATUSES]
+    if require_all_runnable and not_runnable:
+        if not emit_json:
+            print(f"\nNOT RUNNABLE ({len(not_runnable)}):")
+            for row in not_runnable:
+                print(f"  {row['id']}: {row['status']} -> {'; '.join(row['issues']) or 'no details'}")
+        return 1
 
     return 1 if broken or missing_registry else 0
 

@@ -2857,7 +2857,7 @@ async fn execute_splice(
 
     // Build arguments
     let mut cmd_args = vec![
-        splitter_script,
+        splitter_script.clone(),
         request.file_path.clone(),
         "--output".to_string(),
         output_dir.clone(),
@@ -5039,7 +5039,7 @@ async fn setup_python_environment(window: tauri::Window) -> Result<String, Strin
                 "pip".into(),
                 "install".into(),
                 "spleeter==2.4.0".into(),
-                "tensorflow-cpu==2.12.0".into(),
+                "tensorflow==2.9.3".into(),
                 "--no-warn-script-location".into(),
                 "--no-cache-dir".into(),
             ],
