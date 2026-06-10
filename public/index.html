@@ -2,14 +2,19 @@
 <html lang="en" class="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#020617">
+<meta name="apple-mobile-web-app-capable" content="yes">
 <title>Liminal StemSplit — AI Stem Separation. Local-First. One-Time Purchase.</title>
 <meta name="description" content="Separate any song into 4-6 stems. Isolate vocals, drums, bass, and more. 100% local privacy. No subscriptions. One-time purchase $49.">
 <meta property="og:title" content="Liminal StemSplit — AI Stem Separation">
 <meta property="og:description" content="Isolate vocals, drums, bass, and other instruments from any song. Local-first. One-time payment.">
 <meta name="twitter:card" content="summary_large_image">
-<meta property="og:image" content="https://liminal-stemsplit.onrender.com/assets/liminal.png">
+<meta property="og:image" content="https://liminal-stemsplit.onrender.com/assets/app-screenshots/03-after-split.png?v=20260610c">
+<meta name="twitter:image" content="https://liminal-stemsplit.onrender.com/assets/app-screenshots/03-after-split.png?v=20260610c">
 <link rel="icon" href="/assets/liminal.png" type="image/png">
+<link rel="preload" href="/assets/hero-bg.jpg?v=20260610c" as="image">
+<link rel="preload" href="/assets/liminal.png?v=20260610c" as="image">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -46,23 +51,37 @@ body{font-family:'Inter',sans-serif;background:#020617;color:#fafafa;overflow-x:
 
 /* NAV */
 nav{position:fixed;top:0;left:0;right:0;z-index:100;padding:1rem 2rem;transition:all 0.3s}
-nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);padding:0.75rem 2rem}
+nav.scrolled{background:rgba(2,6,23,0.92);backdrop-filter:blur(20px);border-bottom:1px solid rgba(255,255,255,0.05);padding:0.75rem 2rem}
+.nav-mobile-toggle{display:none;width:40px;height:40px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.04);color:#fff;align-items:center;justify-content:center;cursor:pointer}
+.nav-mobile-menu{display:none;position:fixed;inset:0;z-index:99;background:rgba(2,6,23,0.97);padding:5.5rem 1.5rem 2rem;overflow-y:auto}
+.nav-mobile-menu.open{display:flex;flex-direction:column;gap:0.35rem}
+.nav-mobile-menu a{display:block;padding:0.9rem 0.85rem;border-radius:12px;border:1px solid rgba(255,255,255,0.06);color:rgba(255,255,255,0.82);font-size:1rem;font-weight:500;text-decoration:none}
+.nav-mobile-menu a:active{background:rgba(6,182,212,0.08);border-color:rgba(6,182,212,0.2)}
+@media(max-width:768px){
+  .nav-mobile-toggle{display:inline-flex}
+  .nav-cta-secondary{display:none!important}
+}
 
 /* HERO ATMOSPHERE */
 .hero-section{
-  position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 5rem;overflow:hidden;
-  background:#020617 url('/assets/hero-bg.jpg?v=20260610') center center / cover no-repeat fixed;
+  position:relative;z-index:1;min-height:100vh;min-height:100dvh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:5.5rem 1.25rem 4rem;overflow:hidden;
+  background-color:#020617;
+  background-image:url('/assets/hero-bg.jpg?v=20260610c');
+  background-position:center center;
+  background-size:cover;
+  background-repeat:no-repeat;
+  background-attachment:scroll;
 }
 .hero-atmosphere{position:absolute;inset:0;pointer-events:none;z-index:0}
 .hero-layer{position:absolute;inset:0}
 .hero-layer--photo{
-  background:url('/assets/hero-bg.jpg?v=20260610') center center / cover no-repeat;
+  background:url('/assets/hero-bg.jpg?v=20260610c') center center / cover no-repeat;
   transform:scale(1.03);
   filter:saturate(1.08) contrast(1.05);
 }
 .hero-layer--base{
   background:
-    linear-gradient(180deg,rgba(2,6,23,0.12) 0%,rgba(2,6,23,0.28) 55%,rgba(2,6,23,0.62) 100%);
+    linear-gradient(180deg,rgba(2,6,23,0.08) 0%,rgba(2,6,23,0.22) 50%,rgba(2,6,23,0.55) 100%);
 }
 .hero-layer--wormhole{
   top:50%;left:50%;width:min(140vw,1100px);height:min(140vw,1100px);
@@ -116,6 +135,50 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 @keyframes fog-drift-cyan{0%,100%{transform:translate(0,0)}50%{transform:translate(3%,-2%)}}
 @keyframes fog-drift-violet{0%,100%{transform:translate(0,0)}50%{transform:translate(-4%,3%)}}
 @keyframes logo-glow-pulse{0%,100%{opacity:0.82;transform:translate(-50%,-50%) scale(1)}50%{opacity:1;transform:translate(-50%,-50%) scale(1.05)}}
+
+/* APP SHOWCASE */
+.app-showcase{position:relative;z-index:1;padding:5rem 1.5rem 4rem;background:linear-gradient(180deg,rgba(2,6,23,0.2) 0%,rgba(6,182,212,0.04) 45%,transparent 100%)}
+.app-showcase-inner{max-width:1180px;margin:0 auto}
+.app-showcase-steps{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.75rem;margin:2.5rem 0 1.75rem}
+.app-step-btn{position:relative;padding:1rem 1rem 1rem 3.25rem;border-radius:16px;border:1px solid rgba(255,255,255,0.06);background:rgba(2,6,23,0.55);color:rgba(255,255,255,0.55);text-align:left;cursor:pointer;transition:all 0.35s cubic-bezier(0.4,0,0.2,1)}
+.app-step-btn:hover{border-color:rgba(6,182,212,0.25);background:rgba(6,182,212,0.04)}
+.app-step-btn.active{border-color:rgba(6,182,212,0.45);background:linear-gradient(135deg,rgba(6,182,212,0.12),rgba(168,85,247,0.08));color:#fff;box-shadow:0 18px 50px rgba(6,182,212,0.12)}
+.app-step-num{position:absolute;left:1rem;top:1rem;width:1.75rem;height:1.75rem;border-radius:999px;display:flex;align-items:center;justify-content:center;font-size:0.6875rem;font-family:'JetBrains Mono',monospace;font-weight:700;color:#67e8f9;background:rgba(6,182,212,0.12);border:1px solid rgba(6,182,212,0.25)}
+.app-step-btn.active .app-step-num{background:rgba(6,182,212,0.22);box-shadow:0 0 18px rgba(34,211,238,0.35)}
+.app-step-title{display:block;font-size:0.875rem;font-weight:600;margin-bottom:0.2rem}
+.app-step-sub{display:block;font-size:0.6875rem;color:rgba(255,255,255,0.38);line-height:1.4}
+.app-step-btn.active .app-step-sub{color:rgba(214,243,255,0.72)}
+.app-window{position:relative;border-radius:22px;overflow:hidden;border:1px solid rgba(6,182,212,0.18);background:linear-gradient(180deg,#0b1220 0%,#020617 100%);box-shadow:0 30px 90px rgba(0,0,0,0.55),0 0 0 1px rgba(255,255,255,0.03),0 0 80px rgba(6,182,212,0.08)}
+.app-window::before{content:'';position:absolute;inset:-1px;border-radius:22px;padding:1px;background:linear-gradient(135deg,rgba(34,211,238,0.35),rgba(168,85,247,0.15),rgba(34,211,238,0.05));-webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);-webkit-mask-composite:xor;mask-composite:exclude;pointer-events:none}
+.app-window-bar{display:flex;align-items:center;justify-content:space-between;padding:0.8rem 1rem;border-bottom:1px solid rgba(255,255,255,0.06);background:rgba(2,6,23,0.85)}
+.app-window-dots{display:flex;gap:0.4rem}
+.app-window-dot{width:0.65rem;height:0.65rem;border-radius:999px;background:rgba(148,163,184,0.35)}
+.app-window-dot:nth-child(1){background:#ef4444}
+.app-window-dot:nth-child(2){background:#f59e0b}
+.app-window-dot:nth-child(3){background:#22c55e}
+.app-window-title{font-size:0.6875rem;font-family:'JetBrains Mono',monospace;color:rgba(148,163,184,0.8);letter-spacing:0.08em;text-transform:uppercase}
+.app-window-badge{font-size:0.625rem;padding:0.2rem 0.55rem;border-radius:999px;border:1px solid rgba(34,211,238,0.25);color:#67e8f9;background:rgba(6,182,212,0.08)}
+.app-window-body{position:relative;background:#020617;min-height:min(56vw,520px)}
+.app-window-body img{display:block;width:100%;height:auto;vertical-align:top;transition:opacity 0.45s cubic-bezier(0.4,0,0.2,1),transform 0.55s cubic-bezier(0.4,0,0.2,1)}
+.app-window-body img.is-swapping{opacity:0;transform:scale(0.992)}
+.app-showcase::before{content:'';position:absolute;inset:10% 5% auto 5%;height:55%;background:radial-gradient(ellipse at center,rgba(6,182,212,0.08) 0%,transparent 72%);pointer-events:none;filter:blur(40px)}
+.app-window-glow{position:absolute;inset:auto -10% -30% -10%;height:45%;background:radial-gradient(ellipse at center,rgba(6,182,212,0.18) 0%,transparent 70%);pointer-events:none;filter:blur(18px)}
+.app-showcase-caption{display:flex;flex-wrap:wrap;gap:0.75rem;justify-content:center;margin-top:1.5rem}
+.app-showcase-pill{display:inline-flex;align-items:center;gap:0.45rem;padding:0.45rem 0.85rem;border-radius:999px;border:1px solid rgba(255,255,255,0.08);background:rgba(255,255,255,0.02);font-size:0.75rem;color:rgba(255,255,255,0.55)}
+.app-showcase-pill strong{color:#e2e8f0;font-weight:600}
+.app-preview-thumbs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0.55rem;margin-top:1rem}
+.app-preview-thumb{position:relative;border-radius:12px;overflow:hidden;border:2px solid rgba(255,255,255,0.06);background:#0b1220;cursor:pointer;padding:0;transition:all 0.3s}
+.app-preview-thumb img{display:block;width:100%;height:auto;aspect-ratio:16/10;object-fit:cover;object-position:top center}
+.app-preview-thumb.active{border-color:rgba(6,182,212,0.55);box-shadow:0 8px 28px rgba(6,182,212,0.18)}
+.app-preview-thumb-label{position:absolute;left:0;right:0;bottom:0;padding:0.3rem 0.45rem;font-size:0.5625rem;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,0.82);background:linear-gradient(180deg,transparent,rgba(2,6,23,0.92));text-transform:uppercase;letter-spacing:0.06em}
+@media(max-width:900px){
+  .app-showcase-steps{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:640px){
+  .app-showcase-steps{display:none}
+  .app-showcase{padding-top:3.5rem}
+  .app-preview-thumbs{grid-template-columns:repeat(2,minmax(0,1fr));gap:0.5rem}
+}
 
 /* STEM PLAYER */
 .stem-player{position:relative;z-index:1;padding:4rem 2rem;background:linear-gradient(180deg,transparent 0%,rgba(6,182,212,0.02) 50%,transparent 100%)}
@@ -195,20 +258,47 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 .waveform-big{width:100%;height:120px;border-radius:12px;background:rgba(6,182,212,0.02);border:1px solid rgba(6,182,212,0.06);overflow:hidden;position:relative;margin:1.5rem 0;cursor:pointer}
 .waveform-big canvas{width:100%;height:100%}
 
-/* REVEAL */
-.reveal{opacity:0;transform:translateY(30px);transition:all 0.8s cubic-bezier(0.4,0,0.2,1)}
-.reveal.visible{opacity:1;transform:translateY(0)}
+/* REVEAL — visible by default; animate only when JS is running */
+.reveal{opacity:1;transform:none;transition:opacity 0.8s cubic-bezier(0.4,0,0.2,1),transform 0.8s cubic-bezier(0.4,0,0.2,1)}
+html.js .reveal{opacity:0;transform:translateY(24px)}
+html.js .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* SCROLL INDICATOR */
 .scroll-indicator{position:absolute;bottom:0.75rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.2);font-size:0.625rem;letter-spacing:0.15em;text-transform:uppercase;animation:float 2s ease-in-out infinite;pointer-events:none;z-index:5}
 
 @media(max-width:768px){
-  .stem-track{grid-template-columns:60px 1fr auto;gap:0.5rem}
-  .stem-actions{gap:0.25rem}
+  .hero-section{padding:4.75rem 1rem 3.25rem}
+  .hero-logo{max-height:200px}
+  .hero-logo-glow{filter:blur(14px)}
+  .glass,.glass-strong,.stem-container,.email-bar,.toast{backdrop-filter:none;-webkit-backdrop-filter:none}
+  .app-window-body{min-height:0}
+  .app-window-title{display:none}
+  .app-window-badge{font-size:0.5625rem}
+  .app-showcase{padding:3rem 1rem 2.5rem}
+  .stem-track{grid-template-columns:52px 1fr auto;gap:0.4rem;padding:0.5rem}
+  .stem-actions{gap:0.2rem}
   .stem-volume{display:none}
+  .stem-container{padding:1rem;border-radius:18px}
+  .stem-player{padding:2.5rem 1rem}
   .pricing-grid{grid-template-columns:1fr}
-  nav{padding:0.75rem 1rem}
-  .master-bar{flex-wrap:wrap}
+  nav{padding:0.65rem 0.85rem;padding-top:max(0.65rem,env(safe-area-inset-top))}
+  .master-bar{flex-wrap:wrap;gap:0.65rem}
+  .master-time{width:100%;text-align:right}
+  .social-bar{gap:0.65rem;padding:0.85rem 1rem}
+  .social-bar-item{font-size:0.6875rem}
+  .btn-primary,.btn-secondary{padding:0.85rem 1.35rem;font-size:0.875rem}
+  .email-bar{padding:0.85rem 1rem;padding-bottom:max(0.85rem,env(safe-area-inset-bottom))}
+  .scroll-indicator{display:none}
+}
+@media(max-width:480px){
+  .hero-section h1{font-size:2.35rem!important;line-height:1.05!important}
+  .hero-section p{font-size:0.95rem!important}
+  .app-step-btn{padding:0.85rem 0.85rem 0.85rem 2.85rem}
+  .app-step-num{left:0.75rem;top:0.85rem}
+}
+@media(min-width:769px){
+  .hero-section{background-attachment:fixed}
+  .hero-layer--photo{background-attachment:fixed}
 }
 </style>
 </head>
@@ -237,17 +327,30 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
     </div>
     <div class="hidden md:flex items-center gap-8">
       <a href="/funnel/" class="text-sm text-white/50 hover:text-white transition-colors">Free Demo</a>
+      <a href="#app-showcase" class="text-sm text-white/50 hover:text-white transition-colors">See App</a>
       <a href="#features" class="text-sm text-white/50 hover:text-white transition-colors">Features</a>
       <a href="#download" class="text-sm text-white/50 hover:text-white transition-colors">Download</a>
       <a href="#pricing" class="text-sm text-white/50 hover:text-white transition-colors">Pricing</a>
       <a href="#faq" class="text-sm text-white/50 hover:text-white transition-colors">FAQ</a>
     </div>
-    <div class="flex items-center gap-3">
-      <a href="#download" class="hidden sm:inline-flex btn-secondary text-sm !py-2 !px-4">Download</a>
-      <a href="#demo" class="btn-primary text-sm !py-2 !px-5">Try Demo →</a>
+    <div class="flex items-center gap-2 sm:gap-3">
+      <a href="#download" class="nav-cta-secondary hidden sm:inline-flex btn-secondary text-sm !py-2 !px-4">Download</a>
+      <a href="#demo" class="btn-primary text-sm !py-2 !px-4 sm:!px-5 whitespace-nowrap">Try Demo →</a>
+      <button type="button" class="nav-mobile-toggle md:hidden" id="navMobileToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navMobileMenu">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+      </button>
     </div>
   </div>
 </nav>
+<div class="nav-mobile-menu" id="navMobileMenu" aria-hidden="true">
+  <a href="#app-showcase" data-nav-close>See App</a>
+  <a href="#demo" data-nav-close>Interactive Demo</a>
+  <a href="#download" data-nav-close>Download</a>
+  <a href="#pricing" data-nav-close>Pricing</a>
+  <a href="#features" data-nav-close>Features</a>
+  <a href="#faq" data-nav-close>FAQ</a>
+  <a href="/funnel/" data-nav-close>Free Funnel Demo</a>
+</div>
 
 <!-- HERO -->
 <section class="hero-section" id="hero">
@@ -261,7 +364,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
     <div class="hero-logo-stage">
       <div class="hero-logo-glow" aria-hidden="true"></div>
       <img
-        src="/assets/liminal.png?v=20260610b"
+        src="/assets/liminal.png?v=20260610c"
         alt="Liminal STEM SPLIT"
         class="hero-logo"
         width="820"
@@ -285,11 +388,14 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
     </p>
 
     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-      <a href="#demo" class="btn-primary text-base" onclick="trackClick('hero_demo')">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-        Hear It In Action ↓
+      <a href="#app-showcase" class="btn-primary text-base" onclick="trackClick('hero_showcase')">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+        See Real App Screenshots
       </a>
-      <a href="#pricing" class="btn-secondary text-base" onclick="trackClick('hero_pricing')">
+      <a href="#demo" class="btn-secondary text-base" onclick="trackClick('hero_demo')">
+        Hear the Demo ↓
+      </a>
+      <a href="#pricing" class="btn-secondary text-base hidden sm:inline-flex" onclick="trackClick('hero_pricing')">
         See Plans
         <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
       </a>
@@ -306,6 +412,78 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   <span class="social-bar-item"><span class="text-liminal-400 font-bold">30-day</span> money-back guarantee</span>
   <span class="social-bar-item">✦ <span class="text-liminal-400">1 free split</span> in the desktop demo</span>
 </div>
+
+<!-- REAL APP SCREENSHOTS -->
+<section class="app-showcase" id="app-showcase">
+  <div class="app-showcase-inner reveal">
+    <div class="text-center mb-2">
+      <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">REAL DESKTOP APP</span>
+      <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">See the <span class="gradient-text">Actual Workflow</span></h2>
+      <p class="text-white/40 max-w-2xl mx-auto text-sm sm:text-base">Captured from the live Windows app — load a track, split with AI, review stems, then shape each stem in the Pro FX rack. No mockups. No stock art.</p>
+    </div>
+
+    <div class="app-showcase-steps" role="tablist" aria-label="App workflow steps">
+      <button type="button" class="app-step-btn active" data-shot="01-app-loaded.png" data-caption="Drop any WAV, MP3, or FLAC. Pick your engine and stem count before you split." aria-selected="true">
+        <span class="app-step-num">01</span>
+        <span class="app-step-title">Track Loaded</span>
+        <span class="app-step-sub">Before split — model picker &amp; reactor ready</span>
+      </button>
+      <button type="button" class="app-step-btn" data-shot="02-during-split.png" data-caption="GPU-accelerated inference with live progress — your audio never leaves the machine.">
+        <span class="app-step-num">02</span>
+        <span class="app-step-title">During Split</span>
+        <span class="app-step-sub">Real-time AI separation in progress</span>
+      </button>
+      <button type="button" class="app-step-btn" data-shot="03-after-split.png" data-caption="Audition, solo, and export vocals, drums, bass, and more — instantly after processing.">
+        <span class="app-step-num">03</span>
+        <span class="app-step-title">Stems Ready</span>
+        <span class="app-step-sub">Waveforms, transport, and stem controls</span>
+      </button>
+      <button type="button" class="app-step-btn" data-shot="04-fx-menu.png" data-caption="18-module Pro FX rack per stem — EQ, compression, reverb, saturation, and more.">
+        <span class="app-step-num">04</span>
+        <span class="app-step-title">Post-FX Menu</span>
+        <span class="app-step-sub">Per-stem mastering chain built in</span>
+      </button>
+    </div>
+
+    <div class="app-window">
+      <div class="app-window-bar">
+        <div class="app-window-dots" aria-hidden="true"><span class="app-window-dot"></span><span class="app-window-dot"></span><span class="app-window-dot"></span></div>
+        <div class="app-window-title">NoDAW™ Liminal™ — StemSplit Desktop</div>
+        <div class="app-window-badge">100% Local</div>
+      </div>
+      <div class="app-window-body">
+        <img id="appShowcaseImage" src="/assets/app-screenshots/01-app-loaded.png?v=20260610c" alt="Liminal StemSplit desktop app — track loaded before split" width="1280" height="900" loading="eager" decoding="async" fetchpriority="high">
+        <div class="app-window-glow" aria-hidden="true"></div>
+      </div>
+    </div>
+
+    <div class="app-preview-thumbs" id="appPreviewThumbs" aria-label="Screenshot previews">
+      <button type="button" class="app-preview-thumb active" data-shot="01-app-loaded.png" data-caption="Drop any WAV, MP3, or FLAC. Pick your engine and stem count before you split.">
+        <img src="/assets/app-screenshots/01-app-loaded.png?v=20260610c" alt="" loading="lazy" decoding="async">
+        <span class="app-preview-thumb-label">Before</span>
+      </button>
+      <button type="button" class="app-preview-thumb" data-shot="02-during-split.png" data-caption="GPU-accelerated inference with live progress — your audio never leaves the machine.">
+        <img src="/assets/app-screenshots/02-during-split.png?v=20260610c" alt="" loading="lazy" decoding="async">
+        <span class="app-preview-thumb-label">During</span>
+      </button>
+      <button type="button" class="app-preview-thumb" data-shot="03-after-split.png" data-caption="Audition, solo, and export vocals, drums, bass, and more — instantly after processing.">
+        <img src="/assets/app-screenshots/03-after-split.png?v=20260610c" alt="" loading="lazy" decoding="async">
+        <span class="app-preview-thumb-label">After</span>
+      </button>
+      <button type="button" class="app-preview-thumb" data-shot="04-fx-menu.png" data-caption="18-module Pro FX rack per stem — EQ, compression, reverb, saturation, and more.">
+        <img src="/assets/app-screenshots/04-fx-menu.png?v=20260610c" alt="" loading="lazy" decoding="async">
+        <span class="app-preview-thumb-label">FX Rack</span>
+      </button>
+    </div>
+
+    <div class="app-showcase-caption">
+      <span class="app-showcase-pill"><strong>Real UI</strong> from production build</span>
+      <span class="app-showcase-pill"><strong>Local-first</strong> — no cloud upload</span>
+      <span class="app-showcase-pill"><strong>Pro workflow</strong> — split to FX in one app</span>
+    </div>
+    <p id="appShowcaseCaption" class="text-center text-sm text-white/45 max-w-2xl mx-auto mt-4">Drop any WAV, MP3, or FLAC. Pick your engine and stem count before you split.</p>
+  </div>
+</section>
 
 <!-- INTERACTIVE STEM DEMO -->
 <section class="stem-player" id="demo">
@@ -491,6 +669,15 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 </footer>
 
 <script>
+document.documentElement.classList.add('js');
+
+function revealAllNow() {
+  document.querySelectorAll('.reveal').forEach((el) => el.classList.add('visible'));
+}
+
+window.addEventListener('error', revealAllNow);
+window.addEventListener('unhandledrejection', revealAllNow);
+
 // ========================
 // SALES PSYCHOLOGY ENGINE
 // ========================
@@ -499,13 +686,34 @@ function trackClick(label) { try { localStorage.setItem('liminal_click_' + Date.
 const SUPPORT_EMAIL = 'myaiplug.com@gmail.com';
 const RELEASES_URL = 'https://github.com/myaiplug/StemSplit1/releases/latest';
 
-// Nav scroll
-document.getElementById('nav').addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
-}, true);
-window.addEventListener('scroll', () => {
-  document.getElementById('nav').classList.toggle('scrolled', window.scrollY > 60);
-});
+function isMobileViewport() {
+  return window.matchMedia('(max-width: 768px)').matches;
+}
+
+// Nav scroll + mobile menu
+(function initNav() {
+  const nav = document.getElementById('nav');
+  const menu = document.getElementById('navMobileMenu');
+  const toggle = document.getElementById('navMobileToggle');
+  if (!nav) return;
+
+  const setMenuOpen = (open) => {
+    if (!menu || !toggle) return;
+    menu.classList.toggle('open', open);
+    menu.setAttribute('aria-hidden', open ? 'false' : 'true');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+    document.body.style.overflow = open ? 'hidden' : '';
+  };
+
+  toggle?.addEventListener('click', () => setMenuOpen(!menu?.classList.contains('open')));
+  menu?.querySelectorAll('[data-nav-close]').forEach((link) => {
+    link.addEventListener('click', () => setMenuOpen(false));
+  });
+
+  window.addEventListener('scroll', () => {
+    nav.classList.toggle('scrolled', window.scrollY > 60);
+  }, { passive: true });
+})();
 
 // Toast
 function showToast(msg) {
@@ -522,20 +730,127 @@ function toggleFaq(item) {
 }
 
 // Scroll reveal
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
-}, { threshold: 0.1 });
-document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+(function initReveal() {
+  const reveals = document.querySelectorAll('.reveal');
+  if (!reveals.length) return;
+  if (!('IntersectionObserver' in window)) {
+    revealAllNow();
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
+  reveals.forEach((el) => observer.observe(el));
+  // Mobile: don't leave above-fold sections invisible if IO is flaky
+  if (window.matchMedia('(max-width: 768px)').matches) {
+    requestAnimationFrame(revealAllNow);
+  }
+})();
+
+// App screenshot showcase tabs
+(function initAppShowcase() {
+  const img = document.getElementById('appShowcaseImage');
+  const caption = document.getElementById('appShowcaseCaption');
+  const buttons = Array.from(document.querySelectorAll('.app-step-btn[data-shot]'));
+  if (!img || !buttons.length) return;
+
+  const alts = {
+    '01-app-loaded.png': 'Liminal StemSplit — separation config before split',
+    '02-during-split.png': 'Liminal StemSplit — AI stem separation in progress',
+    '03-after-split.png': 'Liminal StemSplit — stems ready with waveforms and transport',
+    '04-fx-menu.png': 'Liminal StemSplit — Pro FX rack on vocal stem',
+  };
+  const thumbs = Array.from(document.querySelectorAll('.app-preview-thumb[data-shot]'));
+  const cacheBust = '?v=20260610c';
+
+  function setShotByName(shot, captionText) {
+    if (!shot) return;
+    const stepBtn = buttons.find((b) => b.dataset.shot === shot);
+    buttons.forEach((b) => {
+      const active = b.dataset.shot === shot;
+      b.classList.toggle('active', active);
+      b.setAttribute('aria-selected', active ? 'true' : 'false');
+    });
+    thumbs.forEach((t) => t.classList.toggle('active', t.dataset.shot === shot));
+    img.classList.add('is-swapping');
+    const nextSrc = '/assets/app-screenshots/' + shot + cacheBust;
+    const preload = new Image();
+    preload.onload = () => {
+      img.src = nextSrc;
+      img.alt = alts[shot] || 'Liminal StemSplit desktop app screenshot';
+      const text = captionText || stepBtn?.dataset.caption;
+      if (caption && text) caption.textContent = text;
+      requestAnimationFrame(() => img.classList.remove('is-swapping'));
+    };
+    preload.onerror = () => img.classList.remove('is-swapping');
+    preload.src = nextSrc;
+  }
+
+  function setShot(btn) {
+    setShotByName(btn.dataset.shot, btn.dataset.caption);
+  }
+
+  buttons.forEach((btn, idx) => {
+    btn.addEventListener('click', () => setShot(btn));
+    btn.addEventListener('keydown', (e) => {
+      if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+        e.preventDefault();
+        setShot(buttons[(idx + 1) % buttons.length]);
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+        e.preventDefault();
+        setShot(buttons[(idx - 1 + buttons.length) % buttons.length]);
+      }
+    });
+  });
+
+  thumbs.forEach((thumb, idx) => {
+    thumb.addEventListener('click', () => setShotByName(thumb.dataset.shot, thumb.dataset.caption));
+    thumb.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        setShotByName(thumb.dataset.shot, thumb.dataset.caption);
+      }
+    });
+  });
+
+  const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobile = window.matchMedia('(max-width: 768px)').matches;
+  let autoTimer = null;
+  if (!prefersReduced && !isMobile) {
+    let autoIdx = 0;
+    autoTimer = setInterval(() => {
+      if (document.hidden) return;
+      autoIdx = (autoIdx + 1) % buttons.length;
+      setShotByName(buttons[autoIdx].dataset.shot, buttons[autoIdx].dataset.caption);
+    }, 7000);
+    document.getElementById('app-showcase')?.addEventListener('mouseenter', () => {
+      if (autoTimer) clearInterval(autoTimer);
+    });
+    document.getElementById('app-showcase')?.addEventListener('focusin', () => {
+      if (autoTimer) clearInterval(autoTimer);
+    });
+  }
+})();
 
 // Email bar
 let emailCaptured = false;
 try { emailCaptured = !!localStorage.getItem('liminal_email'); } catch(e) {}
-setTimeout(() => { if (!emailCaptured) document.getElementById('emailBar').classList.add('visible'); }, 20000);
+const emailBar = document.getElementById('emailBar');
+const showEmailBar = () => {
+  if (!emailCaptured && emailBar) emailBar.classList.add('visible');
+};
+if (!isMobileViewport()) {
+  setTimeout(showEmailBar, 20000);
+}
 window.addEventListener('scroll', () => {
-  if (!emailCaptured && window.scrollY > window.innerHeight * 0.7) {
-    document.getElementById('emailBar').classList.add('visible');
-  }
-});
+  if (!emailCaptured && window.scrollY > window.innerHeight * 0.7) showEmailBar();
+}, { passive: true });
 
 function captureEmail() {
   const el = document.getElementById('barEmail');
@@ -567,12 +882,23 @@ function dismissBar() {
 // ========================
 // HERO ATMOSPHERE (canvas layers 3–6)
 // ========================
-(function initHeroAtmosphere() {
+try { (function initHeroAtmosphere() {
   const canvas = document.getElementById('hero-fx-canvas');
   const hero = document.getElementById('hero');
   if (!canvas || !hero) return;
 
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isMobile = window.matchMedia('(max-width: 768px)').matches || window.matchMedia('(pointer: coarse)').matches;
+  if (reduceMotion || isMobile) {
+    canvas.remove();
+    return;
+  }
+
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    canvas.remove();
+    return;
+  }
   const CYAN = '0,212,255';
   const PURPLE = '168,85,247';
   const ICE = '214,243,255';
@@ -757,17 +1083,25 @@ function dismissBar() {
     });
   }
 
+  let rafId = 0;
   function animate() {
     t += 0.012;
     ctx.clearRect(0, 0, w, h);
     drawVolumetricFog();
     drawStemDivergence();
     drawNeuralGrid();
-    requestAnimationFrame(animate);
+    rafId = requestAnimationFrame(animate);
   }
 
   animate();
-})();
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+      cancelAnimationFrame(rafId);
+    } else if (!rafId) {
+      animate();
+    }
+  });
+})(); } catch (err) { console.warn('Hero atmosphere disabled:', err); }
 
 // ========================
 // STEM PLAYER ENGINE
