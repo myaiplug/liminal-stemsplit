@@ -8,6 +8,8 @@
 <meta property="og:title" content="Liminal StemSplit — AI Stem Separation">
 <meta property="og:description" content="Isolate vocals, drums, bass, and other instruments from any song. Local-first. One-time payment.">
 <meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://liminal-stemsplit.onrender.com/assets/liminal-hero-logo.jpg">
+<link rel="icon" href="/assets/liminal.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -50,8 +52,9 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 #hero-canvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none}
 
 /* HERO */
-.hero-section{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 3rem}
-.hero-logo{display:block;width:min(92vw,720px);max-height:220px;object-fit:contain;margin:0 auto 2rem;border-radius:20px;box-shadow:0 24px 80px rgba(6,182,212,0.18),0 0 60px rgba(168,85,247,0.12)}
+.hero-section{position:relative;z-index:1;min-height:100vh;display:flex;flex-direction:column;justify-content:center;align-items:center;text-align:center;padding:6rem 2rem 5rem}
+.hero-logo{display:block;width:min(92vw,720px);max-height:240px;object-fit:contain;margin:0 auto 2rem;padding:1rem 1.5rem;border-radius:24px;background:linear-gradient(180deg,rgba(255,255,255,0.98) 0%,rgba(241,245,249,0.94) 100%);border:1px solid rgba(255,255,255,0.2);box-shadow:0 24px 80px rgba(6,182,212,0.22),0 0 60px rgba(168,85,247,0.14)}
+.hero-image{display:block;width:min(90vw,600px);max-height:120px;object-fit:contain;margin:0 auto 1.5rem;border-radius:16px}
 
 /* STEM PLAYER */
 .stem-player{position:relative;z-index:1;padding:4rem 2rem;background:linear-gradient(180deg,transparent 0%,rgba(6,182,212,0.02) 50%,transparent 100%)}
@@ -136,7 +139,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* SCROLL INDICATOR */
-.scroll-indicator{position:absolute;bottom:2rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.2);font-size:0.625rem;letter-spacing:0.15em;text-transform:uppercase;animation:float 2s ease-in-out infinite}
+.scroll-indicator{position:absolute;bottom:0.75rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.2);font-size:0.625rem;letter-spacing:0.15em;text-transform:uppercase;animation:float 2s ease-in-out infinite;pointer-events:none;z-index:5}
 
 @media(max-width:768px){
   .stem-track{grid-template-columns:60px 1fr auto;gap:0.5rem}
@@ -173,7 +176,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
       <span class="font-bold text-sm tracking-tight">Liminal <span class="text-liminal-400 font-light">StemSplit</span></span>
     </div>
     <div class="hidden md:flex items-center gap-8">
-      <a href="#demo" class="text-sm text-white/50 hover:text-white transition-colors">Demo</a>
+      <a href="/funnel/" class="text-sm text-white/50 hover:text-white transition-colors">Free Demo</a>
       <a href="#features" class="text-sm text-white/50 hover:text-white transition-colors">Features</a>
       <a href="#download" class="text-sm text-white/50 hover:text-white transition-colors">Download</a>
       <a href="#pricing" class="text-sm text-white/50 hover:text-white transition-colors">Pricing</a>
@@ -190,7 +193,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 <section class="hero-section">
   <div class="relative z-10 max-w-5xl mx-auto">
     <img
-      src="/assets/liminal-hero-logo.jpg"
+      src="/assets/liminal-hero-logo.jpg?v=20260609"
       alt="Liminal STEM SPLIT"
       class="hero-logo"
       width="720"
@@ -203,9 +206,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
       AI-Powered Stem Separation • 100% Local • No Subscription
     </div>
 
-    <div class="waveform-big max-w-3xl mx-auto mb-8" id="heroWaveform" style="height:160px;margin-bottom:2rem" onclick="seekHeroWaveform(event)">
-      <canvas id="heroWaveformCanvas"></canvas>
-    </div>
+    <img src="/assets/liminal.png" alt="Liminal waveform visualization" class="hero-image" width="600" height="120" />
 
     <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none mb-6">
       <span class="gradient-text">Isolate</span> Any<br>
@@ -512,7 +513,9 @@ function dismissBar() {
       opacity: Math.random()*0.3+0.05
     });
   }
+  const time = { offset: 0 };
   function animate() {
+    time.offset += 0.003;
     ctx.clearRect(0,0,w,h);
     particles.forEach(p => {
       p.y += p.speedY;
@@ -522,13 +525,20 @@ function dismissBar() {
       ctx.fillStyle = `rgba(6,182,212,${p.opacity})`;
       ctx.fill();
     });
-    ctx.fillStyle = 'rgba(6,182,212,0.015)';
-    for (let i = 0; i < 3; i++) {
-      const x = Math.sin(Date.now()/3000 + i*2)*w*0.3 + w*0.5;
-      ctx.beginPath();
-      ctx.arc(x, h*0.3 + i*80, 200, 0, Math.PI*2);
-      ctx.fill();
-    }
+    const t = time.offset;
+    const grad = ctx.createRadialGradient(w*0.5 + Math.sin(t)*w*0.15, h*0.4 + Math.sin(t*0.7)*h*0.1, 0, w*0.5, h*0.5, w*0.6);
+    grad.addColorStop(0, 'rgba(6,182,212,0.04)');
+    grad.addColorStop(0.3, 'rgba(168,85,247,0.025)');
+    grad.addColorStop(0.6, 'rgba(6,182,212,0.015)');
+    grad.addColorStop(1, 'rgba(6,182,212,0)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, 0, w, h);
+    const grad2 = ctx.createRadialGradient(w*0.3 + Math.sin(t*1.3)*w*0.1, h*0.6 + Math.cos(t*0.9)*h*0.08, 0, w*0.3, h*0.6, w*0.4);
+    grad2.addColorStop(0, 'rgba(168,85,247,0.03)');
+    grad2.addColorStop(0.5, 'rgba(236,72,153,0.015)');
+    grad2.addColorStop(1, 'rgba(168,85,247,0)');
+    ctx.fillStyle = grad2;
+    ctx.fillRect(0, 0, w, h);
     requestAnimationFrame(animate);
   }
   animate();
@@ -571,7 +581,6 @@ const Player = {
 
     await this.loadStems();
     this.renderUI();
-    this.drawHeroWaveform();
   },
 
   async loadStems(opts = {}) {
@@ -803,72 +812,6 @@ const Player = {
     this.setVolume(stemId, vol);
   },
 
-  async drawHeroWaveform() {
-    if (!this.stems.some(s => this.buffers[s.id])) return;
-    const canvas = document.getElementById('heroWaveformCanvas');
-    const parent = canvas.parentElement;
-    canvas.width = parent.offsetWidth * 2;
-    canvas.height = 160 * 2;
-    canvas.style.width = parent.offsetWidth + 'px';
-    canvas.style.height = '160px';
-    const ctx = canvas.getContext('2d');
-    ctx.scale(2, 2);
-    const mid = 80;
-    ctx.clearRect(0, 0, parent.offsetWidth, 160);
-
-    // Draw combined waveform from all stems
-    const colors = ['#f59e0b','#a855f7','#10b981','#06b6d4'];
-    this.stems.forEach((stem, si) => {
-      if (!this.buffers[stem.id]) return;
-      const data = this.buffers[stem.id].getChannelData(0);
-      const step = Math.ceil(data.length / parent.offsetWidth);
-      for (let i = 0; i < parent.offsetWidth; i++) {
-        let min = 0, max = 0;
-        for (let j = 0; j < step; j++) {
-          const d = data[i * step + j] || 0;
-          if (d < min) min = d; if (d > max) max = d;
-        }
-        const h = Math.max(Math.abs(min), Math.abs(max)) * 50;
-        ctx.globalAlpha = 0.25;
-        ctx.fillStyle = colors[si % colors.length];
-        ctx.fillRect(i, mid - h, 1, h * 2);
-      }
-    });
-
-    // Draw composite outline
-    ctx.globalAlpha = 1;
-    const composite = this.stems.reduce((acc, stem) => {
-      if (!this.buffers[stem.id]) return acc;
-      if (!acc) return this.buffers[stem.id].getChannelData(0).slice();
-      const d = this.buffers[stem.id].getChannelData(0);
-      d.forEach((v, i) => { if (i < acc.length) acc[i] = Math.abs(v) > Math.abs(acc[i]) ? v : acc[i]; });
-      return acc;
-    }, null);
-    if (composite) {
-      const step = Math.ceil(composite.length / parent.offsetWidth);
-      ctx.beginPath();
-      ctx.strokeStyle = 'rgba(6,182,212,0.4)';
-      ctx.lineWidth = 1;
-      for (let i = 0; i < parent.offsetWidth; i++) {
-        let max = 0;
-        for (let j = 0; j < step; j++) { const d = Math.abs(composite[i*step+j]||0); if (d>max) max=d; }
-        const h = max * 50;
-        if (i === 0) ctx.moveTo(i, mid - h);
-        ctx.lineTo(i, mid - h);
-      }
-      ctx.stroke();
-      ctx.beginPath();
-      for (let i = 0; i < parent.offsetWidth; i++) {
-        let max = 0;
-        for (let j = 0; j < step; j++) { const d = Math.abs(composite[i*step+j]||0); if (d>max) max=d; }
-        const h = max * 50;
-        if (i === 0) ctx.moveTo(i, mid + h);
-        ctx.lineTo(i, mid + h);
-      }
-      ctx.stroke();
-    }
-  },
-
 };
 
 // ========================
@@ -881,13 +824,6 @@ function toggleMasterPlay() {
 }
 
 function seekMaster(e) {
-  if (!Player.audioContext || !Player.duration) return;
-  const rect = e.currentTarget.getBoundingClientRect();
-  const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
-  Player.seekToPercent(pct);
-}
-
-function seekHeroWaveform(e) {
   if (!Player.audioContext || !Player.duration) return;
   const rect = e.currentTarget.getBoundingClientRect();
   const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
