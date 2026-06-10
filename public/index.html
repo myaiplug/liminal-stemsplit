@@ -62,8 +62,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
 }
 .hero-layer--base{
   background:
-    linear-gradient(180deg,rgba(2,6,23,0.25) 0%,rgba(2,6,23,0.45) 50%,rgba(2,6,23,0.75) 100%),
-    radial-gradient(ellipse 100% 80% at 50% 35%,transparent 0%,rgba(2,6,23,0.35) 100%);
+    linear-gradient(180deg,rgba(2,6,23,0.12) 0%,rgba(2,6,23,0.28) 55%,rgba(2,6,23,0.62) 100%);
 }
 .hero-layer--wormhole{
   top:50%;left:50%;width:min(140vw,1100px);height:min(140vw,1100px);
@@ -95,7 +94,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   background:radial-gradient(ellipse 65% 50% at 72% 55%,rgba(168,85,247,0.05) 0%,transparent 72%);
   animation:fog-drift-violet 28s ease-in-out infinite;
 }
-.hero-fx-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0.18}
+.hero-fx-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0.08}
 .hero-logo-stage{position:relative;display:flex;justify-content:center;margin:0 auto 2rem}
 .hero-logo-glow{
   position:absolute;top:50%;left:50%;width:min(88vw,760px);height:min(36vw,220px);
@@ -255,10 +254,7 @@ nav.scrolled{background:rgba(2,6,23,0.85);backdrop-filter:blur(20px);border-bott
   <div class="hero-atmosphere" aria-hidden="true">
     <div class="hero-layer hero-layer--photo"></div>
     <div class="hero-layer hero-layer--base"></div>
-    <div class="hero-layer hero-layer--wormhole"></div>
-    <div class="hero-layer hero-layer--portal"></div>
-    <div class="hero-layer hero-layer--fog-cyan"></div>
-    <div class="hero-layer hero-layer--fog-violet"></div>
+
   </div>
   <canvas id="hero-fx-canvas" class="hero-fx-canvas"></canvas>
   <div class="relative z-10 max-w-5xl mx-auto">
@@ -765,7 +761,6 @@ function dismissBar() {
     t += 0.012;
     ctx.clearRect(0, 0, w, h);
     drawVolumetricFog();
-    drawSpectralField();
     drawStemDivergence();
     drawNeuralGrid();
     requestAnimationFrame(animate);
