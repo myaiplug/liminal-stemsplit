@@ -24,7 +24,7 @@ jobs:
         with:
           targets: x86_64-pc-windows-msvc
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
 
       - run: npm run build
@@ -60,7 +60,7 @@ jobs:
         with:
           targets: ${{ matrix.target }}
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
 
       - run: npm run build
@@ -108,7 +108,7 @@ jobs:
             libsoup-3.0-dev \
             libjavascriptcoregtk-4.1-dev
 
-      - run: npm ci
+      - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
 
       - run: npm run build
