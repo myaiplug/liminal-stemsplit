@@ -1,19 +1,19 @@
-# Download StemSplit
+# Download Liminal StemSplit
 
-Professional AI-powered audio stem separation tool.
+AI Audio Extraction Studio — isolate vocals, instruments, drums, and more.
 
 ## 📥 Download
 
 ### Windows
-[![Download for Windows](https://img.shields.io/badge/Download-Windows%20x64-blue?style=for-the-badge&logo=windows)](https://github.com/myaiplug/StemSplit1/releases/latest/download/StemSplit_Setup_v0.1.0_x64_Online.exe)
-
-**File:** `StemSplit_Setup_v0.1.0_x64_Online.exe`
+| Installer | Link |
+|-----------|------|
+| **MSI Installer** (recommended) | [NoDAW Liminal_0.4.7_x64_en-US.msi](https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW%20Liminal_0.4.7_x64_en-US.msi) |
+| **NSIS Setup** (lightweight) | [NoDAW Liminal_0.4.7_x64-setup.exe](https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW%20Liminal_0.4.7_x64-setup.exe) |
 
 ### macOS
-[![Download for macOS](https://img.shields.io/badge/Download-macOS-black?style=for-the-badge&logo=apple)](https://github.com/myaiplug/StemSplit1/releases/latest/download/StemSplit_Online_Setup.dmg)
+[![Download for macOS](https://img.shields.io/badge/Download-macOS-black?style=for-the-badge&logo=apple)](https://github.com/myaiplug/liminal-stemsplit/releases/latest)
 
-**File:** `StemSplit_Online_Setup.dmg`  
-*(Universal installer compatible with both Intel and Apple Silicon Macs)*
+*(Build from source — native macOS DMG coming soon)*
 
 ---
 
