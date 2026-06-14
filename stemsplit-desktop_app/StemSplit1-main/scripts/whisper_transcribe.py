@@ -3,6 +3,7 @@ import json
 import shutil
 import subprocess
 import sys
+import tempfile
 from pathlib import Path
 
 
@@ -94,7 +95,36 @@ def transcribe_audio(input_path: Path, output_dir: Path, preset: str, model: str
 
     selected_model = select_auto_model(input_path) if model == "auto" else model
     emit("progress", message=f"Loading Whisper {selected_model}...", percent=36)
-    whisper_model = whisper.load_model(selected_model)
+
+    # Auto-troubleshoot: try loading model, fall back to smaller size on OOM/download failure
+    whisper_model = None
+    model_attempts = [selected_model, "base", "tiny"]
+    if selected_model in model_attempts:
+        model_attempts.remove(selected_model)
+        model_attempts.insert(0, selected_model)
+    else:
+        model_attempts = [selected_model, "base", "tiny"]
+
+    for attempt in model_attempts:
+        try:
+            whisper_model = whisper.load_model(attempt)
+            emit("progress", message=f"Loaded Whisper {attempt}", percent=40)
+            break
+        except Exception as model_err:
+            err_str = str(model_err).lower()
+            is_oom = "out of memory" in err_str or "cuda" in err_str or "allocate" in err_str
+            is_download = "connection" in err_str or "timeout" in err_str or "http" in err_str or "download" in err_str
+            if is_oom and attempt != model_attempts[-1]:
+                emit("progress", message=f"Whisper {attempt} too large, trying smaller model...", percent=36)
+                continue
+            if is_download and attempt != model_attempts[-1]:
+                emit("progress", message=f"Download issue with {attempt}, retrying smaller model...", percent=36)
+                continue
+            if attempt == model_attempts[-1]:
+                raise RuntimeError(f"Whisper model load failed: {model_err}")
+
+    if whisper_model is None:
+        raise RuntimeError("Could not load any Whisper model")
 
     kwargs = {"task": task, "fp16": False, "word_timestamps": True,
               "beam_size": 5, "best_of": 5, "temperature": (0.0, 0.2, 0.4, 0.6, 0.8, 1.0),
@@ -179,18 +209,13 @@ if __name__ == "__main__":
         emit("error", message=f"Input not found: {input_path}")
         sys.exit(1)
 
-    try:
-        transcribe_audio(input_path, output_dir, args.preset, args.model, args.language, args.task, args.content_type)
-    except Exception as exc:
-        emit("error", message=str(exc))
-        sys.exit(1)
-
+    # Preprocess audio for optimal transcription, then transcribe once
     with tempfile.TemporaryDirectory(prefix="stemsplit_whisper_") as temp_dir:
         processed_path = Path(temp_dir) / "preprocessed.wav"
         try:
             emit("progress", message="Preparing audio for transcription...", percent=12)
             preprocess_audio(input_path, processed_path, args.preset)
-            transcribe_audio(processed_path, output_dir, args.preset, args.model, args.language, args.task)
+            transcribe_audio(processed_path, output_dir, args.preset, args.model, args.language, args.task, args.content_type)
         except Exception as exc:
             emit("error", message=str(exc))
             sys.exit(1)

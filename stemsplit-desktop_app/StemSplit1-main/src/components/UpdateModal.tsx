@@ -15,7 +15,7 @@ export default function UpdateModal() {
   const [isOpen, setIsOpen] = useState(false);
 
   const parseSemver = (version: string): number[] | null => {
-    const match = version.trim().replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)/);
+    const match = version.trim().replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)$/);
     if (!match) return null;
     return [Number(match[1]), Number(match[2]), Number(match[3])];
   };
@@ -37,6 +37,8 @@ export default function UpdateModal() {
         // Skip if running in browser
         const { isTauriRuntime } = await import('@/lib/tauri-runtime');
         if (!isTauriRuntime()) return;
+
+        if (process.env.NEXT_PUBLIC_SCREENSHOT_MODE === '1') return;
 
         // Check if user dismissed recently
         const dismissed = localStorage.getItem('stemsplit_update_dismissed');

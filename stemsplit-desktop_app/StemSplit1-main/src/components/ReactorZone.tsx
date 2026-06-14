@@ -484,7 +484,7 @@ const CoreVisualizer: React.FC<{ isProcessing: boolean; progress: number; bassEn
 const HoloGrid: React.FC = () => {
     return (
         <div className="absolute inset-0 pointer-events-none">
-            <svg width="100%" height="100%" className="opacity-10">
+            <svg width="100%" height="100%" className="opacity-[0.04]">
                 <defs>
                     <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse">
                         <path d="M 40 0 L 0 0 0 40" fill="none" stroke="rgba(34, 211, 238, 0.3)" strokeWidth="1" />
@@ -705,6 +705,9 @@ const ReactorZone: React.FC = () => {
     const [splitModelVariant, setSplitModelVariant] = useState(DEFAULT_MODEL_BY_ENGINE.demucs);
     const [splitStems, setSplitStems] = useState('4');
     const [splitPasses, setSplitPasses] = useState('1');
+    const [deviceMode, setDeviceMode] = useState<'auto' | 'cuda' | 'cpu'>('auto');
+    const [gpuDetected, setGpuDetected] = useState(false);
+    const [gpuName, setGpuName] = useState<string | null>(null);
     const [matcheringReference, setMatcheringReference] = useState<string | null>(null);
     const [pendingFilePath, setPendingFilePath] = useState<string | null>(null);
     const [customOutputDir, setCustomOutputDir] = useState<string | null>(null);
@@ -766,22 +769,42 @@ const ReactorZone: React.FC = () => {
 
     useEffect(() => {
         if (!isFreeMode) return;
-        if (splitEngine !== 'spleeter') setSplitEngine('spleeter');
-        if (splitModelVariant !== 'spleeter_2') setSplitModelVariant('spleeter_2');
+        // Free tier allows Vocals (roformer) & Instrumental (mdx)
+        // Force 2-stem and single pass for free
         if (splitStems !== '2') setSplitStems('2');
         if (splitPasses !== '1') setSplitPasses('1');
-    }, [isFreeMode, splitEngine, splitModelVariant, splitStems, splitPasses]);
+    }, [isFreeMode, splitStems, splitPasses]);
+
+    // Auto-detect GPU on mount
+    useEffect(() => {
+        (async () => {
+            try {
+                const { invoke } = await import('@tauri-apps/api/core');
+                const profile = await invoke<{ has_nvidia: boolean; gpu_name?: string | null }>('get_system_profile');
+                setGpuDetected(profile.has_nvidia);
+                setGpuName(profile.gpu_name || null);
+                if (profile.has_nvidia) {
+                    setDeviceMode('auto');
+                }
+            } catch {
+                // Non-Tauri or probe failure — CPU fallback
+                setGpuDetected(false);
+                setDeviceMode('cpu');
+            }
+        })();
+    }, []);
 
     const splitOptions = useMemo(() => ({
         outputDir: customOutputDir || undefined,
-        engine: isFreeMode ? 'spleeter' : splitEngine,
+        engine: splitEngine,
         stems: isFreeMode ? 2 : parseInt(splitStems),
         passes: isFreeMode ? 1 : parseInt(splitPasses),
         format: isFreeMode ? 'mp3' as const : undefined,
         applyEffects: !isFreeMode,
-        modelVariant: isFreeMode ? 'spleeter_2' : splitModelVariant,
+        modelVariant: splitModelVariant,
         referenceFile: splitModelVariant === 'postfx_matchering' ? (matcheringReference || undefined) : undefined,
-    }), [customOutputDir, isFreeMode, splitEngine, splitStems, splitPasses, splitModelVariant, matcheringReference]);
+        device: deviceMode === 'auto' ? undefined : deviceMode,
+    }), [customOutputDir, isFreeMode, splitEngine, splitStems, splitPasses, splitModelVariant, matcheringReference, deviceMode]);
 
     useEffect(() => {
         const model = getModelById(splitModelVariant);
@@ -1179,11 +1202,83 @@ const ReactorZone: React.FC = () => {
         }
     }, [pendingFilePath, pendingFiles, startSeparation, play, splitOptions, blockFreeSplitIfExhausted]);
 
+    useEffect(() => {
+        if (!isTauriRuntime()) return;
+
+        const handler = (event: Event) => {
+            const detail = (event as CustomEvent<{
+                action?: string;
+                path?: string;
+                stem?: string;
+                modelId?: string;
+            }>).detail;
+            if (!detail?.action) return;
+
+            if (detail.action === 'activate-dev-pro') {
+                void (async () => {
+                    const { invoke } = await import('@tauri-apps/api/core');
+                    await invoke('activate_license', {
+                        licenseKey: 'LIMINAL-DEV-LOCAL',
+                        email: 'dev@liminal.local',
+                    });
+                    window.dispatchEvent(new CustomEvent('liminal-refresh-license'));
+                })();
+                return;
+            }
+
+            if (detail.action === 'load' && detail.path) {
+                setUiError(null);
+                if (detail.modelId) {
+                    const model = getModelById(detail.modelId);
+                    if (model) {
+                        setSplitEngine(model.engine);
+                        setSplitModelVariant(detail.modelId);
+                    }
+                }
+                applySelectedPaths([detail.path]);
+                return;
+            }
+
+            if (detail.action === 'close-modals') {
+                setShowSettings(false);
+                setShowYouTubeModal(false);
+                setShowWhisperModal(false);
+                setShowAnalysisModal(false);
+                return;
+            }
+
+            if (detail.action === 'split') {
+                void executePendingSplit();
+                return;
+            }
+
+            if (detail.action === 'open-fx' && detail.stem) {
+                setActiveFxStem(detail.stem);
+            }
+        };
+
+        window.addEventListener('liminal-screenshot', handler);
+        return () => window.removeEventListener('liminal-screenshot', handler);
+    }, [applySelectedPaths, executePendingSplit]);
+
 
     // Main render
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-center bg-slate-950 overflow-x-hidden overflow-y-auto">
-             
+            {/* Hero waveform photo background */}
+            <div
+                className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat"
+                style={{
+                    backgroundImage: "url('/hero-bg.jpg')",
+                    filter: 'saturate(1.08) contrast(1.05)',
+                }}
+                aria-hidden
+            />
+            <div
+                className="absolute inset-0 z-0 pointer-events-none bg-gradient-to-b from-slate-950/20 via-slate-950/50 to-slate-950/88"
+                aria-hidden
+            />
+
             {/* Custom Title Bar */}
             <TitleBar onToolTrigger={handleToolTrigger} />
 
@@ -1667,9 +1762,52 @@ const ReactorZone: React.FC = () => {
                                         )}
                                     </div>
                                 )}
+                                {/* Recommended Mode */}
+                                <div className="border border-cyan-900/40 rounded-xl p-2.5 bg-slate-950/70 mb-3 relative overflow-hidden">
+                                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none" />
+                                    <div className="relative z-10">
+                                        <label className="block mb-1.5 flex items-center gap-2">
+                                            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/90">
+                                                What are you extracting?
+                                            </span>
+                                        </label>
+                                        <div className="grid grid-cols-3 gap-1.5">
+                                            {[
+                                                { label: 'Vocals', id: 'vocals', eng: 'roformer' as SeparationEngine, mod: 'roformer_bs_317', stems: '4' },
+                                                { label: 'Karaoke', id: 'karaoke', eng: 'mdx' as SeparationEngine, mod: 'mdx_kara', stems: '2' },
+                                                { label: 'Podcast', id: 'podcast', eng: 'vr' as SeparationEngine, mod: 'vr_denoise', stems: '2' },
+                                                { label: 'Guitar', id: 'guitar', eng: 'instrument' as SeparationEngine, mod: 'inst_guitar', stems: '2' },
+                                                { label: 'Piano', id: 'piano', eng: 'instrument' as SeparationEngine, mod: 'inst_piano', stems: '2' },
+                                                { label: 'Drums', id: 'drums', eng: 'drumsep' as SeparationEngine, mod: 'drumsep_49469', stems: '6' },
+                                            ].map((opt) => {
+                                                const isActive = splitEngine === opt.eng && splitModelVariant === opt.mod;
+                                                return (
+                                                    <button
+                                                        key={opt.id}
+                                                        type="button"
+                                                        onClick={() => {
+                                                            setSplitEngine(opt.eng);
+                                                            setSplitModelVariant(opt.mod);
+                                                            setSplitStems(opt.stems);
+                                                        }}
+                                                        className={`text-[10px] font-mono uppercase tracking-wider px-2 py-1.5 rounded border transition-all duration-150 ${
+                                                            isActive
+                                                                ? 'border-cyan-500/60 bg-cyan-500/10 text-cyan-300 shadow-[0_0_8px_rgba(34,211,238,0.15)]'
+                                                                : 'border-slate-700/50 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                                                        }`}
+                                                    >
+                                                        {opt.label}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Advanced: Neural Model Matrix */}
                                 <div className="border border-slate-800 rounded-xl p-2.5 bg-slate-950/60">
                                     <label className="block mb-1.5 text-slate-400 text-[10px] font-mono uppercase tracking-widest">
-                                        Neural Model Matrix
+                                        Advanced Models
                                     </label>
                                     <ModelPicker
                                         engine={splitEngine}
@@ -1767,6 +1905,38 @@ const ReactorZone: React.FC = () => {
                                     </select>
                                     {splitEngine === 'spleeter' && <span className="text-[10px] text-orange-400 mt-1 block">Passes not available for Spleeter</span>}
                                     {isFreeMode && <span className="text-[10px] text-amber-300 mt-1 block">Output is locked to MP3 in free mode.</span>}
+                                </div>
+
+                                {/* Device selector */}
+                                <div>
+                                    <label className="block mb-1 text-slate-400">Processing Device</label>
+                                    <div className="flex gap-1.5">
+                                        {(['auto', 'cuda', 'cpu'] as const).map((opt) => {
+                                            const isDisabled = opt === 'cuda' && !gpuDetected;
+                                            return (
+                                                <button
+                                                    key={opt}
+                                                    type="button"
+                                                    disabled={isDisabled}
+                                                    onClick={() => setDeviceMode(opt)}
+                                                    className={`flex-1 text-[10px] font-mono uppercase tracking-wider px-2 py-1.5 rounded border transition-all duration-150 ${
+                                                        deviceMode === opt
+                                                            ? 'border-cyan-500/60 bg-cyan-500/10 text-cyan-300'
+                                                            : isDisabled
+                                                                ? 'border-slate-800 bg-slate-900/30 text-slate-600 cursor-not-allowed'
+                                                                : 'border-slate-700/50 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
+                                                    }`}
+                                                >
+                                                    {opt === 'auto' ? (gpuDetected ? 'Auto (GPU)' : 'Auto (CPU)') : opt.toUpperCase()}
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    {gpuDetected && gpuName && (
+                                        <span className="text-[9px] text-emerald-500/60 mt-1 block truncate">
+                                            GPU: {gpuName}
+                                        </span>
+                                    )}
                                 </div>
 
                                 <div className="border-t border-slate-800 pt-4 mt-4">
@@ -2401,8 +2571,8 @@ const ReactorZone: React.FC = () => {
             </AnimatePresence>
 
             {/* Footer - shift up when player is showing */}
-            <footer className={`absolute text-[10px] text-slate-700 tracking-[0.4em] font-minimal font-bold pointer-events-none uppercase transition-all duration-300 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
-                {APP_FOOTER_LABEL}
+            <footer className={`absolute pointer-events-none transition-all duration-300 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
+                <img src="https://liminal-stemsplit.onrender.com/assets/liminal.png?v=20260610b" alt="Liminal" className="h-4 opacity-40" />
             </footer>
         </div>
     );

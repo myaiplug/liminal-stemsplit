@@ -221,7 +221,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ onToolTrigger }) => {
                             )}
                         </AnimatePresence>
                     </div>
-                    <span className="text-[9px] text-cyan-400/70 font-minimal font-light tracking-tight pointer-events-none whitespace-nowrap">{APP_DISPLAY_NAME}</span>
+                    <img src="https://liminal-stemsplit.onrender.com/assets/liminal.png?v=20260610b" alt="Liminal" className="h-4 pointer-events-none" />
                 </div>
 
                 {/* License Button Area */}

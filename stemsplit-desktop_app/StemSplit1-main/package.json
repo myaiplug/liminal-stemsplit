@@ -1,9 +1,9 @@
 {
   "name": "nodaw-splice-engine",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "set TURBOPACK_CACHE_DIR=C:\\Users\\Gaming\\.next-cache&& next dev",
     "build": "next build",
     "start": "next start",
     "lint": "eslint .",

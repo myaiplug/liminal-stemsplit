@@ -1,6 +1,6 @@
 {
   "productName": "NoDAW Liminal",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "identifier": "com.stemsplit.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -17,10 +17,11 @@
         "resizable": true,
         "decorations": false,
         "transparent": true,
-        "title": "NoDAW™ Liminal™ v0.4.6",
-        "width": 1024,
+        "title": "NoDAW™ Liminal™ StemSplit v0.4.7",
+        "width": 1280,
         "minHeight": 640,
-        "minWidth": 720
+        "minWidth": 840,
+        "center": true
       }
     ],
     "security": {
@@ -45,31 +46,37 @@
     "resources": [
       "../scripts"
     ],
+    "category": "public.app-category.music",
+    "shortDescription": "AI Audio Extraction Studio",
+    "longDescription": "Isolate vocals, instruments, drums, and more using Demucs, MDX-Net, Roformer, VR Architecture, and Spleeter.",
+    "copyright": "NoDAW Technologies",
+    "publisher": "NoDAW Technologies",
+    "windows": {
+      "wix": {
+        "language": "en-US"
+      },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerIcon": "icons/icon.ico"
+      }
+    },
     "macOS": {
       "frameworks": [],
-      "minimumSystemVersion": "10.13",
+      "minimumSystemVersion": "10.15",
       "exceptionDomain": "",
       "signingIdentity": null,
       "hardenedRuntime": true,
-      "entitlements": "./entitlements.plist",
-      "dmg": {
-        "windowSize": {
-          "width": 600,
-          "height": 400
-        },
-        "appPosition": {
-          "x": 180,
-          "y": 170
-        },
-        "applicationFolderPosition": {
-          "x": 420,
-          "y": 170
-        }
-      }
+      "entitlements": "./entitlements.plist"
     },
     "linux": {
       "deb": {
         "depends": []
+      },
+      "rpm": {
+        "depends": []
+      },
+      "appimage": {
+        "bundleMediaFramework": true
       }
     }
   }

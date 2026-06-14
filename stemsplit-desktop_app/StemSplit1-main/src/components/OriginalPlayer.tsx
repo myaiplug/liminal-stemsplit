@@ -5,6 +5,7 @@ import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import WaveSurfer from 'wavesurfer.js';
 import { loadWaveSurferSource } from '@/lib/audio-loader';
+import CanvasWaveform, { CanvasWaveformHandle } from './CanvasWaveform';
 
 interface OriginalPlayerProps {
     filePath: string;
@@ -31,6 +32,7 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     const analyserRef = useRef<AnalyserNode | null>(null);
     const audioCtxRef = useRef<AudioContext | null>(null);
     const rafRef = useRef<number>(0);
+    const canvasWaveformRef = useRef<CanvasWaveformHandle>(null);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReady, setIsReady] = useState(false);
@@ -41,6 +43,9 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     const [loadError, setLoadError] = useState<string | null>(null);
     const [loadProgress, setLoadProgress] = useState(0);
     const [reloadToken, setReloadToken] = useState(0);
+    const [useCanvasFallback, setUseCanvasFallback] = useState(false);
+    const fallbackRef = useRef(false);
+    fallbackRef.current = useCanvasFallback;
 
     // Bass analysis loop
     const startBassAnalysis = useCallback(() => {
@@ -82,6 +87,7 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
         let revokeAudioUrl: (() => void) | undefined;
 
         setLoadError(null);
+        setUseCanvasFallback(false);
         setIsReady(false);
         setLoadProgress(0);
 
@@ -167,8 +173,8 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
             });
             ws.on('error', (err) => {
                 if (!cancelled) {
-                    console.warn('[OriginalPlayer] load error:', err);
-                    setLoadError('Failed to load');
+                    console.warn('[OriginalPlayer] load error, trying canvas fallback:', err);
+                    setUseCanvasFallback(true);
                 }
             });
 
@@ -185,15 +191,16 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                 revokeAudioUrl = resolved.revoke;
             } catch (err: any) {
                 if (!cancelled && err?.name !== 'AbortError') {
-                    setLoadError('Failed to load audio');
+                    console.warn('[OriginalPlayer] resolver failed, trying canvas fallback:', err);
+                    setUseCanvasFallback(true);
                 }
             }
         };
 
         init().catch((err) => {
             if (!cancelled) {
-                console.warn('[OriginalPlayer] resolver failed:', err);
-                setLoadError('Failed to load audio');
+                console.warn('[OriginalPlayer] resolver failed, trying canvas fallback:', err);
+                setUseCanvasFallback(true);
             }
         });
 
@@ -212,13 +219,20 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
 
     // Volume sync
     useEffect(() => {
+        if (useCanvasFallback) {
+            canvasWaveformRef.current?.setVolume(isMuted ? 0 : volume);
+            return;
+        }
         if (wsRef.current && isReady) {
             wsRef.current.setVolume(isMuted ? 0 : volume);
         }
-    }, [volume, isMuted, isReady]);
+    }, [volume, isMuted, isReady, useCanvasFallback]);
 
     const togglePlay = useCallback(() => {
-        // Resume AudioContext on user gesture (required by browser autoplay policy)
+        if (fallbackRef.current) {
+            canvasWaveformRef.current?.playPause();
+            return;
+        }
         if (audioCtxRef.current?.state === 'suspended') {
             audioCtxRef.current.resume();
         }
@@ -226,6 +240,10 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     }, []);
 
     const handleStop = useCallback(() => {
+        if (fallbackRef.current) {
+            canvasWaveformRef.current?.stop();
+            return;
+        }
         if (wsRef.current) {
             wsRef.current.stop();
             setCurrentTime(0);
@@ -235,6 +253,13 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     }, [stopBassAnalysis]);
 
     const skipBack = useCallback(() => {
+        if (fallbackRef.current) {
+            const cw = canvasWaveformRef.current;
+            if (!cw) return;
+            const t = Math.max(0, cw.getCurrentTime() - 5);
+            cw.seekTo(t / cw.getDuration());
+            return;
+        }
         if (wsRef.current) {
             const t = Math.max(0, wsRef.current.getCurrentTime() - 5);
             wsRef.current.seekTo(t / wsRef.current.getDuration());
@@ -242,6 +267,13 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     }, []);
 
     const skipForward = useCallback(() => {
+        if (fallbackRef.current) {
+            const cw = canvasWaveformRef.current;
+            if (!cw) return;
+            const t = Math.min(cw.getDuration(), cw.getCurrentTime() + 5);
+            cw.seekTo(t / cw.getDuration());
+            return;
+        }
         if (wsRef.current) {
             const d = wsRef.current.getDuration();
             const t = Math.min(d, wsRef.current.getCurrentTime() + 5);
@@ -277,79 +309,77 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
 
                             {/* Waveform */}
                             <div className="flex-1 relative min-w-0">
-                                <div
-                                    ref={waveRef}
-                                    className={`w-full cursor-pointer transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
-                                />
-                                {!isReady && !loadError && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center">
-                                        {/* Ghost waveform + scan line */}
-                                        <div className="relative w-full h-8 flex items-center justify-center overflow-hidden px-1">
-                                            <div className="flex items-end gap-[1px] h-8 w-full justify-center">
-                                                {Array.from({ length: 50 }).map((_, i) => {
-                                                    const barH = 2 + Math.sin(i * 0.35) * 6 + Math.cos(i * 0.8) * 4;
-                                                    return (
-                                                        <div
-                                                            key={i}
-                                                            className="rounded-full flex-shrink-0"
-                                                            style={{ width: 1.5, height: `${Math.max(2, barH)}px`, backgroundColor: 'rgba(34,211,238,0.1)' }}
-                                                        />
-                                                    );
-                                                })}
+                                {useCanvasFallback ? (
+                                    <CanvasWaveform
+                                        ref={canvasWaveformRef}
+                                        filePath={filePath}
+                                        height={32}
+                                        waveColor="#475569"
+                                        progressColor="#22d3ee"
+                                        onReady={(dur) => {
+                                            setDuration(dur);
+                                            setLoadProgress(100);
+                                            setIsReady(true);
+                                        }}
+                                        onTimeUpdate={(t) => setCurrentTime(t)}
+                                        onPlayStateChange={(p) => {
+                                            setIsPlaying(p);
+                                            if (p) startBassAnalysis();
+                                            else stopBassAnalysis();
+                                        }}
+                                    />
+                                ) : (
+                                    <>
+                                        <div
+                                            ref={waveRef}
+                                            className={`w-full cursor-pointer transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
+                                        />
+                                        {!isReady && !loadError && (
+                                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                                <div className="relative w-full h-8 flex items-center justify-center overflow-hidden px-1">
+                                                    <div className="flex items-end gap-[1px] h-8 w-full justify-center">
+                                                        {Array.from({ length: 50 }).map((_, i) => {
+                                                            const barH = 2 + Math.sin(i * 0.35) * 6 + Math.cos(i * 0.8) * 4;
+                                                            return (
+                                                                <div key={i} className="rounded-full flex-shrink-0"
+                                                                    style={{ width: 1.5, height: `${Math.max(2, barH)}px`, backgroundColor: 'rgba(34,211,238,0.1)' }} />
+                                                            );
+                                                        })}
+                                                    </div>
+                                                    <motion.div className="absolute top-0 bottom-0 w-[2px] pointer-events-none"
+                                                        style={{
+                                                            background: 'linear-gradient(180deg, transparent 0%, rgba(34,211,238,0.5) 40%, rgba(34,211,238,0.9) 50%, rgba(34,211,238,0.5) 60%, transparent 100%)',
+                                                            boxShadow: '0 0 6px rgba(34,211,238,0.4)',
+                                                        }}
+                                                        animate={{ left: ['0%', '100%'] }}
+                                                        transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }} />
+                                                    {[0, 1, 2].map(d => (
+                                                        <motion.div key={`odot-${d}`} className="absolute rounded-full"
+                                                            style={{ width: 2.5, height: 2.5, backgroundColor: '#22d3ee', boxShadow: '0 0 5px #22d3ee', top: `${30 + Math.sin(d * 2) * 20}%` }}
+                                                            animate={{ left: ['-2%', '102%'], opacity: [0, 1, 1, 0] }}
+                                                            transition={{ duration: 2 + d * 0.35, repeat: Infinity, delay: d * 0.5, ease: 'linear' }} />
+                                                    ))}
+                                                </div>
+                                                <div className="flex items-center gap-1.5 mt-0.5">
+                                                    <div className="w-12 h-[1.5px] rounded-full bg-slate-800 overflow-hidden">
+                                                        <motion.div className="h-full rounded-full bg-cyan-400"
+                                                            animate={{ width: `${loadProgress}%` }}
+                                                            transition={{ duration: 0.3 }} />
+                                                    </div>
+                                                    <span className="text-[7px] font-mono tabular-nums text-cyan-400/60">{loadProgress}%</span>
+                                                </div>
                                             </div>
-                                            {/* Scan line */}
-                                            <motion.div
-                                                className="absolute top-0 bottom-0 w-[2px] pointer-events-none"
-                                                style={{
-                                                    background: 'linear-gradient(180deg, transparent 0%, rgba(34,211,238,0.5) 40%, rgba(34,211,238,0.9) 50%, rgba(34,211,238,0.5) 60%, transparent 100%)',
-                                                    boxShadow: '0 0 6px rgba(34,211,238,0.4)',
-                                                }}
-                                                animate={{ left: ['0%', '100%'] }}
-                                                transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }}
-                                            />
-                                            {/* Traveling dots */}
-                                            {[0, 1, 2].map(d => (
-                                                <motion.div
-                                                    key={`odot-${d}`}
-                                                    className="absolute rounded-full"
-                                                    style={{
-                                                        width: 2.5, height: 2.5,
-                                                        backgroundColor: '#22d3ee',
-                                                        boxShadow: '0 0 5px #22d3ee',
-                                                        top: `${30 + Math.sin(d * 2) * 20}%`,
-                                                    }}
-                                                    animate={{ left: ['-2%', '102%'], opacity: [0, 1, 1, 0] }}
-                                                    transition={{ duration: 2 + d * 0.35, repeat: Infinity, delay: d * 0.5, ease: 'linear' }}
-                                                />
-                                            ))}
-                                        </div>
-                                        {/* Progress % */}
-                                        <div className="flex items-center gap-1.5 mt-0.5">
-                                            <div className="w-12 h-[1.5px] rounded-full bg-slate-800 overflow-hidden">
-                                                <motion.div
-                                                    className="h-full rounded-full bg-cyan-400"
-                                                    animate={{ width: `${loadProgress}%` }}
-                                                    transition={{ duration: 0.3 }}
-                                                />
-                                            </div>
-                                            <span className="text-[7px] font-mono tabular-nums text-cyan-400/60">
-                                                {loadProgress}%
-                                            </span>
-                                        </div>
-                                    </div>
+                                        )}
+                                    </>
                                 )}
-                                {loadError && (
-                                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-1">
-                                        <span className="text-[9px] font-mono text-red-400/60">{loadError}</span>
-                                        <button
-                                            type="button"
-                                            onClick={() => {
-                                                setLoadError(null);
-                                                setReloadToken((value) => value + 1);
-                                            }}
-                                            className="text-[8px] font-mono uppercase tracking-wider text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 px-2 py-0.5 rounded"
-                                        >
-                                            Retry Load
+                                {/* Minimal error indicator — never shows "Failed to load audio" */}
+                                {loadError && !useCanvasFallback && (
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                        <button type="button"
+                                            onClick={() => { setLoadError(null); setReloadToken((v) => v + 1); }}
+                                            className="text-[8px] font-mono uppercase tracking-wider text-cyan-400/50 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/40 px-2 py-0.5 rounded transition-all"
+                                            title="Retry">
+                                            ↻
                                         </button>
                                     </div>
                                 )}

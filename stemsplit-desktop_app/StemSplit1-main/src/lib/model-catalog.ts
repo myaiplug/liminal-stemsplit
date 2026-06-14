@@ -374,8 +374,8 @@ export const SEPARATION_MODELS: SeparationModel[] = [
     id: 'roformer_bs_317',
     engine: 'roformer',
     category: 'multistem',
-    name: 'BS-Roformer ep317',
-    tagline: '4-stem band-split transformer',
+    name: 'Studio Vocals',
+    tagline: 'Professional vocal isolation',
     filename: 'model_bs_roformer_ep_317_sdr_12.9755.ckpt',
     description:
       'Band-split Roformer checkpoint (epoch 317, SDR 12.97). 4-stem separation with transformer attention across frequency bands for ultra-clean multistem output.',

@@ -33,7 +33,7 @@ const syncopate = Syncopate({
 
 export const metadata: Metadata = {
   title: APP_WINDOW_TITLE,
-  description: 'AI-powered audio stem separation with hardware optimization',
+  description: 'AI Audio Extraction Studio — isolate vocals, instruments, drums, and more with professional-grade AI models',
 };
 
 export const viewport: Viewport = {

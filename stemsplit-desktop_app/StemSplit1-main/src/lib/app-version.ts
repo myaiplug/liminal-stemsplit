@@ -1,6 +1,6 @@
-export const APP_VERSION = '0.4.6';
+export const APP_VERSION = '0.4.7';
 
-export const APP_BRAND_NAME = 'NoDAW™ Liminal™';
+export const APP_BRAND_NAME = 'NoDAW™ Liminal™ StemSplit';
 
 export const APP_DISPLAY_NAME = `${APP_BRAND_NAME} v${APP_VERSION}`;
 

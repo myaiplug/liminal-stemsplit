@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import WaveSurfer from 'wavesurfer.js';
 import { loadWaveSurferSource } from '@/lib/audio-loader';
 import StemFXMenu from './StemFXMenu';
+import CanvasWaveform, { CanvasWaveformHandle } from './CanvasWaveform';
 
 // --- Types ---
 type StemType = 'vocals' | 'drums' | 'bass' | 'other' | 'piano' | 'guitar' | 'kick' | 'snare' | 'toms' | 'cymbals' | 'instrumental';
@@ -73,6 +74,7 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
     const containerRef = useRef<HTMLDivElement>(null);
     const waveRef = useRef<HTMLDivElement>(null);
     const wsRef = useRef<WaveSurfer | null>(null);
+    const canvasWaveformRef = useRef<CanvasWaveformHandle>(null);
 
     // State
     const [isPlaying, setIsPlaying] = useState(false);
@@ -89,6 +91,7 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
     const [selectionEnd, setSelectionEnd] = useState<number | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [reloadToken, setReloadToken] = useState(0);
+    const [useCanvasFallback, setUseCanvasFallback] = useState(false);
 
     // Initialize WaveSurfer
     useEffect(() => {
@@ -97,6 +100,7 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
         let revokeAudioUrl: (() => void) | undefined;
 
         setLoadError(null);
+        setUseCanvasFallback(false);
         setIsReady(false);
         setLoadProgress(0);
         setCurrentTime(0);
@@ -177,16 +181,16 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                 revokeAudioUrl = resolved.revoke;
             } catch (err: any) {
                 if (!cancelled && err?.name !== 'AbortError') {
-                    console.warn(`[StemPlayer] ${stemName} load failed after retries:`, err);
-                    setLoadError(`Failed to load audio (${stemName})`);
+                    console.warn(`[StemPlayer] ${stemName} load failed after retries, trying canvas fallback:`, err);
+                    setUseCanvasFallback(true);
                 }
             }
         };
 
         initWaveSurfer().catch((err) => {
             if (!cancelled) {
-                console.warn(`[StemPlayer] ${stemName} resolver failed:`, err);
-                setLoadError(`Failed to load audio (${stemName})`);
+                console.warn(`[StemPlayer] ${stemName} resolver failed, trying canvas fallback:`, err);
+                setUseCanvasFallback(true);
             }
         });
 
@@ -201,18 +205,34 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
 
     // Volume sync
     useEffect(() => {
+        if (useCanvasFallback) {
+            canvasWaveformRef.current?.setVolume(isMuted ? 0 : volume);
+            return;
+        }
         if (wsRef.current && isReady) {
             wsRef.current.setVolume(isMuted ? 0 : volume);
         }
-    }, [volume, isMuted, isReady]);
+    }, [volume, isMuted, isReady, useCanvasFallback]);
 
     // --- Controls ---
+    // Ref to track fallback mode without stale closures
+    const fallbackRef = useRef(false);
+    fallbackRef.current = useCanvasFallback;
+
     const togglePlay = useCallback(() => {
+        if (fallbackRef.current) {
+            canvasWaveformRef.current?.playPause();
+            return;
+        }
         if (!wsRef.current) return;
         wsRef.current.playPause();
     }, []);
 
     const handleStop = useCallback(() => {
+        if (fallbackRef.current) {
+            canvasWaveformRef.current?.stop();
+            return;
+        }
         if (!wsRef.current) return;
         wsRef.current.stop();
         setIsPlaying(false);
@@ -224,12 +244,26 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
     }, []);
 
     const skipForward = useCallback(() => {
+        if (fallbackRef.current) {
+            const cw = canvasWaveformRef.current;
+            if (!cw) return;
+            const t = Math.min(cw.getCurrentTime() + 5, cw.getDuration());
+            cw.seekTo(t / cw.getDuration());
+            return;
+        }
         if (!wsRef.current) return;
         const t = Math.min(wsRef.current.getCurrentTime() + 5, totalDuration);
         wsRef.current.seekTo(t / totalDuration);
     }, [totalDuration]);
 
     const skipBack = useCallback(() => {
+        if (fallbackRef.current) {
+            const cw = canvasWaveformRef.current;
+            if (!cw) return;
+            const t = Math.max(cw.getCurrentTime() - 5, 0);
+            cw.seekTo(t / cw.getDuration());
+            return;
+        }
         if (!wsRef.current) return;
         const t = Math.max(wsRef.current.getCurrentTime() - 5, 0);
         wsRef.current.seekTo(t / totalDuration);
@@ -363,98 +397,114 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                 </div>
 
                 {/* Waveform Area */}
-                <div className="relative px-3 py-1" onMouseDown={handleWaveMouseDown}>
-                    {/* Waveform container */}
-                    <div 
-                        ref={waveRef} 
-                        className={`w-full cursor-crosshair transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
-                    />
+                <div className="relative px-3 py-1">
+                    {/* Canvas fallback waveform (when WaveSurfer fails) */}
+                    {useCanvasFallback ? (
+                        <CanvasWaveform
+                            ref={canvasWaveformRef}
+                            filePath={currentFilePath}
+                            height={48}
+                            waveColor={colors.wave}
+                            progressColor={colors.progress}
+                            onReady={(dur) => {
+                                setTotalDuration(dur);
+                                setLoadProgress(100);
+                                setIsReady(true);
+                            }}
+                            onTimeUpdate={(t) => setCurrentTime(t)}
+                            onPlayStateChange={(p) => setIsPlaying(p)}
+                            onLoadError={() => {
+                                // Canvas also failed — show minimal silent indicator
+                                setLoadError('waveform');
+                            }}
+                        />
+                    ) : (
+                        <>
+                            {/* WaveSurfer waveform container */}
+                            <div
+                                ref={waveRef}
+                                className={`w-full cursor-crosshair transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
+                                onMouseDown={handleWaveMouseDown}
+                            />
 
-                    {/* Futuristic waveform loader */}
-                    {!isReady && !loadError && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center">
-                            {/* Fake waveform bars with traveling dots */}
-                            <div className="relative w-full h-10 flex items-center justify-center overflow-hidden px-2">
-                                {/* Static waveform ghost bars */}
-                                <div className="flex items-end gap-[1.5px] h-10 w-full justify-center">
-                                    {Array.from({ length: 60 }).map((_, i) => {
-                                        const barH = 3 + Math.sin(i * 0.3) * 8 + Math.cos(i * 0.7) * 6;
-                                        return (
-                                            <div
-                                                key={i}
-                                                className="rounded-full flex-shrink-0"
+                            {/* Futuristic waveform loader */}
+                            {!isReady && !loadError && (
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                    <div className="relative w-full h-10 flex items-center justify-center overflow-hidden px-2">
+                                        <div className="flex items-end gap-[1.5px] h-10 w-full justify-center">
+                                            {Array.from({ length: 60 }).map((_, i) => {
+                                                const barH = 3 + Math.sin(i * 0.3) * 8 + Math.cos(i * 0.7) * 6;
+                                                return (
+                                                    <div
+                                                        key={i}
+                                                        className="rounded-full flex-shrink-0"
+                                                        style={{
+                                                            width: 2,
+                                                            height: `${Math.max(3, barH)}px`,
+                                                            backgroundColor: `${colors.wave}15`,
+                                                        }}
+                                                    />
+                                                );
+                                            })}
+                                        </div>
+                                        <motion.div
+                                            className="absolute top-0 bottom-0 w-[2px] pointer-events-none"
+                                            style={{
+                                                background: `linear-gradient(180deg, transparent 0%, ${colors.wave}88 40%, ${colors.wave} 50%, ${colors.wave}88 60%, transparent 100%)`,
+                                                boxShadow: `0 0 8px ${colors.wave}66, 0 0 16px ${colors.wave}33`,
+                                            }}
+                                            animate={{ left: ['0%', '100%'] }}
+                                            transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
+                                        />
+                                        {[0, 1, 2, 3, 4].map(d => (
+                                            <motion.div
+                                                key={`dot-${d}`}
+                                                className="absolute rounded-full"
                                                 style={{
-                                                    width: 2,
-                                                    height: `${Math.max(3, barH)}px`,
-                                                    backgroundColor: `${colors.wave}15`,
+                                                    width: 3, height: 3,
+                                                    backgroundColor: colors.wave,
+                                                    boxShadow: `0 0 6px ${colors.wave}`,
+                                                    top: `${30 + Math.sin(d * 1.8) * 20}%`,
+                                                }}
+                                                animate={{ left: ['-2%', '102%'], opacity: [0, 1, 1, 0] }}
+                                                transition={{
+                                                    duration: 2.2 + d * 0.3, repeat: Infinity,
+                                                    delay: d * 0.4, ease: 'linear',
                                                 }}
                                             />
-                                        );
-                                    })}
+                                        ))}
+                                    </div>
+                                    <div className="flex items-center gap-2 mt-1">
+                                        <div className="w-16 h-[2px] rounded-full bg-slate-800 overflow-hidden">
+                                            <motion.div
+                                                className="h-full rounded-full"
+                                                style={{ backgroundColor: colors.wave }}
+                                                animate={{ width: `${loadProgress}%` }}
+                                                transition={{ duration: 0.3 }}
+                                            />
+                                        </div>
+                                        <span className="text-[8px] font-mono tabular-nums" style={{ color: `${colors.wave}99` }}>
+                                            {loadProgress}%
+                                        </span>
+                                    </div>
                                 </div>
-                                {/* Scan line sweeping left to right */}
-                                <motion.div
-                                    className="absolute top-0 bottom-0 w-[2px] pointer-events-none"
-                                    style={{
-                                        background: `linear-gradient(180deg, transparent 0%, ${colors.wave}88 40%, ${colors.wave} 50%, ${colors.wave}88 60%, transparent 100%)`,
-                                        boxShadow: `0 0 8px ${colors.wave}66, 0 0 16px ${colors.wave}33`,
-                                    }}
-                                    animate={{ left: ['0%', '100%'] }}
-                                    transition={{ duration: 1.8, repeat: Infinity, ease: 'linear' }}
-                                />
-                                {/* Traveling dot particles along the waveform */}
-                                {[0, 1, 2, 3, 4].map(d => (
-                                    <motion.div
-                                        key={`dot-${d}`}
-                                        className="absolute rounded-full"
-                                        style={{
-                                            width: 3,
-                                            height: 3,
-                                            backgroundColor: colors.wave,
-                                            boxShadow: `0 0 6px ${colors.wave}`,
-                                            top: `${30 + Math.sin(d * 1.8) * 20}%`,
-                                        }}
-                                        animate={{ left: ['-2%', '102%'], opacity: [0, 1, 1, 0] }}
-                                        transition={{
-                                            duration: 2.2 + d * 0.3,
-                                            repeat: Infinity,
-                                            delay: d * 0.4,
-                                            ease: 'linear',
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                            {/* Progress percentage */}
-                            <div className="flex items-center gap-2 mt-1">
-                                {/* Mini progress track */}
-                                <div className="w-16 h-[2px] rounded-full bg-slate-800 overflow-hidden">
-                                    <motion.div
-                                        className="h-full rounded-full"
-                                        style={{ backgroundColor: colors.wave }}
-                                        animate={{ width: `${loadProgress}%` }}
-                                        transition={{ duration: 0.3 }}
-                                    />
-                                </div>
-                                <span className="text-[8px] font-mono tabular-nums" style={{ color: `${colors.wave}99` }}>
-                                    {loadProgress}%
-                                </span>
-                            </div>
-                        </div>
+                            )}
+                        </>
                     )}
 
-                    {/* Load error */}
-                    {loadError && (
-                        <div className="absolute inset-0 flex flex-col items-center justify-center gap-2">
-                            <span className="text-[10px] font-mono text-red-400/80">{loadError}</span>
+                    {/* Minimal silent error indicator — never shows "Failed to load audio" text */}
+                    {loadError && !useCanvasFallback && (
+                        <div className="absolute inset-0 flex items-center justify-center">
                             <button
                                 type="button"
                                 onClick={() => {
                                     setLoadError(null);
                                     setReloadToken((value) => value + 1);
                                 }}
-                                className="text-[9px] font-mono uppercase tracking-wider text-cyan-300 hover:text-cyan-200 border border-cyan-500/30 px-2 py-1 rounded"
+                                className="text-[8px] font-mono uppercase tracking-wider text-cyan-400/50 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/40 px-2 py-0.5 rounded transition-all"
+                                title="Retry loading audio"
                             >
-                                Retry Load
+                                ↻
                             </button>
                         </div>
                     )}

@@ -54,6 +54,7 @@ export interface UseStemSplitReturn extends UseStemSplitState {
       referenceFile?: string;
       extraModels?: string;
       chunkDuration?: number;
+      device?: 'auto' | 'cuda' | 'cpu';
     }
   ) => Promise<void>;
   cancel: () => Promise<void>;
@@ -106,6 +107,7 @@ export function useStemSplit(): UseStemSplitReturn {
         referenceFile?: string;
         extraModels?: string;
         chunkDuration?: number;
+        device?: 'auto' | 'cuda' | 'cpu';
       }
     ) => {
       try {

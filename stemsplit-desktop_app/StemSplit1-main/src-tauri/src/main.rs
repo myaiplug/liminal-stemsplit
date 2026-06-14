@@ -2262,6 +2262,7 @@ pub struct StemSplitRequest {
     pub reference_file: Option<String>,
     pub extra_models: Option<String>,
     pub chunk_duration: Option<u32>,
+    pub device: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -2759,21 +2760,18 @@ async fn execute_splice(
     if license.is_trial {
         // Auto-enforce trial limitations (coerce values instead of rejecting)
         
-        // Force 2-stem for trial
-        if request.stems_count.map(|s| s > 2).unwrap_or(false) {
-            println!("[License] Trial: Auto-correcting stems from {:?} to 2", request.stems_count);
-            request.stems_count = Some(2);
-        }
-        
-        // Force Spleeter engine for trial
+        // Free tier: allow Vocals (roformer) & Instrumental (mdx), block everything else
         if let Some(ref engine) = request.engine {
             let engine_lower = engine.to_lowercase();
-            if engine_lower != "spleeter" {
-                println!("[License] Trial: Auto-correcting engine from '{}' to 'spleeter'", engine);
-                request.engine = Some("spleeter".into());
+            let is_allowed_free = engine_lower == "roformer" || engine_lower == "mdx";
+            if !is_allowed_free {
+                println!("[License] Trial: Engine '{}' is Pro-only. Auto-correcting to 'roformer'", engine);
+                request.engine = Some("roformer".into());
+                request.model_variant = Some("roformer_bs_317".into());
             }
         } else {
-            request.engine = Some("spleeter".into());
+            request.engine = Some("roformer".into());
+            request.model_variant = Some("roformer_bs_317".into());
         }
         
         // Force MP3 output for trial (auto-correct, don't reject)
@@ -2933,6 +2931,16 @@ async fn execute_splice(
             cmd_args.push("--chunk-duration".to_string());
             cmd_args.push(chunk_duration.to_string());
         }
+    }
+
+    // Device override (auto / cuda / cpu)
+    if let Some(ref device) = request.device {
+        let device_lower = device.to_lowercase();
+        if device_lower == "cuda" || device_lower == "cpu" {
+            cmd_args.push("--device".to_string());
+            cmd_args.push(device_lower.clone());
+        }
+        // "auto" = don't pass anything, let hardware_config.json decide
     }
 
     // Add trial mode limitations to Python script
@@ -3580,7 +3588,26 @@ async fn transcribe_audio(
             "message": "Installing Whisper transcription runtime...",
             "percent": 4
         }));
-        install_python_packages(&python_exe, &env_dir, "Install openai-whisper", &["openai-whisper"])?;
+        let whisper_install = install_python_packages(&python_exe, &env_dir, "Install openai-whisper", &["openai-whisper"]);
+        if whisper_install.is_err() {
+            // Auto-troubleshoot: failed to install whisper — escalate to deep repair
+            let _ = window.emit("whisper-progress", serde_json::json!({
+                "message": "Auto-repairing Python environment for Whisper...",
+                "percent": 4
+            }));
+            let repair_result = deep_repair_python_environment(window.clone()).await;
+            if let Err(repair_err) = repair_result {
+                return Err(format!(
+                    "Whisper installation failed and auto-repair also failed: {}. \
+                     Please run Deep Repair from Settings or reinstall.",
+                    repair_err
+                ));
+            }
+            // Verify whisper is now available after repair
+            if !detect_missing_python_modules(&python_exe, &["whisper"]).is_empty() {
+                return Err("Auto-repair completed but Whisper is still not available. Please run Deep Repair from Settings.".to_string());
+            }
+        }
     }
 
     let output_dir = get_transcript_output_dir(&source_path)?;

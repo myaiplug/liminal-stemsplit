@@ -54,6 +54,7 @@ export interface StemSplitRequest {
   reference_file?: string;
   extra_models?: string;
   chunk_duration?: number;
+  device?: 'auto' | 'cuda' | 'cpu';
 }
 
 /**
@@ -78,6 +79,7 @@ export async function startStemSplit(
     referenceFile?: string;
     extraModels?: string;
     chunkDuration?: number;
+    device?: 'auto' | 'cuda' | 'cpu';
   }
 ): Promise<SeparationResult> {
   try {
@@ -98,6 +100,7 @@ export async function startStemSplit(
         reference_file: options?.referenceFile,
         extra_models: options?.extraModels,
         chunk_duration: options?.chunkDuration,
+        device: options?.device,
       },
     });
     console.log('[IPC] Separation completed:', result);

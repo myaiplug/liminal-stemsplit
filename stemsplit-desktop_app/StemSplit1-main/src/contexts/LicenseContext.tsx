@@ -94,6 +94,14 @@ export function LicenseProvider({ children }: { children: React.ReactNode }) {
     refresh();
   }, [refresh]);
 
+  useEffect(() => {
+    const handler = () => {
+      void refresh();
+    };
+    window.addEventListener('liminal-refresh-license', handler);
+    return () => window.removeEventListener('liminal-refresh-license', handler);
+  }, [refresh]);
+
   const value: LicenseContextType = {
     license,
     loading,
