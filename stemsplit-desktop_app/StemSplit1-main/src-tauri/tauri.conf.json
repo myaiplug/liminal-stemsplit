@@ -58,6 +58,9 @@
       "nsis": {
         "installMode": "currentUser",
         "installerIcon": "icons/icon.ico"
+      },
+      "webviewInstallMode": {
+        "type": "downloadBootstrapper"
       }
     },
     "macOS": {

@@ -6,6 +6,13 @@
   --foreground-rgb: 255, 255, 255;
   --background-start-rgb: 2, 6, 23;
   --background-end-rgb: 15, 23, 42;
+  --cyan: #22d3ee;
+  --purple: #a855f7;
+  --navy: #0a0f1d;
+  --navy-deep: #060912;
+  --border: rgba(34, 211, 238, 0.1);
+  --text: #f3f4f6;
+  --muted: #9ca3af;
 }
 
 body {
@@ -15,6 +22,39 @@ body {
     url('/hero-bg.jpg') center center / cover no-repeat fixed,
     rgb(var(--background-start-rgb));
   min-height: 100vh;
+}
+
+/* DeepSplit noise texture overlay */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
+}
+
+/* Animated waveform bars (DeepSplit style) */
+@keyframes wavebar {
+  0% { transform: scaleY(0.2); }
+  100% { transform: scaleY(1); }
+}
+
+/* Model card accent line glow on hover */
+.model-card::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 1rem;
+  right: 1rem;
+  height: 2px;
+  border-radius: 9999px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+.model-card:hover::after {
+  opacity: 1;
 }
 
 /* Custom Scrollbar for Cyber-HUD Feel */

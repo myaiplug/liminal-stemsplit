@@ -7,8 +7,8 @@ AI Audio Extraction Studio — isolate vocals, instruments, drums, and more.
 ### Windows
 | Installer | Link |
 |-----------|------|
-| **MSI Installer** (recommended) | [NoDAW.Liminal_0.4.7_x64_en-US.msi](https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW.Liminal_0.4.7_x64_en-US.msi) |
-| **NSIS Setup** (lightweight) | [NoDAW.Liminal_0.4.7_x64-setup.exe](https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW.Liminal_0.4.7_x64-setup.exe) |
+| **MSI Installer** (recommended) | [NoDAW Liminal_0.4.7_x64_en-US.msi](https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW%20Liminal_0.4.7_x64_en-US.msi) |
+| **NSIS Setup** (lightweight) | [NoDAW Liminal_0.4.7_x64-setup.exe](https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW%20Liminal_0.4.7_x64-setup.exe) |
 
 ### macOS
 [![Download for macOS](https://img.shields.io/badge/Download-macOS-black?style=for-the-badge&logo=apple)](https://github.com/myaiplug/liminal-stemsplit/releases/latest)
