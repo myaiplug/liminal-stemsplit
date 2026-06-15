@@ -23,6 +23,9 @@ $stored = [ordered]@{
 $licensePath = Join-Path $licenseDir "license.json"
 $stored | ConvertTo-Json | Set-Content -Path $licensePath -Encoding UTF8
 
+$trialUsagePath = Join-Path $licenseDir "trial_usage.json"
+@{ completed_splits = 0; last_completed_unix = 0 } | ConvertTo-Json | Set-Content -Path $trialUsagePath -Encoding UTF8
+
 Write-Host "Dev Pro license activated." -ForegroundColor Green
 Write-Host "  File: $licensePath"
 Write-Host "  Email: $Email"
