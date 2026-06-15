@@ -1,0 +1,920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete Local AI Guide — 15 Tools Explained End-to-End | Liminal Guides</title>
+<meta name="description" content="Exhaustive beginner-to-pro guide for every local AI tool: AceStep, ComfyUI, Ollama, OpenCode, Demucs, Whisper, XTTSv2, RVC, Real-ESRGAN, AnimateDiff, ChromaDB, CrewAI, Docker, CUDA. Launch, workflow, troubleshoot, affiliate tips.">
+<meta property="og:title" content="Complete Local AI Tool Guide — Master Your GPU Studio">
+<meta property="og:description" content="Step-by-step guides for 15+ local AI tools. Save days of setup headache. Start with GPU benchmarks and end with agent teams.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="keywords" content="local AI guide, how to use ComfyUI, AceStep tutorial, Ollama setup, Demucs guide, Whisper transcription tutorial, RVC voice conversion guide, Real-ESRGAN upscale, AnimateDiff guide">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Article",
+  "headline": "Complete Local AI Tool Guide — 15 Tools Explained End-to-End",
+  "description": "From zero to pro: launch, workflows, troubleshooting, and hidden power-user tips for every local AI tool on consumer GPUs.",
+  "author": {"@type": "Organization", "name": "Liminal Guides"},
+  "datePublished": "2026-06-15"
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--orange:#f97316;--pink:#ec4899;--blue:#3b82f6;--yellow:#eab308;--border:rgba(255,255,255,0.06);--text:#f3f4f6;--muted:#6b7280}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth;scroll-padding-top:1rem}
+body{font-family:'Inter',sans-serif;background:#020617;color:var(--text);overflow-x:hidden;line-height:1.7}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.35}
+.wrap{max-width:980px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+nav{display:flex;align-items:center;gap:1.5rem;margin-bottom:2.5rem;font-size:0.8125rem;flex-wrap:wrap}
+nav a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+nav a:hover{color:var(--cyan)}
+.toc{background:rgba(255,255,255,0.015);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:2rem}
+.toc-title{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);font-family:'JetBrains Mono',monospace;margin-bottom:0.75rem}
+.toc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:0.25rem}
+.toc a{color:rgba(255,255,255,0.55);text-decoration:none;font-size:0.8125rem;padding:0.2rem 0;display:block;transition:color 0.15s}
+.toc a:hover{color:var(--cyan)}
+h1{font-size:clamp(1.6rem,4vw,2.5rem);font-weight:800;letter-spacing:-0.03em;line-height:1.15;margin-bottom:0.5rem}
+h1 span{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:0.9375rem;margin-bottom:2rem;max-width:600px}
+h2{font-size:1.25rem;font-weight:700;margin-top:2.5rem;margin-bottom:0.5rem;padding-bottom:0.35rem;border-bottom:1px solid var(--border);color:#fff;display:flex;align-items:center;gap:0.5rem}
+h2 .t{font-size:0.65rem;padding:0.1rem 0.45rem;border-radius:999px;font-family:'JetBrains Mono',monospace;font-weight:400}
+.t-audio{background:rgba(34,211,238,0.1);color:var(--cyan);border:1px solid rgba(34,211,238,0.2)}
+.t-image{background:rgba(236,72,153,0.1);color:var(--pink);border:1px solid rgba(236,72,153,0.2)}
+.t-llm{background:rgba(168,85,247,0.1);color:var(--purple);border:1px solid rgba(168,85,247,0.2)}
+.t-code{background:rgba(34,197,94,0.1);color:var(--green);border:1px solid rgba(34,197,94,0.2)}
+.t-sys{background:rgba(249,115,22,0.1);color:var(--orange);border:1px solid rgba(249,115,22,0.2)}
+h3{font-size:1rem;font-weight:600;margin-top:1.5rem;margin-bottom:0.35rem;color:#fff}
+h4{font-size:0.875rem;font-weight:600;margin-top:1rem;margin-bottom:0.25rem;color:rgba(255,255,255,0.85)}
+p{color:rgba(255,255,255,0.65);margin-bottom:0.75rem;font-size:0.875rem;line-height:1.7}
+code{background:rgba(255,255,255,0.06);padding:0.1rem 0.35rem;border-radius:4px;font-size:0.8em;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+pre{background:rgba(0,0,0,0.35);border:1px solid var(--border);border-radius:8px;padding:0.85rem 1rem;overflow-x:auto;margin:0.6rem 0 1rem;font-size:0.8rem;font-family:'JetBrains Mono',monospace;line-height:1.5;color:#e2e8f0}
+pre .c{color:var(--muted);font-style:italic}
+.tag{display:inline-flex;align-items:center;gap:0.25rem;padding:0.1rem 0.4rem;border-radius:999px;font-size:0.5rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;text-transform:uppercase}
+.tag-green{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.tag-cyan{background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);color:var(--cyan)}
+.tag-orange{background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);color:var(--orange)}
+.tag-red{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);color:#ef4444}
+.step-box{border-left:2px solid var(--cyan);padding:0.6rem 1rem;margin:0.6rem 0;background:rgba(34,211,238,0.02);border-radius:0 8px 8px 0}
+.step-box.warn{border-left-color:var(--orange);background:rgba(249,115,22,0.02)}
+.step-box.danger{border-left-color:#ef4444;background:rgba(239,68,68,0.02)}
+.step-box.good{border-left-color:var(--green);background:rgba(34,197,94,0.02)}
+.step-box .label{font-size:0.6rem;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace;margin-bottom:0.2rem}
+.step-box .label.blue{color:var(--cyan)}
+.step-box .label.yellow{color:var(--orange)}
+.step-box .label.red{color:#ef4444}
+.step-box .label.green{color:var(--green)}
+.step-box p{font-size:0.8125rem;margin-bottom:0.25rem}
+ul,ol{padding-left:1.25rem;margin-bottom:0.75rem}
+li{color:rgba(255,255,255,0.65);font-size:0.875rem;margin-bottom:0.3rem}
+li strong{color:#fff}
+.aff{display:inline-flex;align-items:center;gap:0.3rem;padding:0.05rem 0.35rem;border-radius:4px;background:rgba(234,179,8,0.08);border:1px solid rgba(234,179,8,0.15);color:var(--yellow);font-size:0.55rem;font-family:'JetBrains Mono',monospace;text-transform:uppercase;letter-spacing:0.04em}
+.upsell-box{border:1px dashed rgba(234,179,8,0.2);border-radius:10px;padding:1rem;margin:1rem 0;background:rgba(234,179,8,0.02);display:flex;flex-wrap:wrap;align-items:center;gap:0.75rem}
+.upsell-box p{font-size:0.8125rem;color:rgba(255,255,255,0.5);margin:0;flex:1;min-width:200px}
+.upsell-box .btn{display:inline-flex;align-items:center;gap:0.35rem;padding:0.4rem 1rem;border-radius:6px;font-weight:600;font-size:0.75rem;text-decoration:none;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;white-space:nowrap;transition:opacity 0.15s}
+.upsell-box .btn:hover{opacity:0.85}
+.upsell-box .btn.affiliate{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:var(--text)}
+footer{border-top:1px solid var(--border);padding:2rem 0;margin-top:3rem;text-align:center;font-size:0.75rem;color:var(--muted)}
+footer a{color:var(--cyan);text-decoration:none}
+.kbd{display:inline-block;padding:0.1rem 0.4rem;border-radius:4px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.08);font-size:0.7rem;font-family:'JetBrains Mono',monospace;color:rgba(255,255,255,0.7)}
+@media(max-width:640px){.toc-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <a href="/">Liminal</a>
+  <a href="/workshop.html">Workshop</a>
+  <a href="/installers/">Installers</a>
+  <a href="/marketing-plan.html">Pricing</a>
+  <a href="/guides.html" style="color:var(--cyan)">Guides</a>
+</nav>
+
+<h1><span>Complete Local AI Guide</span></h1>
+<p class="sub">Fifteen tools. One GPU. Zero subscription headaches. Every guide below starts at "I just installed this" and ends at "I can't believe I ever paid for this."</p>
+
+<!-- TABLE OF CONTENTS -->
+<div class="toc">
+  <div class="toc-title">Jump to Tool</div>
+  <div class="toc-grid">
+    <a href="#ffmpeg">ffmpeg</a>
+    <a href="#sox">SoX</a>
+    <a href="#pedalboard">Pedalboard</a>
+    <a href="#acestep">AceStep — Beat Gen</a>
+    <a href="#comfyui">ComfyUI — Image Gen</a>
+    <a href="#sdxl">SDXL &amp; FLUX</a>
+    <a href="#animate">AnimateDiff — Video</a>
+    <a href="#svd">Stable Video Diffusion</a>
+    <a href="#ollama">Ollama — Local LLMs</a>
+    <a href="#opencode">OpenCode — AI Coding</a>
+    <a href="#demucs">Demucs — Stem Splitter</a>
+    <a href="#whisper">Whisper — Transcription</a>
+    <a href="#xtts">XTTSv2 — Voice Clone</a>
+    <a href="#rvc">RVC — Voice Conversion</a>
+    <a href="#esrgan">Real-ESRGAN — Upscale</a>
+    <a href="#gfpgan">GFPGAN — Face Restore</a>
+    <a href="#chroma">ChromaDB — RAG</a>
+    <a href="#crewai">CrewAI — Agent Teams</a>
+    <a href="#musicgen">MusicGen — AudioCraft</a>
+    <a href="#docker">Docker + WSL2</a>
+    <a href="#cuda">CUDA Toolkit</a>
+    <a href="#gpu-mon">GPU Monitoring</a>
+  </div>
+</div>
+
+<!-- ==================== AUDIO TOOLS ==================== -->
+<h2><span class="t t-audio">Audio</span> ffmpeg</h2>
+<p>The single most important tool in any creator's pipeline. ffmpeg converts, trims, merges, compresses, and inspects every audio and video format that exists.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div><p>After installing, verify: <code>ffmpeg -version</code></p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Convert MP3 to WAV:</strong> <code>ffmpeg -i input.mp3 output.wav</code></li>
+  <li><strong>Trim from 0:30 to 1:00:</strong> <code>ffmpeg -i input.mp3 -ss 30 -to 60 -c copy output.mp3</code></li>
+  <li><strong>Merge two audio files:</strong> <code>ffmpeg -i "concat:file1.wav|file2.wav" -acodec copy merged.wav</code></li>
+  <li><strong>Extract audio from video:</strong> <code>ffmpeg -i video.mp4 -vn -acodec libmp3lame audio.mp3</code></li>
+  <li><strong>Change sample rate to 44100:</strong> <code>ffmpeg -i input.wav -ar 44100 output.wav</code></li>
+  <li><strong>Batch convert all MP3s to WAV in a folder:</strong> <code>for %f in (*.mp3) do ffmpeg -i "%f" "%~nf.wav"</code></li>
+  <li><strong>Inspect file metadata:</strong> <code>ffprobe input.wav</code></li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">SYMPTOM</div><p>"ffmpeg is not recognized" — Reopen your terminal after install, or add <code>D:\AI-Tools\ffmpeg\bin</code> to your PATH manually.</p></div>
+<div class="step-box warn"><div class="label yellow">SYMPTOM</div><p>Audio is sped up or slowed down after conversion — You're likely mixing sample rates. Use <code>-ar 44100</code> explicitly to force a consistent rate.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>ffmpeg reads stdin from a pipe. You can chain it with any tool: <code>sox input.wav -t wav - | ffmpeg -i - output.mp3</code></li>
+  <li>Use <code>-af "loudnorm"</code> to normalize volume to broadcast standard in one pass.</li>
+  <li>ffmpeg's <code>-threads auto</code> flag maximizes multi-core CPU usage for encoding.</li>
+</ul>
+
+<div class="upsell-box">
+  <p>💡 <strong>Hardware tip:</strong> ffmpeg benefits from a fast CPU for encoding. An Intel i7-13700K encodes 4x faster than a laptop i5.</p>
+  <a href="https://amzn.to/4cNVLCD" class="btn affiliate" target="_blank" rel="nofollow sponsored">Compare CPUs on Amazon →</a>
+</div>
+
+<!-- SoX -->
+<h2><span class="t t-audio">Audio</span> SoX — Swiss Army Knife of Audio</h2>
+<p>SoX does one thing ffmpeg can't: surgical audio manipulation. Trim silence, apply effects, change tempo without pitch shift, generate tones.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div><p><code>sox --info input.wav</code> — prints sample rate, channels, duration, bit depth.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Trim silence from start/end:</strong> <code>sox input.wav output.wav silence 1 0.1 1% -1 0.1 1%</code></li>
+  <li><strong>Change tempo without pitch shift:</strong> <code>sox input.wav output.wav tempo 1.25</code> (25% faster)</li>
+  <li><strong>Pitch shift up 3 semitones:</strong> <code>sox input.wav output.wav pitch 300</code> (300 cents = 3 semitones)</li>
+  <li><strong>Apply reverb:</strong> <code>sox input.wav output.wav reverb 50 50 100</code> (room, wetness, delay)</li>
+  <li><strong>Concatenate multiple files:</strong> <code>sox file1.wav file2.wav file3.wav merged.wav</code></li>
+  <li><strong>Generate a 440Hz sine tone (5 seconds):</strong> <code>sox -n output.wav synth 5 sine 440</code></li>
+  <li><strong>Reverse audio:</strong> <code>sox input.wav output.wav reverse</code></li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">SYMPTOM</div><p>"sox FAIL sox: Input files must have the same sample rate" — Use <code>sox --combine concatenate -r 44100 file1.wav file2.wav output.wav</code></p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>SoX's <code>stat</code> effect prints detailed RMS, peak, and DC offset: <code>sox input.wav -n stat</code></li>
+  <li>Chain effects: <code>sox input.wav output.wav tempo 1.1 reverb 30 pitch 200</code> — order matters!</li>
+  <li>The <code>compand</code> effect is a simple compressor: <code>sox input.wav output.wav compand 0.3,1 6:-70,-60,-20 -5 -90 0.2</code></li>
+</ul>
+
+<!-- Pedalboard -->
+<h2><span class="t t-audio">Audio</span> Pedalboard — Python Audio Effects</h2>
+<p>Spotify's open-source audio effects library. Think of it as "pedalboard effects in Python" — reverb, delay, compression, distortion, noise gate, pitch shift, all real-time or offline.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Python</div>
+<pre>from pedalboard import Pedalboard, Reverb, Delay, Compressor
+from pedalboard.io import AudioFile
+
+with AudioFile("input.wav") as f:
+  audio = f.read(f.frames)
+  sr = f.samplerate
+
+board = Pedalboard([Reverb(room_size=0.5), Delay(delay_seconds=0.25)])
+effected = board(audio, sr)
+
+with AudioFile("output.wav", "w", sr, effected.shape[0]) as f:
+  f.write(effected)</pre></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Mastering chain:</strong> Compressor → Limiter → Low-pass filter: <code>Pedalboard([Compressor(threshold_db=-20), Limiter(), LowpassFilter(cutoff_frequency_hz=18000)])</code></li>
+  <li><strong>Lo-fi effect:</strong> Bitcrush + low-pass: <code>Pedalboard([Bitcrush(bit_depth=8), LowpassFilter(cutoff_frequency_hz=8000)])</code></li>
+  <li><strong>Noise gate:</strong> <code>Pedalboard([NoiseGate(threshold_db=-40, ratio=10)])</code></li>
+  <li><strong>Pitch shift + formant preserve:</strong> <code>Pedalboard([PitchShift(semitones=2)])</code> — uses rubberband internally</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">SYMPTOM</div><p>"ModuleNotFoundError: No module named 'pedalboard'" — Run <code>pip install pedalboard</code> from an admin terminal.</p></div>
+<div class="step-box warn"><div class="label yellow">SYMPTOM</div><p>Audio crackles after processing — Your buffer size is too small. Add <code>buffer_size=512</code> to the Pedalboard constructor.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Pedalboard supports VST3 plugins. Load any VST3 you own: <code>Pedalboard([load_vst3_plugin("C:\\VSTPlugins\\MyPlugin.vst3")])</code></li>
+  <li>Process audio in real-time through a microphone with <code>pedalboard_sink = AudioStream()</code></li>
+  <li>Batch process a folder of WAVs: loop over files, apply the same board, save to <code>/processed/</code>.</li>
+</ul>
+
+
+<!-- ==================== BEAT GENERATION ==================== -->
+<h2><span class="t t-audio">Beat</span> AceStep v1.5 — Beat Generation</h2>
+<p>Full-song music generation that runs on your GPU. Generates vocals, drums, bass, melody — the whole arrangement. No cloud, no credits, unlimited generations.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Launch</div>
+<p>Run: <code>D:\ACESTEP\ace-step-1.5\start_api_server.bat</code></p>
+<p>Wait for "Uvicorn running on http://127.0.0.1:8765"</p>
+<p>Open a browser to <code>http://127.0.0.1:8765</code></p></div>
+
+<h3>Your First Generation</h3>
+<div class="step-box"><div class="label blue">API</div>
+<pre>curl -X POST http://127.0.0.1:8765/generate \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "lo-fi hip hop beat with vinyl crackle, soft piano", "duration": 15}'</pre>
+<p>Your first 15-second beat will arrive in ~15-30 seconds as a WAV download.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Generate a beat:</strong> <code>curl -X POST ... -d '{"prompt":"drum and bass, fast tempo, growling bassline","duration":30}'</code></li>
+  <li><strong>Generate vocals + music:</strong> <code>{"prompt":"soulful female vocal over funk guitar, 90bpm","duration":20}</code></li>
+  <li><strong>Generate an intro/outro:</strong> Set duration short (8-10s), generate multiple, splice with ffmpeg</li>
+  <li><strong>Batch generate stems:</strong> Generate a full track, then run Demucs to split into individual stems</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">API not starting</div><p>Check models at <code>D:\Models\ace-step-v1.5\</code>. If missing, run the installer again or download from HF: <code>huggingface.co/pzharrington/ace-step-v1.5</code></p></div>
+<div class="step-box warn"><div class="label yellow">Out of memory</div><p>Add <code>--device cpu</code> to the server startup command to force CPU generation (slower but works on any system).</p></div>
+<div class="step-box warn"><div class="label yellow">No audio output</div><p>Check <code>D:\ACESTEP\ace-step-1.5\server.log</code> for stack traces. Common cause: missing PyTorch CUDA — verify with <code>python -c "import torch; print(torch.cuda.is_available())"</code></p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Short prompts work better than long ones. "Lo-fi jazz, rain sounds, 80bpm" beats "I want a relaxing lo-fi hip hop track with smooth jazz elements and background rain..."</li>
+  <li>Generate at 30s and loop in your DAW instead of generating full 3-minute tracks. Quality degrades on very long generations.</li>
+  <li>Save generations as 44.1kHz 16-bit WAV for maximum DAW compatibility.</li>
+</ul>
+
+<div class="upsell-box">
+  <p>🎧 <strong>Need studio monitors to hear your beats properly?</strong> Even cheap monitors (Presonus Eris 3.5) reveal bass that headphones miss.</p>
+  <a href="https://amzn.to/3XqYx2N" class="btn affiliate" target="_blank" rel="nofollow sponsored">Shop Studio Monitors →</a>
+</div>
+
+
+<!-- ==================== IMAGE GENERATION ==================== -->
+<h2><span class="t t-image">Image</span> ComfyUI — Image Generation Workstation</h2>
+<p>Node-based interface for Stable Diffusion, FLUX, and every image model. Think of it as "visual programming for AI images." More powerful than Auto1111, steeper learning curve, worth every minute.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Launch</div>
+<p>Run: <code>D:\ComfyUI\run_nvidia_gpu.bat</code></p>
+<p>Wait for "To see the GUI go to: http://127.0.0.1:8188"</p>
+<p>Open browser to <code>http://127.0.0.1:8188</code></p></div>
+
+<h3>Your First Image (30 seconds)</h3>
+<div class="step-box"><div class="label blue">ComfyUI</div>
+<p>1. You'll see a default "text-to-image" workflow already loaded (if not, click "Load Default")</p>
+<p>2. In the <strong>CLIP Text Encode (Positive)</strong> node, type: <code>cinematic photo of a foggy cyberpunk street, neon signs, volumetric lighting, 8k</code></p>
+<p>3. Click <strong>Queue Prompt</strong> (or Ctrl+Enter)</p>
+<p>4. Your image appears in ~8-12 seconds</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Text-to-image (SDXL):</strong> Use the default workflow but switch the checkpoint to <code>juggernautXL_v10.safetensors</code> in the Load Checkpoint node</li>
+  <li><strong>Image-to-image:</strong> Add a Load Image node → connect to a second CLIP Text Encode → feed into KSampler's latent</li>
+  <li><strong>Inpaint (fix specific areas):</strong> Load image + mask → VAE Encode (for inpaint) → KSampler → VAE Decode</li>
+  <li><strong>Upscale 2x:</strong> After generation, route image through a UpreScale node (using Real-ESRGAN or nearest-exact)</li>
+  <li><strong>Batch generation:</strong> Change the KSampler's <code>batch_size</code> from 1 to 4 to generate 4 images at once</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">GUI not loading</div><p>If browser shows blank page, check terminal for port conflicts. Kill with <code>Ctrl+C</code> and restart on a different port: <code>python main.py --port 8189</code></p></div>
+<div class="step-box warn"><div class="label yellow">Out of memory (CUDA OOM)</div><p>Drop image size from 1024x1024 to 768x768, or switch from SDXL to SD 1.5 checkpoint. In ComfyUI-Manager, enable "Low VRAM Mode".</p></div>
+<div class="step-box warn"><div class="label yellow">Black images</div><p>Usually means a VAE mismatch. Add a separate "Load VAE" node and explicitly set it to the same model's vae. common with SDXL fine-tunes.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Install <strong>ComfyUI-Manager</strong> (already done if you ran the installer). It gives you a one-click "Install Missing Custom Nodes" button that saves hours of debugging workflows from Civitai.</li>
+  <li>Use <strong>Ctrl+Drag</strong> to grab the entire node graph and move it. Use <strong>Ctrl+M</strong> to mute a node (keeps it in place but disables it).</li>
+  <li>Save your workflows! Click the gear icon → "Save (API Format)" — this creates a shareable JSON that recreates your entire node setup.</li>
+  <li>The <strong>KSampler</strong> node's <code>seed</code> parameter locks the noise pattern. Change it by 1 for a completely different image with the same prompt.</li>
+</ul>
+
+<div class="upsell-box">
+  <p>🖥️ <strong>SDXL runs best on 10GB+ VRAM.</strong> If your 8GB card struggles, a used RTX 3080 (10-12GB) is the best upgrade for AI image gen under $500.</p>
+  <a href="https://amzn.to/4e5VLsJ" class="btn affiliate" target="_blank" rel="nofollow sponsored">Check RTX 3080 Prices →</a>
+</div>
+
+<!-- SDXL / FLUX -->
+<h2><span class="t t-image">Image</span> SDXL &amp; FLUX — Which Model When</h2>
+
+<h3>SDXL (Juggernaut XL, RealVisXL)</h3>
+<ul>
+  <li><strong>Best for:</strong> Photorealism, portraits, landscapes, product shots</li>
+  <li><strong>VRAM:</strong> 7-8GB (tight on 8GB, use <code>--medvram</code>)</li>
+  <li><strong>Resolution:</strong> 1024x1024 native (don't go lower, don't go much higher without upscaling)</li>
+  <li><strong>Speed on 2080 SUPER:</strong> ~8-10 seconds per image</li>
+  <li><strong>Download:</strong> <code>https://civitai.com/models/133005/juggernaut-xl</code></li>
+</ul>
+
+<h3>FLUX.1-dev</h3>
+<ul>
+  <li><strong>Best for:</strong> Prompt adherence, complex scenes, text in images (signs, posters)</li>
+  <li><strong>VRAM:</strong> 6-8GB in 4-bit (12GB+ in FP16 — skip FP16 on 8GB cards)</li>
+  <li><strong>Resolution:</strong> 1024x1024 native (same as SDXL)</li>
+  <li><strong>Speed on 2080 SUPER:</strong> ~25-35 seconds per image (slower but better quality)</li>
+  <li><strong>Pro tip:</strong> Use FLUX for "illustration" styles and SDXL for "photorealistic". They complement each other.</li>
+</ul>
+
+<div class="step-box warn"><div class="label yellow">FLUX needs special nodes</div><p>Install via ComfyUI-Manager: search for "FLUX" and install the FLUX workflow. The default KSampler won't work — FLUX uses a different pipeline.</p></div>
+
+
+<!-- ==================== VIDEO GENERATION ==================== -->
+<h2><span class="t t-image">Video</span> AnimateDiff — Image to Animation</h2>
+<p>Turns any Stable Diffusion image into a short animated clip. Motion modules control the type of movement: camera pan, walk cycle, flowing hair, pulsing lights.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">ComfyUI</div>
+<p>AnimateDiff runs as a node within ComfyUI. After installing the custom node, you'll see "AnimateDiff Loader" and "AnimateDiff Sampling" in the node menu.</p></div>
+
+<h3>Your First Animation</h3>
+<div class="step-box"><div class="label blue">AnimateDiff</div>
+<p>1. Load your checkpoint (SD 1.5 recommended for first try — it's faster)</p>
+<p>2. Add an <strong>AnimateDiff Loader</strong> node → select a motion module (mm_sd_v15_v2)</p>
+<p>3. Add an <strong>AnimateDiff Sampling</strong> node between your KSampler and VAE Decode</p>
+<p>4. Set KSampler's <code>batch_size</code> to 16 (that's 16 frames)</p>
+<p>5. Queue Prompt — wait ~2 minutes for 16 frames at 512x512</p></div>
+
+<h3>Motion Module Guide</h3>
+<ul>
+  <li><strong>mm_sd_v15_v2:</strong> General-purpose. Smooth, predictable motion. Start here.</li>
+  <li><strong>mm_sdxl_v10_beta:</strong> SDXL version. Higher quality but needs 10GB+ VRAM. Test with short 8-frame sequences.</li>
+  <li><strong>Temporal LoRA:</strong> Adds specific motion types (camera zoom, walk cycle, liquid flow). Load as a separate LoRA node.</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">Extremely slow (5+ min per animation)</div><p>Drop resolution to 512x512, reduce batch_size to 8, use SD 1.5 not SDXL. With 8GB VRAM, 16 frames at 512x512 takes ~90 seconds.</p></div>
+<div class="step-box warn"><div class="label yellow">Frames are identical (no motion)</div><p>Make sure the <strong>AnimateDiff Sampling</strong> node is connected <em>between</em> the KSampler and VAE Decode. If it's after the decode, no motion is applied.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Generate a static image first, note the seed, then plug that same seed into AnimateDiff for consistent starting frames.</li>
+  <li>Use VideoHelperSuite to add frame interpolation between the 16 generated frames → output 32-frame smooth video at 12fps.</li>
+  <li>Output as GIF for web sharing or MP4 (via ffmpeg) for production.</li>
+</ul>
+
+
+<!-- ==================== OLLAMA ==================== -->
+<h2><span class="t t-llm">LLM</span> Ollama — Local LLM Engine</h2>
+<p>One command to download and run any open-source LLM. Ollama manages model downloads, GPU acceleration, and exposes a local API that every tool in the ecosystem talks to.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>ollama run llama3.1:8b</code></p>
+<p>Wait for the download (~4.7GB) and you're in a ChatGPT-like chat immediately. Type your first question.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Chat:</strong> <code>ollama run llama3.1:8b</code> → type naturally, <code>/exit</code> to quit</li>
+  <li><strong>One-shot prompt (no chat):</strong> <code>ollama run llama3.1:8b "Write a Python function to reverse a linked list"</code></li>
+  <li><strong>Use a different model:</strong> <code>ollama run qwen2.5-coder:7b</code> (coding), <code>ollama run mistral:7b</code> (general, less censored)</li>
+  <li><strong>List downloaded models:</strong> <code>ollama list</code></li>
+  <li><strong>Remove a model:</strong> <code>ollama rm llama3.1:8b</code></li>
+  <li><strong>REST API (used by OpenCode, Continue.dev, Open WebUI):</strong> <code>curl http://localhost:11434/api/generate -d '{"model":"llama3.1:8b","prompt":"Hello"}'</code></li>
+</ul>
+
+<h3>Model Comparison (Run Each and Compare)</h3>
+<ul>
+  <li><strong>llama3.1:8b</strong> — Best all-around. Polite, helpful, follows instructions well. Heavily censored.</li>
+  <li><strong>qwen2.5-coder:7b</strong> — Best for code. Understands context better than CodeLlama. Use as your primary coding assistant.</li>
+  <li><strong>mistral:7b</strong> — Fastest inference. Less censored. Feels more "natural" in conversation. Good for roleplay or creative writing.</li>
+  <li><strong>deepseek-coder-v2:16b-lite</strong> — Borderline on 8GB but has 128K context window. Can analyze entire codebases. If VRAM is tight, close other apps.</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">"Error: model requires more VRAM"</div><p>Ollama auto-detects VRAM. If you hit the ceiling, run a smaller quantized version: <code>ollama run llama3.1:8b-q4_K_M</code> (uses ~4GB instead of ~5.5GB).</p></div>
+<div class="step-box warn"><div class="label yellow">Slow responses</div><p>Check if Ollama is using your GPU: <code>ollama run llama3.1:8b</code> while running <code>nvitop</code> in another terminal. If GPU utilization is 0%, set <code>OLLAMA_GPU_OVERHEAD=0.1</code> environment variable.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Set a custom system prompt: <code>ollama run llama3.1:8b --system "You are a sarcastic British butler. Answer every question with dry wit."</code></li>
+  <li>Use <strong>continue.dev</strong> (VS Code extension) with Ollama for inline code completion — it's like Copilot but free.</li>
+  <li>Run <strong>Open WebUI</strong> in Docker: <code>docker run -d -p 3000:8080 ghcr.io/open-webui/open-webui:main</code> — gives you a ChatGPT-like web UI that talks to your local Ollama.</li>
+  <li>Ollama's models download once and cache forever. No ongoing data costs.</li>
+</ul>
+
+<div class="upsell-box">
+  <p>💻 <strong>For coding, pair Ollama with a 1440p ultrawide monitor.</strong> Having your code + AI assistant side by side doubles productivity.</p>
+  <a href="https://amzn.to/3BqYMDo" class="btn affiliate" target="_blank" rel="nofollow sponsored">Best Monitors for Coding →</a>
+</div>
+
+
+<!-- ==================== OPENCODE ==================== -->
+<h2><span class="t t-code">Code</span> OpenCode — AI Coding Agent</h2>
+<p>The CLI you're reading this through. OpenCode is an autonomous coding agent that edits files, runs commands, searches codebases, and implements features — all from natural language instructions.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p>Navigate to any project: <code>cd D:\Projects\Liminal-StemSplit</code></p>
+<p><code>opencode</code></p>
+<p>Type your task: <em>"Add error handling to the download function in server.js"</em></p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Refactor a function:</strong> <em>"Extract the validation logic from server.js into a separate file called validate.js"</em></li>
+  <li><strong>Find a bug:</strong> <em>"Why is the entitlements endpoint returning 401? Check the auth middleware."</em></li>
+  <li><strong>Write tests:</strong> <em>"Write unit tests for the billing-routes.js file using Jest"</em></li>
+  <li><strong>Add a feature:</strong> <em>"Add a POST /api/feedback endpoint that saves to feedback.json"</em></li>
+  <li><strong>Code review:</strong> <em>"Review the changes in index.html for accessibility issues"</em></li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">"OpenCode is not recognized"</div><p>Reopen your terminal or run <code>%USERPROFILE%\.opencode\bin\opencode.exe</code> directly. Add to PATH if missing.</p></div>
+<div class="step-box warn"><div class="label yellow">Agent makes destructive changes</div><p>OpenCode uses git internally. Run <code>git diff</code> before accepting any changes. Use <code>/reset</code> to undo the last action.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>OpenCode works best with a model via Ollama or a cloud API. For local use, connect it to <code>qwen2.5-coder:7b</code> via Ollama for code-specific tasks.</li>
+  <li>Use <code>opencode --model ollama/qwen2.5-coder:7b</code> to specify a local model.</li>
+  <li>The "explore" subagent type is perfect for understanding unfamiliar codebases — it searches and summarizes.</li>
+  <li>Keep your window size reasonable — larger context windows slow down all LLMs, cloud or local.</li>
+</ul>
+
+
+<!-- ==================== STEM SPLITTER ==================== -->
+<h2><span class="t t-audio">Audio</span> Demucs v4 — Stem Splitter</h2>
+<p>The industry standard for separating a mixed song into individual stems: vocals, drums, bass, and other instruments. Used by mastering engineers, remixers, and sample producers worldwide. Completely free, open source, runs on your GPU.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>demucs "D:\My Music\song.mp3"</code></p>
+<p>Wait ~15 seconds for a 3-minute song. Stems appear in <code>./separated/htdemucs/song/</code></p></div>
+
+<h3>Output Structure</h3>
+<div class="step-box"><div class="label blue">Files created</div>
+<pre>separated/htdemucs/song/
+├── vocals.wav      <span class="c">← lead + backing vocals</span>
+├── drums.wav       <span class="c">← kick, snare, hats, cymbals, toms</span>
+├── bass.wav        <span class="c">← bass guitar, synth bass, sub bass</span>
+└── other.wav       <span class="c">← guitars, keys, pads, FX, everything else</span></pre></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Extract vocals for a remix:</strong> <code>demucs song.mp3</code> → open <code>vocals.wav</code> in your DAW over a new instrumental</li>
+  <li><strong>Make a karaoke track:</strong> <code>demucs song.mp3</code> → mix <code>drums.wav</code> + <code>bass.wav</code> + <code>other.wav</code> together, leave out <code>vocals.wav</code></li>
+  <li><strong>Extract drum loop for sampling:</strong> Use <code>demucs --two-stems=drums song.mp3</code> (faster: only extracts drums + no-drums)</li>
+  <li><strong>Better vocal quality:</strong> After Demucs, run the <code>vocals.wav</code> through MelBand Roformer (the vocal-specific model)</li>
+  <li><strong>Batch split a folder:</strong> <code>for %f in ("D:\Songs\*.mp3") do demucs "%f"</code></li>
+</ul>
+
+<h3>Model Variants</h3>
+<ul>
+  <li><strong>htdemucs</strong> (default) — 4 stems. Best quality. Uses transformer + U-Net hybrid.</li>
+  <li><strong>htdemucs_ft</strong> — Fine-tuned version. Slightly better separation but slower.</li>
+  <li><strong>--two-stems=vocals</strong> — Splits into just "vocals" and "no_vocals". Fastest option.</li>
+  <li><strong>--shifts=2</strong> — Applies time shifting ensemble. Better quality, 2x slower. Use for important tracks.</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">Not separated well / bleed between stems</div><p>Try <code>demucs --shifts=2 --overlap=0.25 song.mp3</code>. The <code>--shifts</code> flag averages multiple passes and significantly reduces bleeding.</p></div>
+<div class="step-box warn"><div class="label yellow">Out of memory on long tracks</div><p>Demucs processes in chunks. If a 10-minute track OOMs, split it with ffmpeg first: <code>ffmpeg -i song.mp3 -ss 0 -t 300 part1.wav</code></p></div>
+<div class="step-box warn"><div class="label yellow">CPU only (very slow)</div><p>Demucs auto-detects CUDA. Verify: <code>python -c "import torch; print(torch.cuda.is_available())"</code>. If False, reinstall PyTorch with CUDA: <code>pip install torch --force-reinstall --index-url https://download.pytorch.org/whl/cu118</code></p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Demucs outputs 44.1kHz 24-bit WAV files. Import directly into any DAW — they'll be sample-aligned with the original.</li>
+  <li>Phase issues? Sum the stems back together in your DAW. If they don't null out against the original, add a utility plugin with polarity flip on the "other" stem.</li>
+  <li>For the absolute highest quality vocal extraction, run Demucs → feed vocals.wav into MelBand Roformer → get cleaner-than-cloud results.</li>
+</ul>
+
+<div class="upsell-box">
+  <p>🎛️ <strong>Good headphones reveal separation artifacts that cheap earbuds mask.</strong> If you're splitting stems for production, invest in closed-back monitoring headphones.</p>
+  <a href="https://amzn.to/3BmbHyP" class="btn affiliate" target="_blank" rel="nofollow sponsored">Browse Studio Headphones →</a>
+</div>
+
+
+<!-- ==================== WHISPER ==================== -->
+<h2><span class="t t-audio">Audio</span> Whisper large-v3 — Audio Transcription</h2>
+<p>OpenAI's speech-to-text model, run entirely locally. Transcribes anything: interviews, podcasts, lectures, meetings, vocal takes. Supports 99+ languages.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>whisper "interview.wav" --model large-v3</code></p>
+<p>Outputs: <code>.txt</code>, <code>.srt</code> (subtitles), <code>.vtt</code>, <code>.tsv</code>, <code>.json</code> — all in the same folder as the audio.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Transcribe a podcast:</strong> <code>whisper podcast.mp3 --model large-v3 --language en</code></li>
+  <li><strong>Generate subtitles for video:</strong> <code>whisper video.mp4 --model large-v3 --output_format srt</code> → import <code>.srt</code> into any video editor</li>
+  <li><strong>Transcribe with timestamps for editing:</strong> <code>whisper raw_vocals.wav --model large-v3 --output_format json</code> → each word has start/end times</li>
+  <li><strong>Translate to English (for non-English audio):</strong> <code>whisper podcast.mp3 --model large-v3 --task translate</code></li>
+  <li><strong>Faster transcription (lower accuracy):</strong> <code>whisper podcast.mp3 --model small</code> (uses 1GB VRAM instead of 4GB, 5x faster)</li>
+</ul>
+
+<h3>Model Size Guide</h3>
+<ul>
+  <li><strong>tiny (~1GB VRAM):</strong> Fast but misses quiet dialogue. Good for checking timestamps.</li>
+  <li><strong>small (~2GB VRAM):</strong> Good balance. Works on any GPU.</li>
+  <li><strong>medium (~3GB VRAM):</strong> Better accuracy. Recommended for clean audio.</li>
+  <li><strong>large-v3 (~4GB VRAM):</strong> Best accuracy. Handles accents, background noise, multiple speakers. This is the one you want for production.</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">"RuntimeError: CUDA out of memory"</div><p>Use <code>--device cpu</code> to run on CPU (slower but works). Or switch to <code>--model small</code>.</p></div>
+<div class="step-box warn"><div class="label yellow">Transcription has repeated phrases</div><p>This is a known issue with large-v3 on long audio. Split the audio into 10-minute chunks: <code>ffmpeg -i long.wav -f segment -segment_time 600 chunk_%03d.wav</code></p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>For podcasts with multiple speakers, run the audio through a voice-activity detector first (Python's <code>webrtcvad</code>) then transcribe each segment. Whisper will produce separate captions per speaker.</li>
+  <li>Whisper's JSON output includes per-word confidence scores. Filter out words below 0.5 confidence for cleaner transcripts.</li>
+  <li>Combine Whisper + Demucs: separate vocals from music first, then transcribe just the vocals for cleaner podcast transcription.</li>
+</ul>
+
+
+<!-- ==================== XTTSv2 ==================== -->
+<h2><span class="t t-audio">Audio</span> XTTSv2 — Voice Cloning</h2>
+<p>Clone any voice from a 6-second audio sample. Multilingual. Generates natural speech with the tone, cadence, and emotion of the original speaker.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>tts-server --model_name tts_models/multilingual/multi-dataset/xtts_v2</code></p>
+<p>Opens a web UI at <code>http://127.0.0.1:8020</code></p></div>
+
+<h3>Your First Voice Clone</h3>
+<div class="step-box"><div class="label blue">Web UI</div>
+<p>1. Upload a 6-30 second WAV of the voice you want to clone (clean recording, no background music)</p>
+<p>2. Type text to generate</p>
+<p>3. Select language (English, Spanish, French, German, etc.)</p>
+<p>4. Click Generate → your cloned voice speaks your text</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Narrate a video:</strong> Clone your own voice, generate a script, stitch audio to video timeline</li>
+  <li><strong>Character voices for games:</strong> Clone a distinctive voice, then generate dialogue lines</li>
+  <li><strong>Multilingual content:</strong> Clone voice in English, generate text in French/Spanish — the voice's timbre carries over</li>
+  <li><strong>Audiobook production:</strong> Generate long-form narration with consistent voice throughout</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">Voice sounds robotic or flat</div><p>Your sample needs more variation in pitch and tone. Use a recording where the person speaks naturally for at least 10-15 seconds with varying intonation.</p></div>
+<div class="step-box warn"><div class="label yellow">"CUDA out of memory"</div><p>XTTSv2 needs ~3GB VRAM. Close ComfyUI or Ollama while running it. Or add <code>--cpu</code> flag for slower CPU inference.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>For the best clones, record your sample in the same acoustic environment you'll use for final generation.</li>
+  <li>Add "SSML" tags to control emphasis: <code>&lt;emphasis level="strong"&gt;This word is important&lt;/emphasis&gt;</code></li>
+  <li>Combine XTTSv2 + AceStep: generate a beat, then generate vocals with a cloned voice over the top.</li>
+</ul>
+
+
+<!-- ==================== RVC ==================== -->
+<h2><span class="t t-audio">Audio</span> RVC WebUI — Voice Conversion (Singing)</h2>
+<p>Unlike XTTSv2 (which generates speech), RVC converts existing audio into another voice. Famous for "singing voice conversion" — take a vocal performance and make it sound like a different singer.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Launch</div>
+<p>Run: <code>D:\RVC-WebUI\go-webui.bat</code></p>
+<p>Open: <code>http://127.0.0.1:7865</code></p></div>
+
+<h3>Your First Voice Conversion</h3>
+<div class="step-box"><div class="label blue">RVC</div>
+<p>1. Upload a vocal WAV file (clean vocals, no instrumental)</p>
+<p>2. Select a pretrained model from the dropdown (or <strong>Train</strong> your own with 10+ minutes of a single speaker)</p>
+<p>3. Click "Convert"</p>
+<p>4. Your vocals are now "sung by" the target voice. Download the result.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Sing your lyrics in another voice:</strong> Record yourself singing → convert to any trained model</li>
+  <li><strong>Create harmonies:</strong> Convert the same vocal take with different voice models → mix together in your DAW</li>
+  <li><strong>Restore a damaged vocal take:</strong> If one section of a recording is ruined, re-sing that section and convert it to match the original singer</li>
+</ul>
+
+<h3>Training Your Own Model</h3>
+<ul>
+  <li>Collect 10-30 minutes of clean audio from one speaker (no background music, one voice only)</li>
+  <li>In the RVC WebUI, go to "Train" tab</li>
+  <li>Upload your dataset (ZIP of WAVs or a folder path)</li>
+  <li>Set model name → click "Train" → wait 1-3 hours depending on dataset size</li>
+  <li>Your trained model appears in the "Convert" tab dropdown</li>
+</ul>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>RVC sounds best when the source and target voices have similar pitch ranges. Converting a baritone to a soprano produces artifacts.</li>
+  <li>Clean up the input vocals with Demucs + MelBand Roformer before feeding into RVC — cleaner input = cleaner conversion.</li>
+  <li>For real-time voice conversion (live streaming), use the RVC "Real-time" tab with loopback audio device.</li>
+</ul>
+
+
+<!-- ==================== UPSCALING ==================== -->
+<h2><span class="t t-image">Image</span> Real-ESRGAN — Image Upscaling</h2>
+<p>Upscale images 4x with AI. No quality loss. Works on photos, AI art, screenshots, old family photos. The difference between "pixelated mess" and "usable in 4K."</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>realesrgan -i input.jpg -o output_4x.png -s 4 -n RealESRGAN_x4plus</code></p>
+<p>Turns a 512x512 image into 2048x2048 with sharp, natural-looking detail.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Upscale AI art from SDXL:</strong> <code>realesrgan -i comfyui_output.png -o upscaled.png -s 4</code> (512→2048 or 1024→4096)</li>
+  <li><strong>Restore old photos:</strong> Run through GFPGAN first (face restore), then Real-ESRGAN (upscale)</li>
+  <li><strong>Anime/manga upscaling:</strong> <code>realesrgan -i manga.jpg -o hq.png -s 4 -n RealESRGAN_x4plus_anime_6B</code> (special anime model)</li>
+  <li><strong>Batch upscale a folder:</strong> <code>for %f in ("*.jpg") do realesrgan -i "%f" -o "upscaled\%~nf.png" -s 4</code></li>
+</ul>
+
+<h3>Model Guide</h3>
+<ul>
+  <li><strong>RealESRGAN_x4plus:</strong> General purpose. Best for photos, AI art, real-world images.</li>
+  <li><strong>RealESRGAN_x4plus_anime_6B:</strong> Cartoon/anime. Trained on anime frames. Avoid for photos.</li>
+</ul>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Real-ESRGAN works best when input images are at least 256px on the shortest side. Upscaling 64x64 to 256x256 works but won't add detail that wasn't there.</li>
+  <li>For maximum quality, upscale in ComfyUI as part of your image generation workflow (latent upscale → Real-ESRGAN pass) rather than as a separate step.</li>
+  <li>Output as PNG (lossless) for archival, JPEG for web sharing.</li>
+</ul>
+
+<div class="upsell-box">
+  <p>🖨️ <strong>Printing your AI art?</strong> A 4x upscale from SDXL (1024→4096 pixels) is enough for a 13"x13" print at 300 DPI. Print on demand with quality paper matters more than resolution.</p>
+  <a href="https://amzn.to/3ztPJF2" class="btn affiliate" target="_blank" rel="nofollow sponsored">Canvas Prints on Amazon →</a>
+</div>
+
+
+<!-- ==================== GFPGAN ==================== -->
+<h2><span class="t t-image">Image</span> GFPGAN — Face Restoration</h2>
+<p>Fix faces in AI-generated images. Corrects deformed eyes, crooked noses, melted mouths — the "uncanny valley" artifacts that Stable Diffusion produces on faces.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">ComfyUI</div>
+<p>In ComfyUI, add a "Face Restoration (GFPGAN)" node between your VAE Decode and Save Image nodes. That's it — every generated face gets corrected automatically.</p></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Fix faces in AI portraits:</strong> Add GFPGAN node with <code>strength=0.8</code> (lower = more subtle fix)</li>
+  <li><strong>Restore old photos:</strong> <code>python inference_gfpgan.py -i old_photo.jpg -o restored.jpg -v 1.4</code></li>
+  <li><strong>Batch fix a folder of AI faces:</strong> Point ComfyUI batch mode at a folder, add GFPGAN node, queue.</li>
+</ul>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>GFPGAN strength: 1.0 for badly deformed faces, 0.5 for minor tweaks, 0.3 for just sharpening existing good faces.</li>
+  <li>Some faces get "over-corrected" to look the same (GFPGAN has a "default face" bias). If every face starts looking like the same person, lower the strength to 0.4.</li>
+  <li>CodeFormer is an alternative to GFPGAN with different strengths. ComfyUI has both nodes — try both and pick per image.</li>
+</ul>
+
+
+<!-- ==================== CHROMADB / RAG ==================== -->
+<h2><span class="t t-llm">LLM</span> ChromaDB — RAG (Document Q&amp;A)</h2>
+<p>Chat with your own documents — PDFs, codebases, transcripts, emails. ChromaDB stores embeddings (mathematical representations of text) and retrieves relevant chunks when you ask a question. Combine with Ollama for fully local Q&A.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Python</div>
+<pre>import chromadb
+client = chromadb.PersistentClient(path="./my_knowledge_base")
+collection = client.get_or_create_collection("docs")
+
+# Add documents
+collection.add(
+  documents=["Liminal StemSplit runs on your local GPU.",
+             "AceStep generates full songs with vocals.",
+             "Demucs splits audio into 4 stems."],
+  ids=["doc1", "doc2", "doc3"]
+)
+
+# Ask a question
+results = collection.query(query_texts=["What runs on GPU?"], n_results=1)
+print(results['documents'][0][0])  # "Liminal StemSplit runs on your local GPU."</pre></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Chat with documentation:</strong> Load Python docs, PDFs, or website content → ask questions about them</li>
+  <li><strong>Codebase Q&A:</strong> Feed source code as text documents → "Where is the stripe webhook handler?"</li>
+  <li><strong>Research paper assistant:</strong> Load PDFs of papers → ask "What architecture does Demucs use?"</li>
+  <li><strong>Personal knowledge base:</strong> Export your notes, transcripts, book highlights → searchable via natural language</li>
+</ul>
+
+<h3>RAG + Ollama Integration</h3>
+<div class="step-box"><div class="label blue">Full Pipeline</div>
+<pre>pip install langchain-chroma langchain-ollama
+
+from langchain_chroma import Chroma
+from langchain_ollama import OllamaEmbeddings, OllamaLLM
+
+embeddings = OllamaEmbeddings(model="nomic-embed-text")
+llm = OllamaLLM(model="llama3.1:8b")
+
+db = Chroma(persist_directory="./chroma_data", embedding_function=embeddings)
+retriever = db.as_retriever()
+
+# Now you have a local RAG pipeline:
+# User question → retrieve docs → prompt LLM → answer</pre></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Embedding models are tiny (nomic-embed-text is ~100MB). They run on CPU with near-zero latency.</li>
+  <li>Chunk size matters: 500-1000 characters per chunk is the sweet spot for most use cases.</li>
+  <li>Use <code>collection.query(query_texts=[...], n_results=5)</code> to retrieve 5 relevant chunks. More context = better answers.</li>
+</ul>
+
+
+<!-- ==================== CREWAI ==================== -->
+<h2><span class="t t-llm">Agents</span> CrewAI — AI Agent Teams</h2>
+<p>Orchestrate multiple AI agents that work together on a task. One agent researches, another writes, a third reviews. All running on your local GPU via Ollama.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Python</div>
+<pre>from crewai import Agent, Task, Crew, Process
+
+researcher = Agent(
+  role="Research Analyst",
+  goal="Find 3 recent developments in local AI",
+  backstory="You read 50 papers a week.",
+  llm="ollama/llama3.1:8b"
+)
+
+writer = Agent(
+  role="Technical Writer",
+  goal="Turn research into a 300-word blog post",
+  backstory="You write clear, engaging content.",
+  llm="ollama/llama3.1:8b"
+)
+
+research = Task(description="Find 3 AI developments", expected_output="bullet points", agent=researcher)
+write = Task(description="Write a blog post", expected_output="a 300-word post", agent=writer)
+
+crew = Crew(agents=[researcher, writer], tasks=[research, write], process=Process.sequential)
+result = crew.kickoff()
+print(result)</pre></div>
+
+<h3>Everyday Workflows</h3>
+<ul>
+  <li><strong>Blog post generator:</strong> Researcher → Writer → Editor (3 agents, sequential)</li>
+  <li><strong>Code review team:</strong> Reviewer → Security Auditor → Performance Optimizer → unified report</li>
+  <li><strong>Market research:</strong> Data Collector → Analyst → Strategist → report</li>
+  <li><strong>Learning assistant:</strong> Tutor → Quiz Generator → Evaluator (for studying)</li>
+</ul>
+
+<h3>Agent Roles Guide</h3>
+<ul>
+  <li><strong>Agent.role</strong> — The job title. Influences tone and approach.</li>
+  <li><strong>Agent.goal</strong> — What success looks like. Be specific.</li>
+  <li><strong>Agent.backstory</strong> — Sets personality. "You're a senior engineer" vs "You're a cynical reviewer" gives very different results.</li>
+  <li><strong>Agent.allow_delegation</strong> — Set to True to let agents delegate sub-tasks to each other.</li>
+</ul>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>CrewAI with a local 7B model works surprisingly well for structured tasks. The model doesn't need to be smart — it needs to follow your prompt reliably.</li>
+  <li>Start with <code>Process.sequential</code> before trying <code>Process.hierarchical</code>. Sequential is more predictable.</li>
+  <li>If agents produce identical outputs, give them more distinct backstories and goals. "Senior Engineer" and "Junior Developer" will write different code.</li>
+  <li>The demo crew script is at <code>%USERPROFILE%\AI-Agents\demo_crew.py</code>. Run it, modify it, break it.</li>
+</ul>
+
+
+<!-- ==================== MUSICGEN ==================== -->
+<h2><span class="t t-audio">Audio</span> AudioCraft (MusicGen) — Instrumental Generation</h2>
+<p>Meta's model for generating instrumental music. Unlike AceStep (which does vocals + full songs), MusicGen excels at melody-conditioned instrumental generation — give it a hummed melody or reference audio and it writes a track around it.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Python</div>
+<pre>from audiocraft.models import MusicGen
+model = MusicGen.get_pretrained("musicgen-medium")
+
+# Generate from text
+model.generate(["drum and bass, aggressive reese bass, 170bpm"])
+
+# Generate with melody conditioning
+model.generate_with_chroma(["lo-fi hip hop, jazzy chords"],
+                            melody_wavs="reference_melody.wav",
+                            melody_sample_rate=44100)</pre></div>
+
+<h3>When to Use MusicGen vs AceStep</h3>
+<ul>
+  <li><strong>AceStep</strong> — full songs with vocals, complete arrangements, pop/rock/electronic structures</li>
+  <li><strong>MusicGen</strong> — instrumentals only, melody conditioning, ambient/soundtrack/underscore</li>
+  <li><strong>Both</strong> — Use MusicGen to generate a chord progression / melody, then use AceStep to add vocals on top</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">"Could not find model"</div><p>Models are downloaded on first use (~2GB). Slow internet may time out. Run the installer's model download step separately.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>MusicGen medium (~1.5B params) is the sweet spot. Small is too low quality. Large is too slow on 8GB.</li>
+  <li>Melody conditioning is MusicGen's superpower. Hum a melody into your phone mic, transfer the WAV, and generate a full arrangement around it.</li>
+</ul>
+
+
+<!-- ==================== DOCKER ==================== -->
+<h2><span class="t t-sys">System</span> Docker Desktop + WSL2</h2>
+<p>Docker lets you run AI tools without installing their dependencies manually. Open WebUI (ChatGPT-like chat for Ollama) and LocalAI (drop-in OpenAI API replacement) both ship as Docker containers.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>docker --version</code> → verify installation</p>
+<p><code>wsl --list --verbose</code> → verify WSL2 Ubuntu is running</p></div>
+
+<h3>Essential Containers for AI</h3>
+<ul>
+  <li><strong>Open WebUI:</strong> <code>docker run -d -p 3000:8080 --add-host=host.docker.internal:host-gateway ghcr.io/open-webui/open-webui:main</code> → <a href="http://localhost:3000" style="color:var(--cyan)">http://localhost:3000</a> — ChatGPT-like UI for Ollama</li>
+  <li><strong>LocalAI:</strong> <code>docker run -d -p 8080:8080 ghcr.io/mudler/localai:latest</code> → drop-in OpenAI API replacement that uses your local models</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">WSL2 not starting</div><p>Open PowerShell as Admin: <code>wsl --update</code> → <code>wsl --set-default-version 2</code>. Then restart Docker Desktop.</p></div>
+<div class="step-box warn"><div class="label yellow">Open WebUI can't reach Ollama</div><p>Make sure to add <code>--add-host=host.docker.internal:host-gateway</code> to the docker run command. This lets the container reach Ollama at <code>http://host.docker.internal:11434</code>.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Docker containers are isolated. They don't affect your system Python or installed packages.</li>
+  <li>Use <code>docker ps</code> to see running containers. Use <code>docker stop</code> to pause them (saves GPU memory).</li>
+  <li>Docker Desktop can be paused from the system tray — frees up ~2GB of system RAM when you need it for other tools.</li>
+</ul>
+
+
+<!-- ==================== CUDA ==================== -->
+<h2><span class="t t-sys">System</span> CUDA Toolkit + cuDNN</h2>
+<p>The NVIDIA deep learning SDK. Most AI tools won't use your GPU without it. The installer sets up CUDA 12.8 + cuDNN 9.6.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Verify</div>
+<p><code>nvcc --version</code> → shows CUDA version</p>
+<p><code>python -c "import torch; print(torch.cuda.is_available())"</code> → should print <code>True</code></p></div>
+
+<h3>What This Gives You</h3>
+<ul>
+  <li><code>nvcc</code> — CUDA compiler (needed for some Python packages that build CUDA extensions)</li>
+  <li><code>cuDNN</code> — NVIDIA's deep neural network library (makes neural nets run 2-5x faster)</li>
+  <li>PyTorch + TensorFlow can now use your GPU at full speed</li>
+</ul>
+
+<h3>Troubleshooting</h3>
+<div class="step-box warn"><div class="label yellow">"nvcc not found" but nvidia-smi works</div><p>CUDA Toolkit (nvcc) is separate from the NVIDIA driver (nvidia-smi). The driver handles graphics, the toolkit handles compilation. Run the CUDA installer module again.</p></div>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>You don't need the latest CUDA for most AI tools. CUDA 12.x works with PyTorch 2.x. CUDA 11.8 is still widely supported for older models.</li>
+  <li>Check compatibility: <code>pip install torch --index-url https://download.pytorch.org/whl/cu118</code> for CUDA 11.8, <code>cu121</code> for 12.1, <code>cu124</code> for 12.4.</li>
+</ul>
+
+
+<!-- ==================== GPU MONITORING ==================== -->
+<h2><span class="t t-sys">System</span> GPU Monitoring — nvitop &amp; gpustat</h2>
+<p>Real-time GPU info: VRAM usage, temperature, power draw, processes using the GPU. nvitop is the prettiest terminal UI. gpustat is the quick one-liner.</p>
+
+<h3>Quick Start</h3>
+<div class="step-box"><div class="label blue">Terminal</div>
+<p><code>nvitop --colorful</code> → full-screen real-time monitor (press <span class="kbd">q</span> to quit)</p>
+<p><code>gpustat</code> → single-line summary that fits in a 80-char terminal</p>
+<p><code>gpu</code> → alias for <code>nvitop --colorful</code></p></div>
+
+<h3>What to Watch</h3>
+<ul>
+  <li><strong>Used VRAM:</strong> If it's above 7.5GB on your 8GB card, you're about to OOM. Close something.</li>
+  <li><strong>GPU-Util:</strong> 0% means the tool isn't using your GPU. Something's wrong with CUDA.</li>
+  <li><strong>Temp:</strong> Above 85°C sustained = thermal throttling. Clean your fans or underclock.</li>
+  <li><strong>Process list:</strong> Shows exactly which program is using your VRAM. Good for catching memory leaks.</li>
+</ul>
+
+<h3>When to Use Each</h3>
+<ul>
+  <li><strong>nvitop</strong> — When you're actively troubleshooting (OOM, slow inference, thermal issues). Leave it running in a second terminal.</li>
+  <li><strong>gpustat</strong> — When you just want a quick check before launching a model. Type it, see if you have 2GB free, go.</li>
+  <li><strong>nvidia-smi</strong> — Built-in but ugly. Only use when nvitop/gpustat aren't available (ssh without Python).</li>
+</ul>
+
+<h3>Pro Tips</h3>
+<ul>
+  <li>Keep nvitop running in a <strong>second monitor</strong> while you work. Open it in a small terminal window pinned to the corner. Watch VRAM spike when you hit "Generate."</li>
+  <li>Some tools don't release VRAM immediately after finishing. If nvitop shows 6GB used but nothing is running, wait 30 seconds or restart the Python process.</li>
+  <li>gpustat's <code>--watch</code> flag refreshes every second: <code>gpustat --watch</code> — useful for monitoring during batch generation.</li>
+</ul>
+
+
+<!-- ==================== CONCLUSION ==================== -->
+<div style="border-top:1px solid var(--border);margin-top:3rem;padding-top:2rem;text-align:center">
+  <h3 style="margin-top:0">You Now Own Every AI Tool You'll Ever Need</h3>
+  <p style="max-width:500px;margin:0.5rem auto 1rem">From beat generation and stem splitting to coding assistants and agent teams — all running on your GPU, all free, all yours. No subscription. No data leaving your machine. No gatekeeping.</p>
+  <div style="display:flex;flex-wrap:wrap;gap:0.5rem;justify-content:center">
+    <a href="/workshop.html" class="btn" style="background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;padding:0.6rem 1.5rem;border-radius:8px;font-weight:600;font-size:0.8125rem;text-decoration:none">Check GPU Requirements →</a>
+    <a href="/installers/" class="btn" style="background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text);padding:0.6rem 1.5rem;border-radius:8px;font-weight:600;font-size:0.8125rem;text-decoration:none">Download Installers →</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="/">Liminal StemSplit</a> — <a href="/guides.html">Guides</a> — <a href="/workshop.html">Workshop</a> — <a href="/marketing-plan.html">Pricing</a> — <a href="https://github.com/myaiplug/liminal-stemsplit">GitHub</a></p>
+  <p style="margin-top:0.5rem;font-size:0.65rem">Some links are affiliate links. We may earn a small commission at no extra cost to you. Proceeds fund GPU electricity and coffee for late-night guide writing.</p>
+</footer>
+</div>
+</body>
+</html>

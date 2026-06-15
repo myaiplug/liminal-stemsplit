@@ -6,3 +6,15 @@ data/licenses.json
 *.log
 .DS_Store
 Thumbs.db
+
+# Agent / IDE config
+.vscode/
+.agents/
+.aider-desk/
+.claude/
+.openhands/
+.pi/
+.qwen/
+skills/
+mcps/
+terminals/

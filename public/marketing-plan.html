@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local AI Freedom Installer — Marketing Plan | Liminal</title>
+<meta name="description" content="One installer to rule them all. Free local AI tools — no subscriptions, no gatekeeping. $1 coffee or $5 support.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--orange:#f97316;--pink:#ec4899;--blue:#3b82f6;--yellow:#eab308;--border:rgba(255,255,255,0.06);--text:#f3f4f6;--muted:#6b7280}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#020617;color:var(--text);overflow-x:hidden;line-height:1.7}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.35}
+.wrap{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+nav{display:flex;align-items:center;gap:1.5rem;margin-bottom:3rem;font-size:0.875rem;flex-wrap:wrap}
+nav a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+nav a:hover{color:var(--cyan)}
+.label{display:inline-block;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);color:var(--cyan);padding:0.15rem 0.5rem;border-radius:999px;font-size:0.6rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.06em;text-transform:uppercase;margin-bottom:1rem}
+h1{font-size:clamp(1.8rem,4.5vw,2.8rem);font-weight:800;letter-spacing:-0.03em;line-height:1.15;margin-bottom:0.75rem}
+h1 span{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.sub{color:var(--muted);font-size:1rem;margin-bottom:2.5rem;max-width:560px}
+h2{font-size:1.3rem;font-weight:700;margin-top:2.5rem;margin-bottom:1rem;color:#fff}
+h3{font-size:1rem;font-weight:600;margin-top:1.5rem;margin-bottom:0.5rem;color:#fff}
+p{color:rgba(255,255,255,0.65);margin-bottom:1rem;font-size:0.9375rem}
+.card{border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:1rem;background:rgba(255,255,255,0.02)}
+.card-glow{border-color:rgba(34,211,238,0.12);background:linear-gradient(135deg,rgba(34,211,238,0.03),rgba(168,85,247,0.03))}
+.price-row{display:flex;gap:1rem;flex-wrap:wrap;margin:1.5rem 0}
+.price-card{flex:1;min-width:200px;border:1px solid var(--border);border-radius:12px;padding:1.5rem;text-align:center;background:rgba(255,255,255,0.02);transition:all 0.2s}
+.price-card:hover{transform:translateY(-3px);border-color:rgba(34,211,238,0.25)}
+.price-card.featured{border-color:rgba(34,211,238,0.2);background:linear-gradient(135deg,rgba(34,211,238,0.05),rgba(168,85,247,0.05))}
+.price{font-size:2rem;font-weight:800;color:#fff;margin:0.5rem 0}
+.price-label{font-size:0.75rem;text-transform:uppercase;letter-spacing:0.06em;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.price-desc{font-size:0.8125rem;color:rgba(255,255,255,0.5);margin:0.75rem 0;min-height:3em}
+.price-btn{display:inline-block;padding:0.5rem 1.5rem;border-radius:8px;font-weight:600;font-size:0.8125rem;text-decoration:none;transition:opacity 0.2s}
+.price-btn.primary{background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff}
+.price-btn.secondary{border:1px solid rgba(255,255,255,0.15);color:var(--text)}
+.price-btn:hover{opacity:0.85}
+.tag{display:inline-flex;align-items:center;gap:0.3rem;padding:0.1rem 0.45rem;border-radius:999px;font-size:0.55rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;text-transform:uppercase;margin-right:0.2rem}
+.tag-green{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.tag-cyan{background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);color:var(--cyan)}
+.tag-purple{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:var(--purple)}
+.tag-orange{background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);color:var(--orange)}
+table{width:100%;border-collapse:collapse;margin:1rem 0 1.5rem;font-size:0.8125rem}
+th{text-align:left;padding:0.5rem 0.75rem;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);color:var(--muted);font-weight:500;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace}
+td{padding:0.5rem 0.75rem;border-bottom:1px solid var(--border);color:rgba(255,255,255,0.75)}
+tr:hover td{background:rgba(255,255,255,0.01)}
+.quote{border-left:2px solid var(--purple);padding:0.75rem 1.25rem;margin:1rem 0;background:rgba(168,85,247,0.03);border-radius:0 8px 8px 0;font-style:italic;color:rgba(255,255,255,0.7)}
+.quote cite{display:block;margin-top:0.35rem;font-style:normal;font-size:0.8125rem;color:var(--muted)}
+.tweet-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:0.75rem;margin:1rem 0}
+.tweet{border:1px solid var(--border);border-radius:10px;padding:1rem;background:rgba(255,255,255,0.015)}
+.tweet-text{font-size:0.8125rem;color:rgba(255,255,255,0.65);line-height:1.5}
+.tweet-author{font-size:0.7rem;color:var(--muted);margin-top:0.5rem;font-family:'JetBrains Mono',monospace}
+.step-list{list-style:none;counter-reset:step}
+.step-list li{counter-increment:step;padding:0.6rem 0 0.6rem 2rem;position:relative;color:rgba(255,255,255,0.65);font-size:0.875rem;border-bottom:1px solid var(--border)}
+.step-list li::before{content:counter(step);position:absolute;left:0;top:0.6rem;width:1.3rem;height:1.3rem;border-radius:50%;background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);color:var(--cyan);display:flex;align-items:center;justify-content:center;font-size:0.65rem;font-weight:600;font-family:'JetBrains Mono',monospace}
+code{background:rgba(255,255,255,0.06);padding:0.1rem 0.35rem;border-radius:4px;font-size:0.8em;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+.btn{display:inline-flex;align-items:center;gap:0.5rem;padding:0.65rem 1.5rem;border-radius:8px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:600;text-decoration:none;font-size:0.875rem;transition:opacity 0.2s}
+.btn:hover{opacity:0.85}
+.btn-outline{background:transparent;border:1px solid rgba(255,255,255,0.15);color:var(--text)}
+.cta-box{text-align:center;margin:2.5rem 0;padding:2rem;border:1px solid rgba(34,211,238,0.12);border-radius:12px;background:linear-gradient(135deg,rgba(34,211,238,0.03),rgba(168,85,247,0.03))}
+.cta-box .btn{margin:0.5rem}
+footer{border-top:1px solid var(--border);padding:2rem 0;margin-top:3rem;text-align:center;font-size:0.75rem;color:var(--muted)}
+footer a{color:var(--cyan);text-decoration:none}
+@media(max-width:640px){.price-row{flex-direction:column}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <a href="/">Liminal</a>
+  <a href="/workshop.html">Workshop</a>
+  <a href="/installers/">Installers</a>
+  <a href="/privacy.html">Privacy</a>
+</nav>
+
+<div class="label">Marketing Plan v1.0</div>
+<h1><span>Local AI Freedom</span> Installer</h1>
+<p class="sub">One command. Zero subscriptions. Every tool a broke creator needs to make music, art, code, and content — entirely on their own hardware.</p>
+
+<!-- THE PITCH -->
+<h2>The Pitch (60 words)</h2>
+<div class="quote">
+"AI should be a tool you own, not a subscription you owe. The Local AI Freedom Installer gives you every best-in-class local model — music generation, image synthesis, coding assistants, stem splitting, voice cloning, agent teams — with one PowerShell command. Open source. Runs on any GPU with 8GB+ VRAM. No monthly bills. No data leaks. No gatekeeping. Free on GitHub, or throw a dollar to help a broke creator."
+</div>
+
+<!-- PRICING -->
+<h2>Pricing</h2>
+<p>The installer scripts are <strong>100% free and open source</strong> on GitHub. Always. The paid tiers are convenience + support for a broke creator making tools for broke creators.</p>
+
+<div class="price-row">
+  <div class="price-card">
+    <div class="price-label">Free — Forever</div>
+    <div class="price" style="font-size:1.5rem">$0</div>
+    <div class="price-desc">Clone the GitHub repo, run the scripts yourself. All 15 modules included. No limits, no registration.</div>
+    <a href="https://github.com/myaiplug/liminal-stemsplit" class="price-btn secondary">GitHub</a>
+  </div>
+  <div class="price-card featured">
+    <div class="price-label">☕ Coffee — Tip Jar</div>
+    <div class="price">$1</div>
+    <div class="price-desc">Same scripts as free, plus a pre-packaged zip with a PDF quickstart guide. For when you want to say thanks.</div>
+    <a href="https://gumroad.com/l/local-ai-freedom" class="price-btn primary">Buy for $1</a>
+  </div>
+  <div class="price-card">
+    <div class="price-label">⚡ Supporter — Fuel the Work</div>
+    <div class="price">$5</div>
+    <div class="price-desc">Everything above + USB-ready auto-installer tool + priority model updates + your name in the GitHub README credits.</div>
+    <a href="https://gumroad.com/l/local-ai-freedom-supporter" class="price-btn primary">Buy for $5</a>
+  </div>
+</div>
+
+<p style="text-align:center;font-size:0.8125rem;color:var(--muted)">"Broke creator pricing" — if you can't afford $1, the free GitHub version is exactly the same. No features gated.</p>
+
+<!-- THE TARGET -->
+<h2>Who This Is For</h2>
+<table>
+<tr><th>Persona</th><th>Pain Point</th><th>What They Get</th></tr>
+<tr>
+  <td>Bedroom producer</td>
+  <td>$30/mo for stem separation SaaS</td>
+  <td>Demucs + MelBand Roformer + AceStep = unlimited splits & beat generation</td>
+</tr>
+<tr>
+  <td>Indie game dev</td>
+  <td>Can't afford Midjourney + Copilot + Fiverr</td>
+  <td>SDXL/FLUX + ComfyUI + Qwen Coder + OpenCode = all in house</td>
+</tr>
+<tr>
+  <td>Podcaster / VTuber</td>
+  <td>Desperate for clean audio + voice cloning</td>
+  <td>Whisper transcription + XTTSv2 cloning + RVC voice conversion</td>
+</tr>
+<tr>
+  <td>Student researcher</td>
+  <td>No budget for ChatGPT Plus or GPU clusters</td>
+  <td>Llama 3.1 8B + ChromaDB RAG + CrewAI agent teams</td>
+</tr>
+<tr>
+  <td>Curious creative</td>
+  <td>"I have an old GPU, what can I run?"</td>
+  <td>Workshop page (VRAM budget + model rankings + pre-scanned system)</td>
+</tr>
+</table>
+
+<!-- DISTRIBUTION CHANNELS -->
+<h2>Distribution Strategy</h2>
+
+<h3>Primary (Free / Zero Cost)</h3>
+<ol class="step-list">
+  <li><strong>GitHub</strong> — Public repo with README + workshop link. SEO: "local AI installer", "free AI tools for creators", "broke creator AI suite"</li>
+  <li><strong>Reddit</strong> — r/StableDiffusion, r/LocalLLaMA, r/musicproduction, r/audioengineering, r/GameDevelopment. Title: "Built a free installer that sets up every local AI tool in one command — for broke creators who can't afford subscriptions"</li>
+  <li><strong>Hacker News</strong> — "Show HN: Local AI Freedom Installer — 15 best models, one PowerShell command, $0"</li>
+  <li><strong>YouTube tutorial</strong> — No-budget screen recording. Title: "I installed 15 AI tools in 5 minutes with one script (and you can too)"</li>
+  <li><strong>Twitter/X</strong> — Short thread with side-by-side comparisons: "This tool costs $30/mo cloud. This tool costs $0 local. Here's both running side by side."</li>
+  <li><strong>Discord servers</strong> — Audio producer Discords, AI art Discords, open-source Discords. One post: "Save your friends $200/mo — share this installer"</li>
+  <li><strong>itch.io</strong> — List as a "tool" with $1/$5 pricing. Itch's audience of indie devs and creatives is the exact target.</li>
+</ol>
+
+<h3>Secondary (Low Cost)</h3>
+<ol class="step-list" start="8">
+  <li><strong>Gumroad</strong> — $1/$5 listings. Automatic email delivery of zip + PDF guide. No fulfillment cost.</li>
+  <li><strong>Product Hunt</strong> — Launch with the "broke creator" angle. PH audience loves free tools and independence.</li>
+</ol>
+
+<!-- LAUNCH SEQUENCE -->
+<h2>Launch Timeline</h2>
+<table>
+<tr><th>Day</th><th>Action</th><th>Channel</th></tr>
+<tr><td>0</td><td>Push to GitHub main branch. Update README with screenshots of each tool running.</td><td>GitHub</td></tr>
+<tr><td>0</td><td>Create Gumroad listings ($1 and $5 tiers). Set up automatic email delivery.</td><td>Gumroad</td></tr>
+<tr><td>1</td><td>Post to r/LocalLLaMA + r/StableDiffusion + r/musicproduction. Include GPU benchmark table.</td><td>Reddit</td></tr>
+<tr><td>2</td><td>Record 90-second demo video. Upload to YouTube. Title + description optimized for search.</td><td>YouTube</td></tr>
+<tr><td>3</td><td>Post to Hacker News (Show HN). Be ready to answer questions in the thread.</td><td>HN</td></tr>
+<tr><td>5</td><td>Publish to Product Hunt. Schedule for morning PST.</td><td>Product Hunt</td></tr>
+<tr><td>7</td><td>Twitter/X thread with screenshots + GPU comparison table. @ reply to AI influencers.</td><td>Twitter/X</td></tr>
+<tr><td>10</td><td>Post to itchio. Tag as "tools", "ai", "creative". Set $1 minimum.</td><td>itch.io</td></tr>
+<tr><td>14</td><td>Post to relevant Discord servers. Be a member first, not a drive-by spammer.</td><td>Discord</td></tr>
+</table>
+
+<!-- MESSAGING MATRIX -->
+<h2>Messaging by Audience</h2>
+
+<table>
+<tr><th>Audience</th><th>Hook</th><th>Call to Action</th></tr>
+<tr>
+  <td>Music producers</td>
+  <td>"Stop paying $30/mo for stem separation. Run Demucs + AceStep locally on the GPU you already own."</td>
+  <td>→ "Steal my installer"</td>
+</tr>
+<tr>
+  <td>AI artists</td>
+  <td>"SDXL + FLUX + AnimateDiff + Real-ESRGAN — all in one ComfyUI install. No Colab subscription needed."</td>
+  <td>→ "One command setup"</td>
+</tr>
+<tr>
+  <td>Coders</td>
+  <td>"Local coding assistant that doesn't phone home. Qwen 2.5 Coder + OpenCode + Continue.dev in 30 seconds."</td>
+  <td>→ "Clone and run"</td>
+</tr>
+<tr>
+  <td>Broke creatives</td>
+  <td>"I'm a broke creator too. I built this so we don't have to pay rent to OpenAI every month."</td>
+  <td>→ "Free on GitHub / $1 coffee"</td>
+</tr>
+<tr>
+  <td>Tech enthusiasts</td>
+  <td>"15 models. 8GB VRAM. One PowerShell command. The entire local AI stack benchmarked and battle-tested."</td>
+  <td>→ "Benchmarks + installer"</td>
+</tr>
+</table>
+
+<!-- SOCIAL PROOF TEMPLATES -->
+<h2>Pre-Written Posts</h2>
+
+<div class="tweet-grid">
+  <div class="tweet">
+    <div class="tweet-text">"Built a free installer that sets up every local AI tool in one command. 15 modules. 8GB VRAM. Music, image, code, voice, agents. No subscriptions. Just your GPU and one PowerShell script. Free on GitHub, or throw a dollar to help a broke creator."</div>
+    <div class="tweet-author">🐦 Twitter/X — 280 char version</div>
+  </div>
+  <div class="tweet">
+    <div class="tweet-text">"Show HN: Local AI Freedom Installer — 15 best local models in one command. I'm a broke creator building for broke creators. The scripts are free on GitHub. If you want a pre-packaged zip with a guide, it's $1. No features gated. Everything open source. Run it, fork it, share it."</div>
+    <div class="tweet-author">📰 Hacker News — Show HN</div>
+  </div>
+  <div class="tweet">
+    <div class="tweet-text">"Title says it builds but you're skeptical? I was too. Ran it on my 2080 SUPER (8GB). Everything works. Ollama pulled 4 models, AceStep ran first try, ComfyUI booted with SDXL. The $1 tier is the best deal in AI right now."</div>
+    <div class="tweet-author">🟧 Reddit — r/LocalLLaMA reply</div>
+  </div>
+</div>
+
+<!-- REVENUE PROJECTION -->
+<h2>Revenue Model (Transparent)</h2>
+<p>This is not a business. This is a broke creator sharing tools with other broke creators. If the numbers don't look like a business, that's the point.</p>
+
+<table>
+<tr><th>Tier</th><th>Price</th><th>Downloads Needed</th><th>To Make</th></tr>
+<tr><td>Coffee</td><td>$1</td><td>100</td><td>$100 (minus ~$15 Gumroad fees) = <strong>$85</strong></td></tr>
+<tr><td>Supporter</td><td>$5</td><td>100</td><td>$500 (minus ~$35 fees) = <strong>$465</strong></td></tr>
+<tr><td>Coffee</td><td>$1</td><td>500</td><td>$500 → <strong>$425</strong></td></tr>
+<tr><td>Supporter</td><td>$5</td><td>500</td><td>$2,500 → <strong>$2,325</strong></td></tr>
+</table>
+
+<p style="font-size:0.8125rem;color:var(--muted)">Reality check: expect mostly free GitHub clones. Every paid download is a gift, not a transaction. Goal: $500 total to cover domain + GPU electricity + coffee for late-night debugging sessions.</p>
+
+<!-- COPY PASTE README -->
+<h2>READ ME Title Ideas</h2>
+<div class="card card-glow">
+  <p style="font-family:'JetBrains Mono',monospace;font-size:0.8125rem;color:var(--cyan)">
+    # Local AI Freedom Installer<br>
+    <br>
+    ### One command. Fifteen tools. Zero subscriptions.<br>
+    <br>
+    Stop renting AI. Start owning it.<br>
+    <br>
+    This installer gives you every best-in-class local AI model — music<br>
+    generation, image synthesis, coding, stem splitting, voice cloning,<br>
+    agent teams — with a single PowerShell command. Runs on any GPU<br>
+    with 8GB+ VRAM (yes, that 2080 SUPER you bought in 2019 is perfect).<br>
+    <br>
+    ### Pricing<br>
+    - **Free** — clone the repo, run the scripts<br>
+    - **$1** — pre-packaged zip + PDF quickstart guide<br>
+    - **$5** — supporter edition + USB setup tool + README credits<br>
+    <br>
+    Built by a broke creator for broke creators. No features gated behind paywalls.
+  </p>
+</div>
+
+<!-- CALL TO ACTION -->
+<div class="cta-box">
+  <h2 style="margin-top:0">Ready to Own Your AI Stack?</h2>
+  <p style="color:var(--muted);max-width:450px;margin:0.5rem auto">15 models. 8GB VRAM. One command. Your GPU, your data, your creative freedom.</p>
+  <div style="margin-top:1rem">
+    <a href="https://github.com/myaiplug/liminal-stemsplit" class="btn btn-outline">Clone Free on GitHub</a>
+    <a href="/workshop.html" class="btn">See the Workshop →</a>
+  </div>
+</div>
+
+<footer>
+  <p><a href="/">Liminal StemSplit</a> — <a href="/workshop.html">Workshop</a> — <a href="/installers/">Installers</a> — <a href="https://github.com/myaiplug/liminal-stemsplit">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>

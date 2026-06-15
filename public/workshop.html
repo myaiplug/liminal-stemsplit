@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Local AI Workshop — What Your GPU Can Actually Run | Liminal</title>
+<meta name="description" content="Complete guide to running AI models locally on consumer GPUs. Scan your system, compare models, and find what works for your hardware.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--orange:#f97316;--pink:#ec4899;--blue:#3b82f6;--navy:#0a0f1d;--border:rgba(255,255,255,0.06);--text:#f3f4f6;--muted:#6b7280}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#020617;color:var(--text);overflow-x:hidden;line-height:1.6}
+body::after{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");pointer-events:none;z-index:9999;opacity:0.35}
+.wrap{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+nav{display:flex;align-items:center;gap:1rem;margin-bottom:3rem;font-size:0.875rem}
+nav a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+nav a:hover{color:var(--cyan)}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin-bottom:0.75rem}
+h1 span{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:var(--muted);font-size:1.05rem;margin-bottom:2.5rem;max-width:600px}
+.spec-box{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:12px;padding:1.5rem;margin-bottom:2.5rem;display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:1rem}
+.spec-item{text-align:center}
+.spec-item .label{font-size:0.65rem;text-transform:uppercase;letter-spacing:0.08em;color:var(--muted);margin-bottom:0.25rem;font-family:'JetBrains Mono',monospace}
+.spec-item .value{font-size:1.1rem;font-weight:600;color:#fff}
+.spec-item .value.gpu{color:var(--green)}
+.spec-item .value.vram{color:var(--cyan)}
+.spec-item .value.ram{color:var(--blue)}
+.spec-item .value.ok{color:var(--green)}
+.spec-item .value.warn{color:var(--orange)}
+.spec-item .value.bad{color:var(--pink)}
+h2{font-size:1.4rem;font-weight:700;margin-top:3rem;margin-bottom:1rem;color:#fff}
+h3{font-size:1.05rem;font-weight:600;margin-top:1.5rem;margin-bottom:0.5rem;color:#fff}
+p{color:rgba(255,255,255,0.65);margin-bottom:1rem;font-size:0.9375rem}
+.tag{display:inline-flex;align-items:center;gap:0.35rem;padding:0.15rem 0.5rem;border-radius:999px;font-size:0.6rem;font-family:'JetBrains Mono',monospace;letter-spacing:0.04em;text-transform:uppercase;margin-right:0.35rem}
+.tag-cyan{background:rgba(34,211,238,0.1);border:1px solid rgba(34,211,238,0.2);color:var(--cyan)}
+.tag-green{background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.2);color:var(--green)}
+.tag-purple{background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.2);color:var(--purple)}
+.tag-orange{background:rgba(249,115,22,0.1);border:1px solid rgba(249,115,22,0.2);color:var(--orange)}
+.tag-pink{background:rgba(236,72,153,0.1);border:1px solid rgba(236,72,153,0.2);color:var(--pink)}
+.tag-blue{background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.2);color:var(--blue)}
+table{width:100%;border-collapse:collapse;margin:1.5rem 0 2rem;font-size:0.8125rem}
+th{text-align:left;padding:0.6rem 0.75rem;background:rgba(255,255,255,0.02);border-bottom:1px solid var(--border);color:var(--muted);font-weight:500;font-size:0.65rem;text-transform:uppercase;letter-spacing:0.06em;font-family:'JetBrains Mono',monospace}
+td{padding:0.6rem 0.75rem;border-bottom:1px solid var(--border);color:rgba(255,255,255,0.75);vertical-align:top}
+tr:hover td{background:rgba(255,255,255,0.01)}
+td:first-child{font-weight:600;color:#fff}
+td:nth-child(4){font-family:'JetBrains Mono',monospace;font-size:0.75rem}
+.rating{font-family:'JetBrains Mono',monospace;font-weight:600}
+.rating-5{color:var(--green)}
+.rating-4{color:var(--cyan)}
+.rating-3{color:var(--orange)}
+.rating-2{color:var(--pink)}
+.card{background:rgba(255,255,255,0.02);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+.card-title{font-size:0.9rem;font-weight:600;color:#fff;margin-bottom:0.35rem}
+.card-desc{font-size:0.8125rem;color:rgba(255,255,255,0.5);line-height:1.5}
+.best-for{display:inline-flex;align-items:center;gap:0.3rem;margin-top:0.5rem;font-size:0.7rem;font-family:'JetBrains Mono',monospace}
+.best-for::before{content:'→';color:var(--cyan)}
+.bar-track{height:6px;background:rgba(255,255,255,0.06);border-radius:999px;overflow:hidden;margin:0.3rem 0 0.15rem}
+.bar-fill{height:100%;border-radius:999px;transition:width 0.5s}
+.bar-green{background:linear-gradient(90deg,var(--green),#4ade80)}
+.bar-cyan{background:linear-gradient(90deg,var(--cyan),#67e8f9)}
+.bar-orange{background:linear-gradient(90deg,var(--orange),#fb923c)}
+.bar-pink{background:linear-gradient(90deg,var(--pink),#f472b6)}
+.legend{display:flex;flex-wrap:wrap;gap:0.75rem;margin:1rem 0 1.5rem;font-size:0.75rem}
+.legend-item{display:flex;align-items:center;gap:0.35rem;color:var(--muted)}
+.legend-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.cta-box{background:linear-gradient(135deg,rgba(34,211,238,0.05),rgba(168,85,247,0.05));border:1px solid rgba(34,211,238,0.15);border-radius:12px;padding:1.5rem;text-align:center;margin:2.5rem 0}
+.cta-box h2{margin-top:0}
+.cta-box .btn{display:inline-flex;align-items:center;gap:0.5rem;margin-top:0.75rem;padding:0.6rem 1.5rem;border-radius:8px;background:linear-gradient(135deg,var(--cyan),var(--purple));color:#fff;font-weight:600;text-decoration:none;font-size:0.875rem;transition:opacity 0.2s}
+.cta-box .btn:hover{opacity:0.85}
+footer{border-top:1px solid var(--border);padding:2rem 0;margin-top:3rem;text-align:center;font-size:0.75rem;color:var(--muted)}
+footer a{color:var(--cyan);text-decoration:none}
+.vram-meter{margin:0.3rem 0 0.4rem;height:8px;border-radius:999px;overflow:hidden;background:rgba(255,255,255,0.04)}
+.vram-fill{height:100%;border-radius:999px}
+code{background:rgba(255,255,255,0.06);padding:0.1rem 0.35rem;border-radius:4px;font-size:0.8em;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+@media(max-width:640px){table{font-size:0.7rem}td,th{padding:0.4rem 0.5rem}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav><a href="/">← Liminal StemSplit</a><a href="/workshop.html">Workshop</a><a href="/privacy.html">Privacy</a></nav>
+
+<h1><span>Local AI Workshop</span></h1>
+<p class="subtitle">A hands-on tour of what your consumer GPU can actually run — from coding assistants and image generators to chatbots, agents, and audio tools. No datacenter required.</p>
+
+<!-- SYSTEM SPEC SCAN -->
+<h2>Your Machine</h2>
+<p>The scan below was run against this actual system. If your specs meet or exceed these, everything on this page is runnable.</p>
+<div class="spec-box">
+  <div class="spec-item">
+    <div class="label">GPU</div>
+    <div class="value gpu">RTX 2080 SUPER</div>
+  </div>
+  <div class="spec-item">
+    <div class="label">VRAM</div>
+    <div class="value vram">8 GB</div>
+  </div>
+  <div class="spec-item">
+    <div class="label">System RAM</div>
+    <div class="value ram">16 GB</div>
+  </div>
+  <div class="spec-item">
+    <div class="label">Compute Cap</div>
+    <div class="value ok">7.5</div>
+  </div>
+  <div class="spec-item">
+    <div class="label">CUDA Driver</div>
+    <div class="value ok">591.86</div>
+  </div>
+  <div class="spec-item">
+    <div class="label">PyTorch</div>
+    <div class="value ok">2.11.0</div>
+  </div>
+</div>
+
+<p><strong>Key insight:</strong> The <span class="tag tag-cyan">8GB VRAM</span> ceiling is the main constraint. It determines which quantization levels and model sizes you can load. But 8GB is enough for 90% of the useful local AI ecosystem — you just can't run 70B+ models or SDXL batches without swapping.</p>
+
+<!-- VRAM QUICK REFERENCE -->
+<h2>VRAM Budget: What Fits in 8GB</h2>
+<div class="legend">
+  <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div> Fits comfortably</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div> Tight — may need optimizations</div>
+  <div class="legend-item"><div class="legend-dot" style="background:var(--pink)"></div> Won't fit without swapping</div>
+</div>
+
+<table>
+<tr><th>Category</th><th>Model Size</th><th>Quantization</th><th>VRAM Use</th><th>Fits 8GB?</th></tr>
+<tr><td>Small LLM</td><td>1–3B params</td><td>FP16</td><td>2–4 GB</td><td><span class="rating rating-5">✓ Comfortable</span></td></tr>
+<tr><td>Medium LLM</td><td>7–8B params</td><td>4-bit (GGUF/GPTQ)</td><td>5–6 GB</td><td><span class="rating rating-5">✓ Comfortable</span></td></tr>
+<tr><td>Medium LLM</td><td>7–8B params</td><td>FP16</td><td>14–16 GB</td><td><span class="rating rating-2">✗ Too large</span></td></tr>
+<tr><td>Large LLM</td><td>13–14B params</td><td>4-bit</td><td>8–10 GB</td><td><span class="rating rating-3">~ Borderline</span></td></tr>
+<tr><td>Large LLM</td><td>30–34B params</td><td>4-bit</td><td>18–22 GB</td><td><span class="rating rating-2">✗ Won't fit</span></td></tr>
+<tr><td>Image (SD 1.5)</td><td>860M params</td><td>FP16</td><td>2–3 GB</td><td><span class="rating rating-5">✓ Comfortable</span></td></tr>
+<tr><td>Image (SDXL)</td><td>2.6B params</td><td>FP16</td><td>6–8 GB</td><td><span class="rating rating-3">~ Tight</span></td></tr>
+<tr><td>Image (SD3.5 Medium)</td><td>2.5B params</td><td>FP16</td><td>8–10 GB</td><td><span class="rating rating-3">~ Borderline</span></td></tr>
+<tr><td>Image (FLUX.1-dev)</td><td>3.5B params</td><td>4-bit</td><td>6–8 GB</td><td><span class="rating rating-3">~ Tight</span></td></tr>
+<tr><td>Audio (AceStep)</td><td>~1B params</td><td>FP16</td><td>3–4 GB</td><td><span class="rating rating-5">✓ Comfortable</span></td></tr>
+<tr><td>TTS (XTTSv2)</td><td>~500M params</td><td>FP16</td><td>2–3 GB</td><td><span class="rating rating-5">✓ Comfortable</span></td></tr>
+<tr><td>Embeddings</td><td>~300M</td><td>FP16</td><td>~1 GB</td><td><span class="rating rating-5">✓ Comfortable</span></td></tr>
+</table>
+
+<!-- AI CODERS -->
+<h2>1. AI Coding Assistants</h2>
+<p>Local code models that rival GitHub Copilot — no telemetry, no subscription, entirely offline.</p>
+
+<table>
+<tr><th>Model</th><th>Size</th><th>Best For</th><th>Rating</th><th>VRAM</th></tr>
+<tr>
+  <td>DeepSeek-Coder-V2-Lite</td>
+  <td>16B (4-bit: ~9GB)</td>
+  <td>General-purpose coding, complex multi-file refactors</td>
+  <td><span class="rating rating-5">★★★★★</span></td>
+  <td><div class="vram-meter"><div class="vram-fill bar-orange" style="width:90%"></div></div></td>
+</tr>
+<tr>
+  <td>CodeLlama 7B</td>
+  <td>7B (4-bit: ~5GB)</td>
+  <td>Solid all-around, Python + JS strong</td>
+  <td><span class="rating rating-4">★★★★</span></td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:60%"></div></div></td>
+</tr>
+<tr>
+  <td>Qwen 2.5 Coder 7B</td>
+  <td>7B (4-bit: ~5GB)</td>
+  <td>Best-in-class 7B coder, multilingual</td>
+  <td><span class="rating rating-5">★★★★★</span></td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:60%"></div></div></td>
+</tr>
+<tr>
+  <td>Stable Code 3B</td>
+  <td>3B (FP16: ~5GB)</td>
+  <td>Fill-in-middle, fast autocomplete, low VRAM</td>
+  <td><span class="rating rating-4">★★★★</span></td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:50%"></div></div></td>
+</tr>
+<tr>
+  <td>Codestral Mamba (Qwen)</td>
+  <td>7B (4-bit: ~5GB)</td>
+  <td>Fast inference via Mamba architecture, no KV cache</td>
+  <td><span class="rating rating-4">★★★★</span></td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:55%"></div></div></td>
+</tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🏆 Best Pick: Qwen 2.5 Coder 7B (4-bit)</div>
+  <div class="card-desc">Runs comfortably in ~5GB VRAM. Outperforms CodeLlama 13B on HumanEval. Use via <code>llama.cpp</code> (GGUF) or <code>vLLM</code>. For the 8GB ceiling, this is the sweetest spot — you get near-SOTA code generation with room left for context.</div>
+  <div class="best-for">Run via Ollama: <code>ollama run qwen2.5-coder:7b</code></div><br>
+  <div class="best-for">Or Continue.dev + llama.cpp for VS Code integration</div>
+</div>
+
+<p><strong>Tools that use these locally:</strong> <span class="tag tag-cyan">OpenCode</span> (this CLI), <span class="tag tag-cyan">Continue.dev</span> (VS Code plugin), <span class="tag tag-cyan">Ollama</span> (one-command model runner), <span class="tag tag-cyan">LM Studio</span> (GUI), <span class="tag tag-cyan">llama.cpp</span> (bare-metal).</p>
+
+<!-- IMAGE GENERATION -->
+<h2>2. Image Generation</h2>
+<p>Stable Diffusion open-weights models are the standard. With 8GB you can run most popular pipelines.</p>
+
+<table>
+<tr><th>Model</th><th>Size</th><th>Strength</th><th>Weakness</th><th>VRAM</th></tr>
+<tr>
+  <td>SD 1.5 (RealisticVision, Deliberate)</td>
+  <td>860M</td>
+  <td>Huge ecosystem of fine-tunes, fast, low VRAM</td>
+  <td>Lower base quality, shows its age vs SDXL</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:35%"></div></div></td>
+</tr>
+<tr>
+  <td>SDXL (Juggernaut, RealVis)</td>
+  <td>2.6B</td>
+  <td>Dramatically better composition, hands, text</td>
+  <td>Eats 7–8GB at 1024px; need <code>--medvram</code> flag</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-orange" style="width:85%"></div></div></td>
+</tr>
+<tr>
+  <td>SD3.5 Medium</td>
+  <td>2.5B</td>
+  <td>SOTA quality, MMDiT architecture, native 1024</td>
+  <td>8.2GB minimum — offloads to CPU frequently</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-pink" style="width:100%"></div></div></td>
+</tr>
+<tr>
+  <td>FLUX.1-dev</td>
+  <td>3.5B</td>
+  <td>Best overall quality, prompt adherence</td>
+  <td>6–8GB in 4-bit, 12GB+ in FP16; slow inference</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-orange" style="width:85%"></div></div></td>
+</tr>
+<tr>
+  <td>Playground v2.5</td>
+  <td>2.6B (SDXL-based)</td>
+  <td>Beautiful aesthetic, great with short prompts</td>
+  <td>Same VRAM as SDXL, fewer fine-tunes</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-orange" style="width:85%"></div></div></td>
+</tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🏆 Best Pick: SDXL with <code>--medvram</code></div>
+  <div class="card-desc">SDXL hits the quality/speed sweet spot for 8GB. Use ComfyUI (already installed on this machine) with the Juggernaut XL or RealVisXL checkpoint. Generate 1024×1024 in ~8–10 seconds. For quick iteration, SD 1.5 still wins for speed.</div>
+  <div class="best-for">Already installed: <code>D:\ComfyUI_windows_portable_nvidia\ComfyUI\</code></div>
+</div>
+
+<!-- BEAT GENERATION -->
+<h2>3. Beat Generation</h2>
+<p>This machine already runs AceStep v1.5 for full-song generation with coherent structure and vocals.</p>
+
+<table>
+<tr><th>Model</th><th>Size</th><th>Strength</th><th>Weakness</th><th>VRAM</th></tr>
+<tr>
+  <td>AceStep v1.5</td>
+  <td>~1B</td>
+  <td>Best local beat generation; full songs with vocals</td>
+  <td>Not real-time; ~30s to generate 30s of audio</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:45%"></div></div></td>
+</tr>
+<tr>
+  <td>MusicGen (Melody/Large)</td>
+  <td>1.5B–3.3B</td>
+  <td>Melody conditioning, controllable generation</td>
+  <td>No vocals in base model; quality trails AceStep</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:55%"></div></div></td>
+</tr>
+<tr>
+  <td>AudioSep</td>
+  <td>~800M</td>
+  <td>Query-based separation ("extract guitar")</td>
+  <td>Slower than Demucs for batch</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:40%"></div></div></td>
+</tr>
+<tr>
+  <td>Demucs v4 — Stem Splitter</td>
+  <td>~300M</td>
+  <td>Fastest stem splitter (4-stem), transformer hybrid</td>
+  <td>Fixed 4-stem output, no query control</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:20%"></div></div></td>
+</tr>
+<tr>
+  <td>MelBand Roformer — Vocal Splitter</td>
+  <td>~80M</td>
+  <td>Best vocal split quality; tiny model</td>
+  <td>Vocals-only; single-purpose</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:10%"></div></div></td>
+</tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🎵 Already on this machine</div>
+  <div class="card-desc">AceStep serves music generation at <code>D:\ACESTEP\ace-step-ACE-Step-1.5</code>. AudioSep and all separation models are at <code>D:\AudioSeperationModels</code>. Demucs is the daily driver for stem splitting — uses under 2GB VRAM and finishes a 3-minute track in ~15 seconds.</div>
+</div>
+
+<!-- TEXT-TO-SPEECH -->
+<h2>4. Text-to-Speech & Transcription</h2>
+
+<table>
+<tr><th>Model</th><th>Size</th><th>Strength</th><th>Weakness</th><th>VRAM</th></tr>
+<tr>
+  <td>XTTSv2 — Voice Clone</td>
+  <td>~500M</td>
+  <td>Best voice cloning; 6s sample is enough; multilingual</td>
+  <td>~2x real-time speed; occasional artifacts on long form</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:35%"></div></div></td>
+</tr>
+<tr>
+  <td>Bark — Expressive TTS</td>
+  <td>~1.2B</td>
+  <td>Expressive — laughter, singing, pauses, emotions</td>
+  <td>Slow (~10x real-time); English-focused</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:60%"></div></div></td>
+</tr>
+<tr>
+  <td>Edge TTS</td>
+  <td>Cloud API</td>
+  <td>Microsoft-quality neural voices, fastest option</td>
+  <td>Requires internet; no voice cloning</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:5%"></div></div></td>
+</tr>
+<tr>
+  <td>Whisper large-v3 — Transcription</td>
+  <td>~1.5B</td>
+  <td>Best local transcription; large-v3 is excellent</td>
+  <td>Large model uses ~4GB; smaller models less accurate</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:50%"></div></div></td>
+</tr>
+<tr>
+  <td>Kokoro — Fast TTS</td>
+  <td>~100M</td>
+  <td>Extremely fast; tiny footprint; good quality</td>
+  <td>Limited voice selection; English only</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:10%"></div></div></td>
+</tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🏆 Best Pick: XTTSv2 for cloning, Kokoro for speed</div>
+  <div class="card-desc">XTTSv2 is installed on this machine via <code>edge-tts</code> and general TTS ecosystem. Use Kokoro (<code>pip install kokoro</code>) for instant, high-quality TTS with near-zero VRAM. Whisper large-v3 is already installed for transcription.</div>
+</div>
+
+<!-- CHATBOTS -->
+<h2>5. Local Chatbots & LLMs</h2>
+<p>General-purpose language models that run fully offline. This is the most crowded category.</p>
+
+<table>
+<tr><th>Model</th><th>Size</th><th>Strength</th><th>Weakness</th><th>VRAM</th></tr>
+<tr>
+  <td>Llama 3.1 8B</td>
+  <td>8B (4-bit: ~5.5GB)</td>
+  <td>Best-in-class 8B chat; instruction following; long context</td>
+  <td>Heavily censored; refuses many creative requests</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:65%"></div></div></td>
+</tr>
+<tr>
+  <td>Mistral 7B v0.3</td>
+  <td>7B (4-bit: ~5GB)</td>
+  <td>Fast inference; excellent reasoning; less censored</td>
+  <td>Slightly behind Llama 3.1 on general knowledge</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:60%"></div></div></td>
+</tr>
+<tr>
+  <td>Qwen 2.5 7B</td>
+  <td>7B (4-bit: ~5GB)</td>
+  <td>Strong multilingual; math; long context (32K)</td>
+  <td>Slightly more token-heavy than Llama</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:60%"></div></div></td>
+</tr>
+<tr>
+  <td>Gemma 2 9B</td>
+  <td>9B (4-bit: ~6GB)</td>
+  <td>Google-quality; excellent for reasoning tasks</td>
+  <td>Niche fine-tune ecosystem; larger quant</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:70%"></div></div></td>
+</tr>
+<tr>
+  <td>DeepSeek V2 Lite</td>
+  <td>16B (4-bit: ~9GB)</td>
+  <td>MOE architecture; punches above weight; 128K context</td>
+  <td>Borderline on 8GB; MOE overhead</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-orange" style="width:95%"></div></div></td>
+</tr>
+<tr>
+  <td>Phi-4 (14B)</td>
+  <td>14B (4-bit: ~8.5GB)</td>
+  <td>Microsoft's best small model; strong code + math</td>
+  <td>Just barely fits in 8GB; no room for context</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-pink" style="width:100%"></div></div></td>
+</tr>
+</table>
+
+<div class="card">
+  <div class="card-title">🏆 Best Pick: Llama 3.1 8B (Q4_K_M GGUF)</div>
+  <div class="card-desc">via Ollama: <code>ollama run llama3.1:8b</code>. Uses ~5.5GB VRAM with 8K context. For uncensored use, try <code>dolphin-llama3.1:8b</code> or <code>mistral:7b</code>. All run at 40–60 tok/s on RTX 2080 SUPER — faster than you can read.</div>
+  <div class="best-for">Chat UI: Open WebUI, Ollama WebUI, or plain terminal</div>
+</div>
+
+<!-- AGENTS & TEAMS -->
+<h2>6. Agentic AI & Agent Teams</h2>
+<p>Beyond chatbots — models that use tools, browse the web, edit files, and coordinate in teams.</p>
+
+<table>
+<tr><th>Tool / Framework</th><th>Backend Model</th><th>Strength</th><th>Weakness</th><th>VRAM</th></tr>
+<tr>
+  <td>OpenCode (this CLI)</td>
+  <td>Any (deepseek-v4-flash-free cloud)</td>
+  <td>File editing, code generation, tool use; agentic loop</td>
+  <td>Default model is cloud; can swap to local via config</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:40%"></div></div></td>
+</tr>
+<tr>
+  <td>OpenClaw / Aider</td>
+  <td>Any (local or cloud)</td>
+  <td>Git-aware code editing; map-reduce for large refactors</td>
+  <td>Terminal-only; no GUI; steep config</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:40%"></div></div></td>
+</tr>
+<tr>
+  <td>LangChain / LangGraph</td>
+  <td>Any local LLM</td>
+  <td>Build custom agent teams; tool orchestration; state machines</td>
+  <td>Overhead; complex debugging; documentation churn</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:45%"></div></div></td>
+</tr>
+<tr>
+  <td>CrewAI</td>
+  <td>Any local LLM via Ollama</td>
+  <td>Role-based agent teams ("researcher + writer + critic")</td>
+  <td>Sequential by default; parallel needs config</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:55%"></div></div></td>
+</tr>
+<tr>
+  <td>AutoGen (Microsoft)</td>
+  <td>Any local LLM</td>
+  <td>Multi-agent conversations; group chat patterns</td>
+  <td>Verbose; needs careful prompt engineering</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:55%"></div></div></td>
+</tr>
+<tr>
+  <td>Praison AI</td>
+  <td>Any local LLM</td>
+  <td>Low-code agent teams; GUI for non-devs</td>
+  <td>Smaller community; fewer examples</td>
+  <td><div class="vram-meter"><div class="vram-fill bar-green" style="width:45%"></div></div></td>
+</tr>
+</table>
+
+<div class="card">
+  <div class="card-title">⚡ Agent teams work locally — here's how</div>
+  <div class="card-desc">With a local LLM (Llama 3.1 8B or Qwen 2.5 Coder 7B), you run a CrewAI or AutoGen team entirely on your GPU. The agent loop is: LLM generates a thought → tool executes → result feeds back to LLM. Each "step" is fast because the model stays loaded in VRAM. A team of 3 agents each with a tool set uses the same ~5GB model loaded once — the context window tracks state.</div>
+  <div class="best-for">Example: Researcher agent + Writer agent + Critic agent → blog post in 2 minutes</div>
+</div>
+
+<!-- RANKING OVERVIEW -->
+<h2>7. Overall Model Rankings</h2>
+
+<table>
+<tr><th>Rank</th><th>Model</th><th>Category</th><th>Rating</th><th>Why</th></tr>
+<tr><td>1</td><td>Qwen 2.5 Coder 7B</td><td><span class="tag tag-cyan">Coder</span></td><td class="rating rating-5">★★★★★</td><td>Best performance-per-VRAM of any model. Beats 13B models in 5GB.</td></tr>
+<tr><td>2</td><td>Llama 3.1 8B</td><td><span class="tag tag-purple">Chat</span></td><td class="rating rating-5">★★★★★</td><td>Gold standard for local chat. Ecosystem, tooling, fine-tunes.</td></tr>
+<tr><td>3</td><td>AceStep v1.5</td><td><span class="tag tag-orange">Audio</span></td><td class="rating rating-5">★★★★★</td><td>Best local music generation. Full songs with vocals.</td></tr>
+<tr><td>4</td><td>SDXL (Juggernaut)</td><td><span class="tag tag-pink">Image</span></td><td class="rating rating-4">★★★★</td><td>Best quality for 8GB. Tight but works with optimizations.</td></tr>
+<tr><td>5</td><td>XTTSv2</td><td><span class="tag tag-green">TTS</span></td><td class="rating rating-4">★★★★</td><td>Voice cloning in 2GB. Unmatched for the footprint.</td></tr>
+<tr><td>6</td><td>DeepSeek V2 Lite</td><td><span class="tag tag-cyan">Coder</span></td><td class="rating rating-4">★★★★</td><td>Borderline on VRAM but 128K context is transformative.</td></tr>
+<tr><td>7</td><td>FLUX.1-dev</td><td><span class="tag tag-pink">Image</span></td><td class="rating rating-4">★★★★</td><td>SOTA image quality. 4-bit fits 8GB but slowly.</td></tr>
+<tr><td>8</td><td>Mistral 7B v0.3</td><td><span class="tag tag-purple">Chat</span></td><td class="rating rating-4">★★★★</td><td>Fastest 7B. Less censored. Great for agent frameworks.</td></tr>
+<tr><td>9</td><td>Demucs v4</td><td><span class="tag tag-blue">Audio</span></td><td class="rating rating-5">★★★★★</td><td>Industry standard stem sep. Tiny VRAM footprint.</td></tr>
+<tr><td>10</td><td>Whisper large-v3</td><td><span class="tag tag-blue">TTS</span></td><td class="rating rating-4">★★★★</td><td>Best local transcription. Already used by this project.</td></tr>
+</table>
+
+<!-- GPU SCAN RESULTS -->
+<h2>8. What This GPU Can Run (Personalized)</h2>
+<p>Based on your <strong>RTX 2080 SUPER (8GB VRAM, Compute 7.5)</strong>:</p>
+
+<div class="card" style="border-left:3px solid var(--green)">
+  <div class="card-title">✓ Runs without issues</div>
+  <div class="card-desc">
+    Llama 3.1 8B, Qwen 2.5 Coder 7B, Mistral 7B, CodeLlama 7B, SD 1.5 (any fine-tune), AceStep, Demucs, AudioSep, MelBand Roformer, XTTSv2, Bark, Kokoro, Whisper large-v3, SDXL (<code>--medvram</code>), FLUX 4-bit, DeepSeek Coder V2 Lite 16B (4-bit GGUF, tight), OpenCode, Ollama (any 7B model), all embedding models.
+  </div>
+  <div class="best-for">VRAM ceiling: load ONE 7B model at a time; switch via Ollama</div>
+</div>
+
+<div class="card" style="border-left:3px solid var(--orange);margin-top:0.75rem">
+  <div class="card-title">~ Runs with optimizations</div>
+  <div class="card-desc">
+    SD3.5 Medium (CPU offloading, ~12s/it), SDXL batches (batch size 1 only), FLUX.1-dev FP16 (won't fit), Phi-4 14B (Q4, borderline), DeepSeek V2 Lite full 16B (Q4_K_M, squeezes in with 4K context).
+  </div>
+  <div class="best-for">Use <code>--lowvram</code> in ComfyUI or <code>--num-ctx 2048</code> in Ollama to squeeze</div>
+</div>
+
+<div class="card" style="border-left:3px solid var(--pink);margin-top:0.75rem">
+  <div class="card-title">✗ Won't fit without system RAM offloading</div>
+  <div class="card-desc">
+    Llama 3 70B, Mixtral 8x7B, SD3.5 Large, DeepSeek-R1 (671B), Qwen 72B, Command R 35B, any FP16 model over 5B params. These need 16GB+ VRAM or system RAM offloading (runs at ~1 tok/s).
+  </div>
+  <div class="best-for">Consider renting 24GB GPUs ($0.50/hr on RunPod) for these workloads</div>
+</div>
+
+<!-- SETUP GUIDE -->
+<h2>9. Quick Start: One Command Each</h2>
+
+<table>
+<tr><th>Tool</th><th>Install Command</th><th>Run Command</th></tr>
+<tr><td>Ollama (gateway to all LLMs)</td><td><code>winget install Ollama.Ollama</code></td><td><code>ollama run llama3.1:8b</code></td></tr>
+<tr><td>ComfyUI (image gen)</td><td><code>git clone https://github.com/comfyanonymous/ComfyUI</code></td><td><code>python main.py</code></td></tr>
+<tr><td>AceStep (music gen)</td><td>Already at <code>D:\ACESTEP\</code></td><td><code>ace-step-1.5\start_api_server.bat</code></td></tr>
+<tr><td>XTTSv2 (voice clone)</td><td><code>pip install TTS</code></td><td><code>tts-server --model_name tts_models/multilingual/multi-dataset/xtts_v2</code></td></tr>
+<tr><td>CrewAI (agents)</td><td><code>pip install crewai crewai-tools</code></td><td>Python script (see docs)</td></tr>
+<tr><td>Open WebUI (chat UI)</td><td><code>docker run -d -p 3000:8080 ghcr.io/open-webui/open-webui</code></td><td>Browser → localhost:3000</td></tr>
+<tr><td>Whisper (transcription)</td><td><code>pip install openai-whisper</code></td><td><code>whisper audio.mp3 --model large-v3</code></td></tr>
+</table>
+
+<!-- AUTOMATED INSTALLER SECTION -->
+<h2>10. Automated Installer Suite</h2>
+<p>Every tool on this page can be installed with one command. The installer scripts handle all dependencies — Python packages, model weights, environment setup — and verify each installation.</p>
+
+<table>
+<tr><th>Module</th><th>Installer</th><th>What It Sets Up</th></tr>
+<tr>
+  <td><span class="tag tag-blue">Media</span> Audio Tools</td>
+  <td><code>install-audio-tools.ps1</code></td>
+  <td>ffmpeg (latest), SoX, librosa, pedalboard, pyrubberband, soundfile, pydub, audioread</td>
+</tr>
+<tr>
+  <td><span class="tag tag-orange">Beat</span> Beat Generation</td>
+  <td><code>install-acestep.ps1</code></td>
+  <td>AceStep v1.5 repo + Python deps + model weights from HuggingFace</td>
+</tr>
+<tr>
+  <td><span class="tag tag-pink">Image</span> Image Generation</td>
+  <td><code>install-comfyui.ps1</code></td>
+  <td>ComfyUI portable, Juggernaut XL checkpoint, IPAdapter + ControlNet custom nodes</td>
+</tr>
+<tr>
+  <td><span class="tag tag-pink">Video</span> Video Generation</td>
+  <td><code>install-video-gen.ps1</code></td>
+  <td>AnimateDiff + VideoHelperSuite nodes, SVD img2vid (svd + svd_xt), motion modules</td>
+</tr>
+<tr>
+  <td><span class="tag tag-purple">LLM</span> Local LLMs</td>
+  <td><code>install-ollama.ps1</code></td>
+  <td>Ollama engine + llama3.1:8b + qwen2.5-coder:7b + mistral:7b + deepseek-coder-v2:16b-lite</td>
+</tr>
+<tr>
+  <td><span class="tag tag-cyan">Code</span> AI Coding</td>
+  <td><code>install-opencode.ps1</code></td>
+  <td>OpenCode CLI (via winget/npm/manual fallback) + PATH registration</td>
+</tr>
+<tr>
+  <td><span class="tag tag-green">Audio</span> Stem Split + Transcription</td>
+  <td><code>install-audio-models.ps1</code></td>
+  <td>Demucs v4, Whisper large-v3, XTTSv2, Kokoro, MelBand Roformer, AudioSep</td>
+</tr>
+<tr>
+  <td><span class="tag tag-orange">Beat</span> MusicGen</td>
+  <td><code>install-musicgen.ps1</code></td>
+  <td>Meta AudioCraft (MusicGen medium + small), AudioGen, encodec — instrumental generation</td>
+</tr>
+<tr>
+  <td><span class="tag tag-green">Audio</span> RVC Voice Conversion</td>
+  <td><code>install-rvc.ps1</code></td>
+  <td>RVC WebUI + pretrained D40k model + Python deps for real-time voice/singing conversion</td>
+</tr>
+<tr>
+  <td><span class="tag tag-pink">Image</span> Upscaling &amp; Restoration</td>
+  <td><code>install-upscale.ps1</code></td>
+  <td>Real-ESRGAN (x4plus, anime), GFPGANv1.4, CodeFormer, ComfyUI reactor node</td>
+</tr>
+<tr>
+  <td><span class="tag tag-purple">LLM</span> RAG Stack</td>
+  <td><code>install-rag.ps1</code></td>
+  <td>ChromaDB + sentence-transformers + Ollama embeddings (nomic, mxbai) + pypdf/unstructured</td>
+</tr>
+<tr>
+  <td><span class="tag tag-blue">Agents</span> Agent Frameworks</td>
+  <td><code>install-agent-frameworks.ps1</code></td>
+  <td>CrewAI, AutoGen, LangChain + Ollama, PraisonAI + demo crew script</td>
+</tr>
+<tr>
+  <td><span class="tag tag-blue">System</span> CUDA Toolkit</td>
+  <td><code>install-cuda.ps1</code></td>
+  <td>CUDA 12.8 + cuDNN 9.6 — deep learning SDK, PATH registration, nvcc compiler</td>
+</tr>
+<tr>
+  <td><span class="tag tag-blue">System</span> Docker + WSL2</td>
+  <td><code>install-docker.ps1</code></td>
+  <td>Docker Desktop, WSL2, pulls Open WebUI + LocalAI containers</td>
+</tr>
+<tr>
+  <td><span class="tag tag-blue">System</span> GPU Monitoring</td>
+  <td><code>install-gpu-monitor.ps1</code></td>
+  <td>nvitop (colorful TUI), gpustat, PowerShell alias, Windows Terminal profile</td>
+</tr>
+</table>
+
+<p style="margin-top:1rem">Run the master launcher from an admin PowerShell 7 terminal:</p>
+<div style="background:rgba(0,0,0,0.4);border:1px solid var(--border);border-radius:8px;padding:1rem;font-family:'JetBrains Mono',monospace;font-size:0.8125rem;color:var(--cyan);overflow-x:auto;white-space:nowrap">
+  git clone https://github.com/myaiplug/liminal-stemsplit.git<br>
+  cd liminal-stemsplit\installers<br>
+  powershell -ExecutionPolicy Bypass -File setup-ai-workstation.ps1
+</div>
+
+<div class="cta-box" style="margin-top:1.5rem">
+  <h2>Your GPU Is More Powerful Than You Think</h2>
+  <p style="color:rgba(255,255,255,0.5);max-width:500px;margin:0.5rem auto">An RTX 2080 SUPER is entry-level by 2026 standards, yet it runs the entire local AI stack — coding, image, audio, chat, agents. The golden era of consumer AI is already here.</p>
+  <a href="/" class="btn">← Back to Liminal StemSplit</a>
+  <a href="https://github.com/myaiplug/liminal-stemsplit" class="btn" style="background:rgba(255,255,255,0.08);margin-left:0.5rem">Get Installers on GitHub</a>
+</div>
+
+<footer>
+  <p>This workshop was generated live by scanning this machine's hardware. <a href="/">Liminal StemSplit</a> — AI stem separation, local-first. <a href="https://github.com/myaiplug/liminal-stemsplit">GitHub</a></p>
+</footer>
+</div>
+</body>
+</html>
