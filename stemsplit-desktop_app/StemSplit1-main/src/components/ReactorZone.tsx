@@ -8,6 +8,7 @@ import { useLicense } from '@/contexts/LicenseContext';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { isTauriRuntime } from '@/lib/tauri-runtime';
 import TitleBar from './TitleBar';
+import LandingHero from './LandingHero';
 import { APP_FOOTER_LABEL } from '@/lib/app-version';
 import StemPlayer from './StemPlayer';
 import OriginalPlayer from './OriginalPlayer';
@@ -739,6 +740,7 @@ const ReactorZone: React.FC = () => {
     const isFreeMode = isTrial && !isPro;
     const [freeTierStatus, setFreeTierStatus] = useState<TrialFreeTierStatus | null>(null);
     const freeTierExhausted = isFreeMode && (freeTierStatus?.free_tier_exhausted ?? false);
+    const showLanding = status === StemSplitStatus.IDLE && !loadedFilePath && !pendingFilePath;
     const { play, stop } = useSoundSystem();
     const prevStatus = useRef(status);
 
@@ -1264,7 +1266,7 @@ const ReactorZone: React.FC = () => {
 
     // Main render
     return (
-        <div className="relative min-h-screen flex flex-col items-center justify-center bg-slate-950 overflow-x-hidden overflow-y-auto">
+        <div className={`relative min-h-screen flex flex-col items-center ${showLanding ? 'justify-start' : 'justify-center'} bg-slate-950 overflow-x-hidden overflow-y-auto`}>
             {/* Hero waveform photo background */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat"
@@ -1292,7 +1294,29 @@ const ReactorZone: React.FC = () => {
             <CoreVisualizer isProcessing={status === StemSplitStatus.PROCESSING} progress={progressPercent} bassEnergy={bassEnergy} />
 
             {/* Main UI Zone */}
-            <div className="relative z-10 flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-8">
+            <AnimatePresence mode="wait">
+                {showLanding && (
+                    <motion.div
+                        key="landing-hero"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0, y: -20 }}
+                        transition={{ duration: 0.4 }}
+                        className="w-full"
+                    >
+                        <LandingHero />
+                    </motion.div>
+                )}
+
+                {!showLanding && (
+                    <motion.div
+                        key="app-ui"
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        transition={{ duration: 0.3 }}
+                        className="relative z-10 flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-8"
+                    >
                 <div className="flex flex-col items-center mb-4">
                     <GlitchText className="font-display font-bold uppercase text-center" style={{
                         fontSize: '2.8rem',
@@ -1710,7 +1734,9 @@ const ReactorZone: React.FC = () => {
                         <span className="text-cyan-500/70">Transcript and YouTube ingest follow Cyber-HUD pipeline styling</span>
                     )}
                 </div>
-            </div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
 
             {/* Config Modal */}
             <AnimatePresence>

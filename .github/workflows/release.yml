@@ -30,8 +30,8 @@ jobs:
       - run: npm run build
         working-directory: ${{ env.APP_DIR }}
 
-      - run: npx tauri build --bundles msi,nsis
-        working-directory: ${{ env.APP_DIR }}
+      - run: cargo tauri build --bundles msi,nsis
+        working-directory: ${{ env.APP_DIR }}/src-tauri
         env:
           TAURI_SIGNING_PRIVATE_KEY: ''
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
@@ -66,8 +66,8 @@ jobs:
       - run: npm run build
         working-directory: ${{ env.APP_DIR }}
 
-      - run: npx tauri build --bundles dmg --target ${{ matrix.target }}
-        working-directory: ${{ env.APP_DIR }}
+      - run: cargo tauri build --bundles dmg --target ${{ matrix.target }}
+        working-directory: ${{ env.APP_DIR }}/src-tauri
         env:
           TAURI_SIGNING_PRIVATE_KEY: ''
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
@@ -114,8 +114,8 @@ jobs:
       - run: npm run build
         working-directory: ${{ env.APP_DIR }}
 
-      - run: npx tauri build --bundles deb,appimage
-        working-directory: ${{ env.APP_DIR }}
+      - run: cargo tauri build --bundles deb,appimage
+        working-directory: ${{ env.APP_DIR }}/src-tauri
         env:
           TAURI_SIGNING_PRIVATE_KEY: ''
           TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
