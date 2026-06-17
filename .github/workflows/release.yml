@@ -5,12 +5,18 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 env:
   APP_DIR: stemsplit-desktop_app/StemSplit1-main
+  NEXT_TELEMETRY_DISABLED: 1
+  TAURI_SKIP_DEVTOOLS_INSPECTOR: true
 
 jobs:
   build-windows:
     runs-on: windows-latest
+    continue-on-error: false
     steps:
       - uses: actions/checkout@v4
 
@@ -33,20 +39,18 @@ jobs:
       - run: cargo tauri build --bundles msi,nsis
         working-directory: ${{ env.APP_DIR }}/src-tauri
         env:
-          TAURI_SIGNING_PRIVATE_KEY: ''
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+          TAURI_BUNDLE_WINDOWS_CODESIGN: "false"
 
       - uses: softprops/action-gh-release@v2
         with:
+          draft: true
           files: |
             ${{ env.APP_DIR }}/src-tauri/target/release/bundle/msi/*.msi
             ${{ env.APP_DIR }}/src-tauri/target/release/bundle/nsis/*.exe
 
   build-macos:
     runs-on: macos-latest
-    strategy:
-      matrix:
-        target: [x86_64-apple-darwin, aarch64-apple-darwin]
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -58,7 +62,7 @@ jobs:
 
       - uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.target }}
+          targets: aarch64-apple-darwin
 
       - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
@@ -66,18 +70,19 @@ jobs:
       - run: npm run build
         working-directory: ${{ env.APP_DIR }}
 
-      - run: cargo tauri build --bundles dmg --target ${{ matrix.target }}
+      - run: cargo tauri build --bundles dmg --target aarch64-apple-darwin
         working-directory: ${{ env.APP_DIR }}/src-tauri
         env:
-          TAURI_SIGNING_PRIVATE_KEY: ''
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+          TAURI_BUNDLE_DMG_CODESIGN: "false"
 
       - uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.APP_DIR }}/src-tauri/target/${{ matrix.target }}/release/bundle/dmg/*.dmg
+          draft: true
+          files: ${{ env.APP_DIR }}/src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg
 
   build-linux:
     runs-on: ubuntu-latest
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
 
@@ -117,11 +122,11 @@ jobs:
       - run: cargo tauri build --bundles deb,appimage
         working-directory: ${{ env.APP_DIR }}/src-tauri
         env:
-          TAURI_SIGNING_PRIVATE_KEY: ''
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ''
+          TAURI_BUNDLE_LINUX_CODESIGN: "false"
 
       - uses: softprops/action-gh-release@v2
         with:
+          draft: true
           files: |
             ${{ env.APP_DIR }}/src-tauri/target/release/bundle/deb/*.deb
             ${{ env.APP_DIR }}/src-tauri/target/release/bundle/appimage/*.AppImage
