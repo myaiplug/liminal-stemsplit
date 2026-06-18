@@ -2599,17 +2599,19 @@ const ReactorZone: React.FC = () => {
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
                 <img src="https://liminal-stemsplit.onrender.com/assets/liminal.png?v=20260610b" alt="Liminal" className="h-4 opacity-40 pointer-events-none" />
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW.Liminal_0.4.7_x64_en-US.msi"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.8/NoDAW.Liminal_0.4.8_x64_en-US.msi"
+                   download="NoDAW.Liminal_0.4.8_x64_en-US.msi"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Windows MSI
                 </a>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW.Liminal_0.4.7_x64-setup.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.8/NoDAW.Liminal_0.4.8_x64-setup.exe"
+                   download="NoDAW.Liminal_0.4.8_x64-setup.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ NSIS Setup
                 </a>
-                <span className="text-[9px] text-slate-600 font-mono">v0.4.7</span>
+                <span className="text-[9px] text-slate-600 font-mono">v0.4.8</span>
             </footer>
         </div>
     );
