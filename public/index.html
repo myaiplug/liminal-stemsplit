@@ -15,6 +15,10 @@
 <link rel="icon" href="/assets/liminal.png" type="image/png">
 <link rel="preload" href="/assets/hero-bg.jpg?v=20260610d" as="image">
 <link rel="preload" href="/assets/liminal.png?v=20260610d" as="image">
+<link rel="preload" href="/stems/drums.wav" as="audio" crossorigin>
+<link rel="preload" href="/stems/bass.wav" as="audio" crossorigin>
+<link rel="preload" href="/stems/other.wav" as="audio" crossorigin>
+<link rel="preload" href="/stems/vocals.wav" as="audio" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&family=Syncopate:wght@400;700&display=swap" rel="stylesheet">
 <script src="https://cdn.tailwindcss.com"></script>
@@ -264,7 +268,7 @@ html.js .reveal{opacity:0;transform:translateY(24px)}
 html.js .reveal.visible{opacity:1;transform:translateY(0)}
 
 /* SCROLL INDICATOR */
-.scroll-indicator{position:absolute;bottom:0.75rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.2);font-size:0.625rem;letter-spacing:0.15em;text-transform:uppercase;animation:float 2s ease-in-out infinite;pointer-events:none;z-index:5}
+.scroll-indicator{position:absolute;bottom:2.5rem;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:0.5rem;color:rgba(255,255,255,0.2);font-size:0.625rem;letter-spacing:0.15em;text-transform:uppercase;animation:float 2s ease-in-out infinite;pointer-events:none;z-index:5}
 
 @media(max-width:768px){
   .hero-section{padding:4.75rem 1rem 3.25rem}
@@ -1136,6 +1140,7 @@ const Player = {
 
   async init() {
     this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+    if (this.audioContext.state === 'suspended') await this.audioContext.resume();
     this.masterGain = this.audioContext.createGain();
     this.masterGain.gain.value = 1;
     this.masterGain.connect(this.audioContext.destination);
@@ -1168,7 +1173,7 @@ const Player = {
     });
     await Promise.all(loaders);
     document.getElementById('totalTime').textContent = this.formatTime(this.duration);
-    if (!opts.quiet) showToast('✅ Stems loaded — click play!');
+    if (!opts.quiet) showToast('✅ Stems loaded!');
   },
 
   getElapsed() {
@@ -1448,14 +1453,34 @@ if (new URLSearchParams(window.location.search).get('checkout') === 'success') {
   setTimeout(() => { window.location.hash = 'download'; }, 1200);
 }
 
-// Init on interaction
-document.addEventListener('click', () => {
-  if (!Player.audioContext) {
-    Player.init().catch(() => {
-      // Will init on click of play button
-    });
-  }
-}, { once: true });
+// Auto-init Player when demo section scrolls into view (or after 2s on load)
+let playerInitialized = false;
+function initPlayerOnce() {
+  if (playerInitialized) return;
+  playerInitialized = true;
+  Player.init().catch(() => {
+    playerInitialized = false;
+  });
+}
+
+// Try to init immediately (AudioContext may need user gesture)
+initPlayerOnce();
+
+// Also init on first click/tap if auto-init failed (AudioContext policy)
+document.addEventListener('click', () => { initPlayerOnce(); }, { once: true });
+document.addEventListener('touchstart', () => { initPlayerOnce(); }, { once: true });
+
+// Auto-play when demo scrolls into view
+const demoObserver = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting && Player.audioContext && Player.duration > 0 && !Player.masterPlay) {
+      toggleMasterPlay();
+      demoObserver.disconnect();
+    }
+  });
+}, { threshold: 0.4 });
+const demoSection = document.getElementById('demo');
+if (demoSection) demoObserver.observe(demoSection);
 
 
 </script>
