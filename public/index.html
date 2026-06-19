@@ -564,17 +564,17 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <p class="text-white/40 max-w-lg mx-auto mt-3">Install the Windows app free. Try 1 Spleeter 2-stem split, then upgrade to Pro for unlimited access.</p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-      <a id="windowsDownloadExe" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64-setup.exe" download="NoDAW.Liminal_0.4.9_x64-setup.exe" class="p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
+      <a id="windowsDownloadExe" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64-setup.exe" data-download="NoDAW.Liminal_0.4.9_x64-setup.exe" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
         <div class="text-2xl mb-2">🪟</div>
         <div class="font-semibold">Windows (.exe)</div>
         <div class="text-xs text-white/40 mt-1">v0.4.9 • 74 MB • Recommended</div>
       </a>
-      <a id="macDownload" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_aarch64.dmg" download="NoDAW.Liminal_0.4.9_aarch64.dmg" class="p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
+      <a id="macDownload" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_aarch64.dmg" data-download="NoDAW.Liminal_0.4.9_aarch64.dmg" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
         <div class="text-2xl mb-2">🍎</div>
         <div class="font-semibold">macOS (Apple Silicon)</div>
         <div class="text-xs text-white/40 mt-1">v0.4.9 • 5.6 MB .dmg</div>
       </a>
-      <a id="linuxDownload" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_amd64.AppImage" download="NoDAW.Liminal_0.4.9_amd64.AppImage" class="p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
+      <a id="linuxDownload" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_amd64.AppImage" data-download="NoDAW.Liminal_0.4.9_amd64.AppImage" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center">
         <div class="text-2xl mb-2">🐧</div>
         <div class="font-semibold">Linux (AppImage)</div>
         <div class="text-xs text-white/40 mt-1">v0.4.9 • 87 MB • Also .deb</div>
@@ -1452,6 +1452,33 @@ if (new URLSearchParams(window.location.search).get('checkout') === 'success') {
   showToast('✅ Payment received! Check your email for the access password, then download and activate Pro in the app.');
   setTimeout(() => { window.location.hash = 'download'; }, 1200);
 }
+
+// Blob download — bypasses Chrome cross-origin `download` attribute restriction
+document.querySelectorAll('.download-link').forEach(link => {
+  link.addEventListener('click', async (e) => {
+    e.preventDefault();
+    const url = link.getAttribute('href');
+    const filename = link.getAttribute('data-download');
+    try {
+      showToast('⬇ Downloading ' + filename + '...');
+      const res = await fetch(url);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const blob = await res.blob();
+      const objectUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = objectUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(objectUrl);
+      showToast('✅ Download started!');
+    } catch (err) {
+      showToast('⚠️ Download failed. Try right-click → Save link as, or visit the GitHub release page.');
+      console.error('Download error:', err);
+    }
+  });
+});
 
 // Auto-init Player when demo section scrolls into view (or after 2s on load)
 let playerInitialized = false;
