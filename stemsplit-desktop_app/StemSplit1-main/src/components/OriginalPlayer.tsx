@@ -40,7 +40,6 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(0.8);
     const [isMuted, setIsMuted] = useState(false);
-    const [loadError, setLoadError] = useState<string | null>(null);
     const [loadProgress, setLoadProgress] = useState(0);
     const [reloadToken, setReloadToken] = useState(0);
     const [useCanvasFallback, setUseCanvasFallback] = useState(false);
@@ -86,7 +85,6 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
         let cancelled = false;
         let revokeAudioUrl: (() => void) | undefined;
 
-        setLoadError(null);
         setUseCanvasFallback(false);
         setIsReady(false);
         setLoadProgress(0);
@@ -307,8 +305,23 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                                 </span>
                             </div>
 
-                            {/* Waveform */}
+                            {/* Waveform — always shows animated bars, overlays real waveform on top */}
                             <div className="flex-1 relative min-w-0">
+                                {/* Permanent animated placeholder bars */}
+                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                                    <div className="relative w-full h-8 flex items-center justify-center overflow-hidden px-1">
+                                        <div className="flex items-end gap-[1px] h-8 w-full justify-center">
+                                            {Array.from({ length: 50 }).map((_, i) => {
+                                                const barH = 2 + Math.sin(i * 0.35) * 6 + Math.cos(i * 0.8) * 4;
+                                                return (
+                                                    <div key={i} className="rounded-full flex-shrink-0"
+                                                        style={{ width: 1.5, height: `${Math.max(2, barH)}px`, backgroundColor: 'rgba(34,211,238,0.07)' }} />
+                                                );
+                                            })}
+                                        </div>
+                                    </div>
+                                </div>
+
                                 {useCanvasFallback ? (
                                     <CanvasWaveform
                                         ref={canvasWaveformRef}
@@ -329,59 +342,10 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                                         }}
                                     />
                                 ) : (
-                                    <>
-                                        <div
-                                            ref={waveRef}
-                                            className={`w-full cursor-pointer transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
-                                        />
-                                        {!isReady && !loadError && (
-                                            <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                                <div className="relative w-full h-8 flex items-center justify-center overflow-hidden px-1">
-                                                    <div className="flex items-end gap-[1px] h-8 w-full justify-center">
-                                                        {Array.from({ length: 50 }).map((_, i) => {
-                                                            const barH = 2 + Math.sin(i * 0.35) * 6 + Math.cos(i * 0.8) * 4;
-                                                            return (
-                                                                <div key={i} className="rounded-full flex-shrink-0"
-                                                                    style={{ width: 1.5, height: `${Math.max(2, barH)}px`, backgroundColor: 'rgba(34,211,238,0.1)' }} />
-                                                            );
-                                                        })}
-                                                    </div>
-                                                    <motion.div className="absolute top-0 bottom-0 w-[2px] pointer-events-none"
-                                                        style={{
-                                                            background: 'linear-gradient(180deg, transparent 0%, rgba(34,211,238,0.5) 40%, rgba(34,211,238,0.9) 50%, rgba(34,211,238,0.5) 60%, transparent 100%)',
-                                                            boxShadow: '0 0 6px rgba(34,211,238,0.4)',
-                                                        }}
-                                                        animate={{ left: ['0%', '100%'] }}
-                                                        transition={{ duration: 1.6, repeat: Infinity, ease: 'linear' }} />
-                                                    {[0, 1, 2].map(d => (
-                                                        <motion.div key={`odot-${d}`} className="absolute rounded-full"
-                                                            style={{ width: 2.5, height: 2.5, backgroundColor: '#22d3ee', boxShadow: '0 0 5px #22d3ee', top: `${30 + Math.sin(d * 2) * 20}%` }}
-                                                            animate={{ left: ['-2%', '102%'], opacity: [0, 1, 1, 0] }}
-                                                            transition={{ duration: 2 + d * 0.35, repeat: Infinity, delay: d * 0.5, ease: 'linear' }} />
-                                                    ))}
-                                                </div>
-                                                <div className="flex items-center gap-1.5 mt-0.5">
-                                                    <div className="w-12 h-[1.5px] rounded-full bg-slate-800 overflow-hidden">
-                                                        <motion.div className="h-full rounded-full bg-cyan-400"
-                                                            animate={{ width: `${loadProgress}%` }}
-                                                            transition={{ duration: 0.3 }} />
-                                                    </div>
-                                                    <span className="text-[7px] font-mono tabular-nums text-cyan-400/60">{loadProgress}%</span>
-                                                </div>
-                                            </div>
-                                        )}
-                                    </>
-                                )}
-                                {/* Minimal error indicator — never shows "Failed to load audio" */}
-                                {loadError && !useCanvasFallback && (
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                        <button type="button"
-                                            onClick={() => { setLoadError(null); setReloadToken((v) => v + 1); }}
-                                            className="text-[8px] font-mono uppercase tracking-wider text-cyan-400/50 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/40 px-2 py-0.5 rounded transition-all"
-                                            title="Retry">
-                                            ↻
-                                        </button>
-                                    </div>
+                                    <div
+                                        ref={waveRef}
+                                        className={`w-full cursor-pointer transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
+                                    />
                                 )}
                             </div>
 

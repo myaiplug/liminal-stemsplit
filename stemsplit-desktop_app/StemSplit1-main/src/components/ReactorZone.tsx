@@ -8,7 +8,6 @@ import { useLicense } from '@/contexts/LicenseContext';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { isTauriRuntime } from '@/lib/tauri-runtime';
 import TitleBar from './TitleBar';
-import LandingHero from './LandingHero';
 import { APP_FOOTER_LABEL } from '@/lib/app-version';
 import StemPlayer from './StemPlayer';
 import OriginalPlayer from './OriginalPlayer';
@@ -736,11 +735,12 @@ const ReactorZone: React.FC = () => {
     const [transcriptError, setTranscriptError] = useState<string | null>(null);
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { status, progress: progressEvent, progressPercent, result, error, startSeparation, cancel } = useStemSplit();
+    const [stemsLoaded, setStemsLoaded] = useState(false);
+    const stemsResultRef = useRef(result);
     const { isTrial, isPro } = useLicense();
     const isFreeMode = isTrial && !isPro;
     const [freeTierStatus, setFreeTierStatus] = useState<TrialFreeTierStatus | null>(null);
     const freeTierExhausted = isFreeMode && (freeTierStatus?.free_tier_exhausted ?? false);
-    const showLanding = status === StemSplitStatus.IDLE && !loadedFilePath && !pendingFilePath;
     const { play, stop } = useSoundSystem();
     const prevStatus = useRef(status);
 
@@ -856,11 +856,13 @@ const ReactorZone: React.FC = () => {
     }, [splitEngine, splitStems, splitModelVariant]);
 
     useEffect(() => {
+        if (result) stemsResultRef.current = result;
         if (prevStatus.current !== status) {
             if (status === StemSplitStatus.PROCESSING) play('process_start');
             if (status === StemSplitStatus.COMPLETED) {
                 play('success_chime');
                 stop('process_loop');
+                if (result?.stems) setStemsLoaded(true);
                 if (result?.output_directory) {
                     // Open the folder in the default file manager once completion happens!
                     console.log('Attempting to open folder:', result.output_directory);
@@ -1266,7 +1268,7 @@ const ReactorZone: React.FC = () => {
 
     // Main render
     return (
-        <div className={`relative min-h-screen flex flex-col items-center ${showLanding ? 'justify-start' : 'justify-center'} bg-slate-950 overflow-x-hidden overflow-y-auto`}>
+        <div className="relative min-h-screen flex flex-col items-center justify-center bg-slate-950 overflow-x-hidden overflow-y-auto">
             {/* Hero waveform photo background */}
             <div
                 className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat"
@@ -1294,29 +1296,9 @@ const ReactorZone: React.FC = () => {
             <CoreVisualizer isProcessing={status === StemSplitStatus.PROCESSING} progress={progressPercent} bassEnergy={bassEnergy} />
 
             {/* Main UI Zone */}
-            <AnimatePresence mode="wait">
-                {showLanding && (
-                    <motion.div
-                        key="landing-hero"
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0, y: -20 }}
-                        transition={{ duration: 0.4 }}
-                        className="w-full"
-                    >
-                        <LandingHero />
-                    </motion.div>
-                )}
-
-                {!showLanding && (
-                    <motion.div
-                        key="app-ui"
-                        initial={{ opacity: 0, y: 20 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        exit={{ opacity: 0 }}
-                        transition={{ duration: 0.3 }}
-                        className="relative z-10 flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-8"
-                    >
+            <div
+                className="relative z-10 flex flex-col items-center justify-center w-full max-w-2xl mx-auto py-8"
+            >
                 <div className="flex flex-col items-center mb-4">
                     <GlitchText className="font-display font-bold uppercase text-center" style={{
                         fontSize: '2.8rem',
@@ -1654,9 +1636,9 @@ const ReactorZone: React.FC = () => {
                     )}
                 </AnimatePresence>
 
-                {/* Stem Players (slide in on completion) */}
+                {/* Stem Players (persist once loaded) */}
                 <AnimatePresence>
-                    {status === StemSplitStatus.COMPLETED && result?.stems && (
+                    {stemsLoaded && stemsResultRef.current?.stems && (
                         <motion.div
                             key="stem-players"
                             initial={{ opacity: 0 }}
@@ -1673,13 +1655,13 @@ const ReactorZone: React.FC = () => {
                             >
                                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
                                 <span className="text-[9px] font-mono tracking-[0.3em] text-cyan-500/60 uppercase whitespace-nowrap">
-                                    {Object.keys(result.stems).length} Stems Ready
+                                    {Object.keys(stemsResultRef.current.stems).length} Stems Ready
                                 </span>
                                 <div className="h-[1px] flex-1 bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
                             </motion.div>
 
                             {/* Player cards */}
-                            {Object.entries(result.stems).map(([name, info], idx) => (
+                            {Object.entries(stemsResultRef.current.stems).map(([name, info], idx) => (
                                 <StemPlayer
                                     key={`${name}-${info.file_path}`}
                                     stemName={name}
@@ -1734,9 +1716,7 @@ const ReactorZone: React.FC = () => {
                         <span className="text-cyan-500/70">Transcript and YouTube ingest follow Cyber-HUD pipeline styling</span>
                     )}
                 </div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            </div>
 
             {/* Config Modal */}
             <AnimatePresence>
@@ -2599,19 +2579,19 @@ const ReactorZone: React.FC = () => {
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
                 <img src="https://liminal-stemsplit.onrender.com/assets/liminal.png?v=20260610b" alt="Liminal" className="h-4 opacity-40 pointer-events-none" />
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.8/NoDAW.Liminal_0.4.8_x64_en-US.msi"
-                   download="NoDAW.Liminal_0.4.8_x64_en-US.msi"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64_en-US.msi"
+                   download="NoDAW.Liminal_0.4.9_x64_en-US.msi"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Windows MSI
                 </a>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.8/NoDAW.Liminal_0.4.8_x64-setup.exe"
-                   download="NoDAW.Liminal_0.4.8_x64-setup.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64-setup.exe"
+                   download="NoDAW.Liminal_0.4.9_x64-setup.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ NSIS Setup
                 </a>
-                <span className="text-[9px] text-slate-600 font-mono">v0.4.8</span>
+                <span className="text-[9px] text-slate-600 font-mono">v0.4.9</span>
             </footer>
         </div>
     );

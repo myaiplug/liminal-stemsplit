@@ -76,7 +76,7 @@ export default function LicenseModal({ isOpen, onClose }: LicenseModalProps) {
     const checkoutEmail = licenseEmail.trim() || sessionEmail || signupEmail || '';
     const result = await startProCheckout(checkoutEmail);
     if (result.ok) {
-      setSuccess('Stripe checkout opened. After payment, check your email for the access password, then activate below.');
+      setSuccess('Stripe checkout opened. After payment, check your email for the license key, then activate below.');
       if (checkoutEmail && !licenseEmail.trim()) {
         setLicenseEmail(checkoutEmail);
       }
@@ -250,7 +250,7 @@ export default function LicenseModal({ isOpen, onClose }: LicenseModalProps) {
                   <div className="space-y-4">
                     <div className="rounded-lg border border-cyan-500/30 bg-cyan-950/20 p-3">
                       <p className="text-[10px] font-mono tracking-[0.18em] uppercase text-cyan-300">Step 1 — Purchase</p>
-                      <p className="text-xs text-slate-400 mt-1">Buy Pro once with Stripe. Your access password is emailed automatically after payment.</p>
+                      <p className="text-xs text-slate-400 mt-1">Buy Pro once with Stripe. Your license key is emailed automatically after payment.</p>
                       <div className="mt-3 flex flex-col sm:flex-row gap-2">
                         <button
                           type="button"
@@ -273,7 +273,7 @@ export default function LicenseModal({ isOpen, onClose }: LicenseModalProps) {
                     <form onSubmit={handleProActivate} className="space-y-3">
                       <p className="text-[10px] font-mono tracking-[0.18em] uppercase text-amber-300">Step 2 — Activate</p>
                       <Input label="Purchase Email" value={licenseEmail} setValue={setLicenseEmail} placeholder="Email used at checkout" />
-                      <Input label="Access Password" value={licenseKey} setValue={setLicenseKey} placeholder="From your purchase confirmation email" />
+                      <Input label="License Key" value={licenseKey} setValue={setLicenseKey} placeholder="LSSP-XXXX-XXXX-XXXX" />
                       <ActionButton label={busy ? 'Activating...' : 'Activate Pro'} disabled={busy || !licenseEmail.trim() || !licenseKey.trim()} />
                       <p className="text-xs text-slate-400">
                         Didn&apos;t get the email? Check spam, or contact support with your Stripe receipt.

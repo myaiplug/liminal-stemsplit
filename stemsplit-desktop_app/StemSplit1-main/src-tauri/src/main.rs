@@ -3574,6 +3574,20 @@ async fn transcribe_audio(
         return Err(format!("Audio file not found: {}", source_path.display()));
     }
 
+    // Verify ffmpeg is available (required by whisper_transcribe.py for preprocessing)
+    let has_ffmpeg = Command::new("ffmpeg")
+        .arg("-version")
+        .output()
+        .map(|o| o.status.success())
+        .unwrap_or(false);
+    if !has_ffmpeg {
+        return Err(
+            "FFmpeg not found. Whisper transcription requires FFmpeg for audio preprocessing. \
+             Install FFmpeg from https://ffmpeg.org or via your package manager."
+                .to_string(),
+        );
+    }
+
     let python_exe = get_python_executable().ok_or_else(|| {
         "Python runtime is not available. Run the built-in environment setup first.".to_string()
     })?;

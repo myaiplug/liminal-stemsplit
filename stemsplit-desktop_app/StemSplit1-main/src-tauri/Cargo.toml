@@ -1,6 +1,6 @@
 [package]
 name = "stem-split"
-version = "0.4.7"
+version = "0.4.9"
 description = "Professional audio stem splitter with AI-powered separation"
 authors = ["Your Name"]
 edition = "2021"
