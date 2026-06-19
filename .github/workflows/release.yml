@@ -22,13 +22,16 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
 
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: x86_64-pc-windows-msvc
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2"
 
       - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
@@ -56,7 +59,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
 
@@ -64,16 +67,18 @@ jobs:
         with:
           targets: aarch64-apple-darwin
 
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2"
+
       - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
 
       - run: npm run build
         working-directory: ${{ env.APP_DIR }}
 
-      - run: cargo tauri build --bundles dmg --target aarch64-apple-darwin
+      - name: Build macOS dmg (Apple Silicon)
+        run: cargo tauri build --bundles dmg --target aarch64-apple-darwin
         working-directory: ${{ env.APP_DIR }}/src-tauri
-        env:
-          TAURI_BUNDLE_DMG_CODESIGN: "false"
 
       - uses: softprops/action-gh-release@v2
         with:
@@ -88,7 +93,7 @@ jobs:
 
       - uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 22
           cache: npm
           cache-dependency-path: ${{ env.APP_DIR }}/package-lock.json
 
@@ -112,6 +117,9 @@ jobs:
             libgtk-3-dev \
             libsoup-3.0-dev \
             libjavascriptcoregtk-4.1-dev
+
+      - name: Install Tauri CLI
+        run: cargo install tauri-cli --version "^2"
 
       - run: npm ci --legacy-peer-deps
         working-directory: ${{ env.APP_DIR }}
