@@ -242,7 +242,7 @@ const TitleBar: React.FC<TitleBarProps> = ({ onToolTrigger }) => {
                     >
                         {/* Scanline overlay inside button */}
                         <div className="absolute inset-0 bg-[linear-gradient(rgba(255,255,255,0.05)_1px,transparent_1px)] bg-[size:100%_2px] pointer-events-none opacity-50 group-hover:opacity-20" />
-                        <span className={`relative z-10 w-2 h-2 rounded-full shadow-[0_0_5px_currentColor] ${isPro ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`}></span>
+                        <span className={`relative z-10 w-2 h-2 rounded-full shadow-[0_0_5px_currentColor] ${isPro ? 'bg-emerald-500' : 'bg-cyan-500 animate-pulse'}`}></span>
                         <span className="relative z-10">{isPro ? 'PRO ACTIVE' : 'UPGRADE TO PRO'}</span>
                     </button>
                 </div>

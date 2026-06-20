@@ -29,6 +29,11 @@ const SalesModal = dynamic(
   { ssr: false }
 );
 
+const LicenseGate = dynamic(
+  () => import('@/components/LicenseGate'),
+  { ssr: false }
+);
+
 export default function Home() {
   const [isPythonReady, setIsPythonReady] = useState(false);
   const [isLicenseModalOpen, setIsLicenseModalOpen] = useState(false);
@@ -51,7 +56,9 @@ export default function Home() {
       <UpdateModal />
       <LicenseModal isOpen={isLicenseModalOpen} onClose={() => setIsLicenseModalOpen(false)} />
       <SalesModal isOpen={isSalesModalOpen} onClose={() => setIsSalesModalOpen(false)} />
-      <ReactorZone />
+      <LicenseGate>
+        <ReactorZone />
+      </LicenseGate>
     </main>
   );
 }

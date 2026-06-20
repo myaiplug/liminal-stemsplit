@@ -3,7 +3,7 @@
 import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useStemSplit, StemSplitStatus } from '@/hooks/useStemSplit';
-import { downloadYouTubeAudio, openResultsFolder, transcribeAudio, WhisperTranscriptionResult, getTrialFreeTierStatus, TrialFreeTierStatus } from '@/lib/tauri-bridge';
+import { downloadYouTubeAudio, openResultsFolder, transcribeAudio, WhisperTranscriptionResult } from '@/lib/tauri-bridge';
 import { useLicense } from '@/contexts/LicenseContext';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { isTauriRuntime } from '@/lib/tauri-runtime';
@@ -737,45 +737,26 @@ const ReactorZone: React.FC = () => {
     const { status, progress: progressEvent, progressPercent, result, error, startSeparation, cancel } = useStemSplit();
     const [stemsLoaded, setStemsLoaded] = useState(false);
     const stemsResultRef = useRef(result);
-    const { isTrial, isPro } = useLicense();
-    const isFreeMode = isTrial && !isPro;
-    const [freeTierStatus, setFreeTierStatus] = useState<TrialFreeTierStatus | null>(null);
-    const freeTierExhausted = isFreeMode && (freeTierStatus?.free_tier_exhausted ?? false);
+    const { isPro } = useLicense();
+    const isFreeMode = !isPro;
     const { play, stop } = useSoundSystem();
     const prevStatus = useRef(status);
-
-    const refreshFreeTierStatus = useCallback(async () => {
-        if (!isFreeMode) {
-            setFreeTierStatus(null);
-            return;
-        }
-        const status = await getTrialFreeTierStatus();
-        setFreeTierStatus(status);
-    }, [isFreeMode]);
 
     const openLicenseModal = useCallback(() => {
         window.dispatchEvent(new CustomEvent('open-license-modal'));
     }, []);
 
-    useEffect(() => {
-        refreshFreeTierStatus();
-    }, [refreshFreeTierStatus, status]);
-
-    const blockFreeSplitIfExhausted = useCallback(() => {
-        if (!freeTierExhausted) return false;
-        setUiError('Your free Spleeter 2-stem split has been used. Upgrade to Pro for unlimited access.');
-        play('error_buzz');
-        openLicenseModal();
-        return true;
-    }, [freeTierExhausted, play, openLicenseModal]);
+    const promptUpgrade = useCallback(() => {
+        window.dispatchEvent(new CustomEvent('open-sales-modal'));
+    }, []);
 
     useEffect(() => {
         if (!isFreeMode) return;
-        // Free tier allows Vocals (roformer) & Instrumental (mdx)
-        // Force 2-stem and single pass for free
+        // Free mode: force 2-stem, 1 pass, Spleeter engine
         if (splitStems !== '2') setSplitStems('2');
         if (splitPasses !== '1') setSplitPasses('1');
-    }, [isFreeMode, splitStems, splitPasses]);
+        if (splitEngine !== 'spleeter') setSplitEngine('spleeter');
+    }, [isFreeMode, splitStems, splitPasses, splitEngine]);
 
     // Auto-detect GPU on mount
     useEffect(() => {
@@ -910,7 +891,6 @@ const ReactorZone: React.FC = () => {
 
     const applySelectedPaths = useCallback((paths: string[]) => {
         if (paths.length === 0) return;
-        if (blockFreeSplitIfExhausted()) return;
 
         setSourceTitle(null);
 
@@ -933,7 +913,7 @@ const ReactorZone: React.FC = () => {
             setLoadedFilePath(paths[0]);
         }
         setShowSettings(true);
-    }, [isFreeMode, blockFreeSplitIfExhausted]);
+    }, [isFreeMode]);
 
     useEffect(() => {
         if (!isTauriRuntime()) return;
@@ -1000,7 +980,6 @@ const ReactorZone: React.FC = () => {
 
     const handleOpenDialog = useCallback(async () => {
         if (status === StemSplitStatus.PROCESSING) return;
-        if (blockFreeSplitIfExhausted()) return;
         setUiError(null);
         play('click_engage');
         try {
@@ -1021,7 +1000,7 @@ const ReactorZone: React.FC = () => {
             console.error("Failed to open dialog", err);
             play('error_buzz');
         }
-    }, [play, status, applySelectedPaths, blockFreeSplitIfExhausted]);
+    }, [play, status, applySelectedPaths]);
 
     const handleSelectOutputDir = useCallback(async () => {
         try {
@@ -1188,7 +1167,6 @@ const ReactorZone: React.FC = () => {
     }, [status, progressEvent, play]);
 
     const executePendingSplit = useCallback(async () => {
-        if (blockFreeSplitIfExhausted()) return;
         if (pendingFilePath) {
             setShowSettings(false);
             play('process_loop');
@@ -1204,7 +1182,7 @@ const ReactorZone: React.FC = () => {
                 await startSeparation(pendingFilePath, splitOptions);
             }
         }
-    }, [pendingFilePath, pendingFiles, startSeparation, play, splitOptions, blockFreeSplitIfExhausted]);
+    }, [pendingFilePath, pendingFiles, startSeparation, play, splitOptions]);
 
     useEffect(() => {
         if (!isTauriRuntime()) return;
@@ -1381,43 +1359,19 @@ const ReactorZone: React.FC = () => {
 
                     {isFreeMode && (
                         <motion.div
-                            initial={{ opacity: 0, y: 6 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.35 }}
-                            className="mt-5 w-full max-w-xl"
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1 }}
+                            className="mt-3 flex items-center gap-3"
                         >
-                            <div className={`relative overflow-hidden rounded-xl border backdrop-blur-md shadow-[0_0_24px_rgba(245,158,11,0.15)] ${
-                                freeTierExhausted
-                                    ? 'border-red-500/40 bg-red-950/40'
-                                    : 'border-amber-500/35 bg-slate-900/80'
-                            }`}>
-                                <div className="absolute inset-0 opacity-[0.07] pointer-events-none bg-[linear-gradient(rgba(245,158,11,0.16)_1px,transparent_1px)] bg-[size:100%_3px]" />
-                                <div className={`absolute inset-y-0 left-0 w-1 bg-gradient-to-b ${
-                                    freeTierExhausted ? 'from-red-400 via-red-500 to-red-700' : 'from-amber-300 via-amber-500 to-amber-700'
-                                }`} />
-                                <div className="px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-                                    <div className="pl-2">
-                                        <p className={`font-mono text-[10px] tracking-[0.24em] uppercase ${
-                                            freeTierExhausted ? 'text-red-300/90' : 'text-amber-400/90'
-                                        }`}>
-                                            {freeTierExhausted ? 'Free Split Used' : 'Free Plan Active'}
-                                        </p>
-                                        <p className="font-mono text-xs text-slate-300 mt-1">
-                                            {freeTierExhausted
-                                                ? 'Upgrade to Pro for unlimited Demucs, MDX, batch, and WAV export.'
-                                                : `1 free Spleeter 2-stem split • ${freeTierStatus?.free_splits_remaining ?? 1} remaining`}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => window.dispatchEvent(new CustomEvent('open-sales-modal'))}
-                                        className="group relative px-4 py-2 rounded-md border border-amber-400/50 text-amber-300 hover:text-slate-950 font-mono text-[10px] tracking-[0.2em] uppercase transition-all duration-200 overflow-hidden"
-                                        title="Unlock full Pro processing"
-                                    >
-                                        <span className="absolute inset-0 bg-gradient-to-r from-amber-500 to-amber-300 opacity-0 group-hover:opacity-100 transition-opacity" />
-                                        <span className="relative">{freeTierExhausted ? 'Get Pro — $49' : 'Upgrade To Pro'}</span>
-                                    </button>
-                                </div>
-                            </div>
+                            <span className="text-[10px] font-mono text-amber-400/60 tracking-[0.2em] uppercase">
+                                Free — 2-Stem Spleeter
+                            </span>
+                            <button
+                                onClick={() => window.dispatchEvent(new CustomEvent('open-sales-modal'))}
+                                className="text-[9px] font-mono text-cyan-400/60 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/40 px-2 py-0.5 rounded transition-all"
+                            >
+                                Upgrade $49
+                            </button>
                         </motion.div>
                     )}
                 </div>
@@ -1736,14 +1690,8 @@ const ReactorZone: React.FC = () => {
                             
                             <div className="space-y-3 font-mono text-sm text-slate-300">
                                 {isFreeMode && (
-                                    <div className={`rounded p-3 text-xs border ${
-                                        freeTierExhausted
-                                            ? 'bg-red-900/20 border-red-700/50 text-red-300'
-                                            : 'bg-amber-900/20 border-amber-700/50 text-amber-300'
-                                    }`}>
-                                        {freeTierExhausted
-                                            ? 'Your free Spleeter 2-stem split has been used. Activate Pro to continue.'
-                                            : 'Free mode: 1 Spleeter 2-stem split (any options you pick are coerced to this). MP3 output only.'}
+                                    <div className="rounded p-3 text-xs border bg-amber-900/20 border-amber-700/50 text-amber-300">
+                                        Free mode: Spleeter 2-stem • 1 pass • MP3. Upgrade to Pro for all engines, unlimited stems, and WAV export.
                                     </div>
                                 )}
                                 {pendingFilePath && (
@@ -2039,18 +1987,16 @@ const ReactorZone: React.FC = () => {
                                             setShowSettings(false);
                                         }
                                     }}
-                                    disabled={freeTierExhausted && !!pendingFilePath}
+                                    disabled={!pendingFilePath}
                                     className={`px-6 py-2 bg-cyan-900 border border-cyan-500 rounded text-cyan-50 hover:bg-cyan-800 transition-colors font-bold shadow-lg shadow-cyan-900/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-cyan-900 ${
                                        pendingFiles.length > 1 ? "animate-pulse" : "" 
                                     }`}
                                 >
-                                    {freeTierExhausted && pendingFilePath
-                                        ? 'UPGRADE TO SPLIT'
-                                        : pendingFiles.length > 1 && !isFreeMode
-                                            ? `SPLIT BATCH (${pendingFiles.length})`
-                                            : pendingFilePath
-                                                ? (isFreeMode ? 'EXECUTE FREE SPLIT' : 'EXECUTE SPLIT')
-                                                : 'Save Config'}
+                                    {pendingFiles.length > 1 && !isFreeMode
+                                        ? `SPLIT BATCH (${pendingFiles.length})`
+                                        : pendingFilePath
+                                            ? (isFreeMode ? 'START FREE SPLIT' : 'START SPLIT')
+                                            : 'Load a file first'}
                                 </button>
                             </div>
                         </motion.div>
