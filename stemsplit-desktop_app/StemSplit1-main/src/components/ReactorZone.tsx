@@ -1273,7 +1273,7 @@ const ReactorZone: React.FC = () => {
             <div
                 className="absolute inset-0 z-0 pointer-events-none bg-cover bg-center bg-no-repeat"
                 style={{
-                    backgroundImage: "url('/hero-bg.jpg')",
+                    backgroundImage: "url('/bg.png')",
                     filter: 'saturate(1.08) contrast(1.05)',
                 }}
                 aria-hidden
@@ -2093,14 +2093,23 @@ const ReactorZone: React.FC = () => {
                             <div className="space-y-4 px-6 py-5 font-mono text-sm text-slate-300">
                                 <div className="rounded-xl border border-slate-700/50 bg-slate-900 p-4 shadow-[0_0_10px_rgba(34,211,238,0.08)]">
                                     <label className="mb-2 block text-[10px] uppercase tracking-[0.24em] text-slate-500">YouTube URL</label>
+                                    <div className="flex gap-2">
                                     <input
                                         value={youtubeUrl}
                                         onChange={(event) => setYouTubeUrl(event.target.value)}
                                         placeholder="https://www.youtube.com/watch?v=..."
-                                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-cyan-50 focus:border-cyan-500 outline-none text-xs"
+                                        className="flex-1 bg-slate-950 border border-slate-700 rounded p-2 text-cyan-50 focus:border-cyan-500 outline-none text-xs"
                                         disabled={isDownloadingYouTube}
                                     />
-                                    <p className="mt-2 text-[10px] text-slate-500">The imported MP3 is staged locally, then becomes the active source for split or transcript workflows.</p>
+                                    <button
+                                        type="button"
+                                        onClick={() => window.open('https://www.youtube.com', '_blank')}
+                                        className="px-3 py-1.5 border border-red-500/30 text-red-400/70 hover:text-red-300 hover:bg-red-950/30 rounded text-[9px] font-mono uppercase tracking-wider transition-colors"
+                                    >
+                                        ▸ YT
+                                    </button>
+                                    </div>
+                                    <p className="mt-2 text-[10px] text-slate-500">Paste a single video URL or a playlist link. Videos import one-by-one into the queue.</p>
                                 </div>
 
                                 <div className="rounded-xl border border-slate-700/50 bg-slate-900 p-4 shadow-[0_0_10px_rgba(34,211,238,0.08)]">
@@ -2131,7 +2140,7 @@ const ReactorZone: React.FC = () => {
                                         </div>
                                         <div>
                                             <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2">Video Formats</p>
-                                            {['video_360p', 'video_720p', 'video_1080p'].map((mode) => (
+                                            {['video_360p', 'video_480p', 'video_720p', 'video_1080p', 'video_1440p', 'video_4k'].map((mode) => (
                                                 <label key={mode} className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-800 p-1.5 rounded">
                                                     <input
                                                         type="radio"
@@ -2578,7 +2587,7 @@ const ReactorZone: React.FC = () => {
 
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
-                <img src="https://liminal-stemsplit.onrender.com/assets/liminal.png?v=20260610b" alt="Liminal" className="h-4 opacity-40 pointer-events-none" />
+                <span className="text-[9px] font-mono text-slate-500 tracking-[0.15em] uppercase select-none">LIMINAL&trade;</span>
                 <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64_en-US.msi"
                    download="NoDAW.Liminal_0.4.9_x64_en-US.msi"
                    target="_blank" rel="noopener noreferrer"

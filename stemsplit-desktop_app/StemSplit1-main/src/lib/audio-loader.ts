@@ -67,22 +67,22 @@ async function getFileSize(filePath: string): Promise<number> {
 }
 
 function timeoutForFileSize(bytes: number): number {
-  if (bytes >= 40 * 1024 * 1024) return 90000;
-  if (bytes >= 15 * 1024 * 1024) return 60000;
-  if (bytes >= 5 * 1024 * 1024) return 45000;
-  return 30000;
+  if (bytes >= 40 * 1024 * 1024) return 15000;
+  if (bytes >= 15 * 1024 * 1024) return 10000;
+  if (bytes >= 5 * 1024 * 1024) return 8000;
+  return 5000;
 }
 
 export async function waitForReadableAudioFile(
   filePath: string,
   options?: { timeoutMs?: number; pollMs?: number; minBytes?: number }
 ): Promise<number> {
-  const pollMs = options?.pollMs ?? 200;
+  const pollMs = options?.pollMs ?? 80;
   const minBytes = options?.minBytes ?? 512;
   const started = Date.now();
   let lastSize = -1;
   let stableReads = 0;
-  let timeoutMs = options?.timeoutMs ?? 30000;
+  let timeoutMs = options?.timeoutMs ?? 5000;
 
   while (Date.now() - started < timeoutMs) {
     if (!(await fileExists(filePath))) {
@@ -176,22 +176,25 @@ export async function buildAudioSourceCandidates(filePath: string): Promise<Reso
     return [{ url: normalizedPath, strategy: 'asset' }];
   }
 
-  const candidates: ResolvedAudioUrl[] = assetCandidates(normalizedPath).map((url) => ({
-    url,
-    strategy: 'asset' as const,
-  }));
-
+  // FS blob first — always works for disk files, no protocol issues
+  const candidates: ResolvedAudioUrl[] = [];
   try {
     candidates.push(await loadViaFsBlob(normalizedPath));
   } catch (error) {
     console.warn('[audio-loader] FS blob candidate failed:', error);
   }
 
+  // Backend blob fallback
   try {
     candidates.push(await loadViaBackendBlob(normalizedPath));
   } catch (error) {
     console.warn('[audio-loader] Backend blob candidate failed:', error);
   }
+
+  // Asset protocol last — only works for bundled resources
+  assetCandidates(normalizedPath).forEach((url) => {
+    candidates.push({ url, strategy: 'asset' as const });
+  });
 
   if (candidates.length === 0) {
     throw new Error(`No audio loading strategy available for ${normalizedPath}`);
@@ -205,7 +208,7 @@ export async function loadWaveSurferSource(
   load: (url: string) => Promise<void>,
   options?: { maxPasses?: number }
 ): Promise<ResolvedAudioUrl> {
-  const maxPasses = options?.maxPasses ?? 6;
+  const maxPasses = options?.maxPasses ?? 3;
   let lastError: unknown = null;
 
   for (let pass = 1; pass <= maxPasses; pass += 1) {
@@ -227,7 +230,7 @@ export async function loadWaveSurferSource(
     }
 
     if (pass < maxPasses) {
-      await sleep(350 * pass);
+      await sleep(200);
     }
   }
 

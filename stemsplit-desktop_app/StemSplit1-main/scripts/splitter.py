@@ -1072,6 +1072,9 @@ class AudioSeparator:
         self.output_format = config.get('output_format', 'wav').lower()
         self.mp3_bitrate = config.get('mp3_bitrate', 320)
         self.apply_effects = config.get('apply_effects', True)
+        self.fast_mode = config.get('fast_mode', False)
+        if self.fast_mode:
+            self.apply_effects = False  # Skip pedalboard chain in fast mode
         
         # Import Demucs here to allow optional import
         try:
@@ -2602,26 +2605,24 @@ class AudioSeparator:
                 import time
                 current = 40
                 while not stop_progress.is_set() and current < 90:
-                    # Slow down as we approach 90 — asymptotic feel
-                    # CPU takes much longer - adjust delays
                     if is_cpu:
                         if current < 50:
-                            delay = 8.0  # CPU is ~5x slower
+                            delay = 3.0
                         elif current < 70:
-                            delay = 15.0
+                            delay = 5.0
                         elif current < 85:
-                            delay = 25.0
-                        else:
-                            delay = 45.0
-                    else:
-                        if current < 60:
-                            delay = 2.0
-                        elif current < 80:
-                            delay = 4.0
-                        elif current < 88:
                             delay = 8.0
                         else:
-                            delay = 15.0
+                            delay = 12.0
+                    else:
+                        if current < 60:
+                            delay = 0.8
+                        elif current < 80:
+                            delay = 1.5
+                        elif current < 88:
+                            delay = 2.5
+                        else:
+                            delay = 4.0
                     
                     time.sleep(delay)
                     current += 1
@@ -2670,7 +2671,7 @@ class AudioSeparator:
             if progress_hook:
                 progress_hook(3, 5, " Stem separation complete", 91)
                 
-            if 'vocals' in stems and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx'):
+            if not self.fast_mode and 'vocals' in stems and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx'):
                 # First try applying sophisticated UVR denoise if the model is present
                 uvr_denoiser_path = find_vr_model_file('UVR-DeNoise-Lite.pth') or ''
                 
@@ -2728,16 +2729,17 @@ class AudioSeparator:
 
             # Step 5: Global Analysis (for tagging and filenames)
             bpm, key, pitch_hz = 0.0, "", 0.0
-            try:
-                if progress_hook:
-                     progress_hook(4, 5, "Analyzing audio characteristics...", 91)
-                logger.info("Analyzing full track for BPM and Key before saving...")
-                bpm = AudioAnalyzer.detect_bpm(audio, sr)
-                key = AudioAnalyzer.detect_key(audio, sr)
-                # Pitch is less useful globally, but we can try or skip
-                # pitch_hz = AudioAnalyzer.detect_pitch(audio, sr) 
-            except Exception as e:
-                logger.warning(f"Global analysis failed: {e}")
+            if not self.fast_mode:
+                try:
+                    if progress_hook:
+                         progress_hook(4, 5, "Analyzing audio characteristics...", 91)
+                    logger.info("Analyzing full track for BPM and Key before saving...")
+                    bpm = AudioAnalyzer.detect_bpm(audio, sr)
+                    key = AudioAnalyzer.detect_key(audio, sr)
+                    # Pitch is less useful globally, but we can try or skip
+                    # pitch_hz = AudioAnalyzer.detect_pitch(audio, sr) 
+                except Exception as e:
+                    logger.warning(f"Global analysis failed: {e}")
 
             # Optional post-FX chain (Apollo, Matchering, Transkun)
             fx_id = getattr(self, 'post_fx', '') or (
@@ -2889,6 +2891,8 @@ def main():
     parser.add_argument('--max-duration', type=int, default=None,
                         help='Max input duration in seconds (trial mode)')
     parser.add_argument('--analyze', action='store_true', help='Just analyze file and exit')
+    parser.add_argument('--fast', action='store_true', 
+                        help='Skip analytics (BPM/key/onset), mastering effects, and spectral cleanup for maximum speed')
 
     logger.info(f"Splitter CLI starting ({Path(__file__).resolve()})")
     args = parser.parse_args()
@@ -2956,6 +2960,7 @@ def main():
         "fx_config": fx_config,
         "trial_mode": args.trial_mode,
         "max_duration_seconds": args.max_duration,
+        "fast_mode": args.fast,
         "shifts": 2 if default_device == "cuda" else 1, # Faster on CPU
     }
 
@@ -2979,6 +2984,7 @@ def main():
                     "fx_config": fx_config,
                     "trial_mode": args.trial_mode,
                     "max_duration_seconds": args.max_duration,
+                    "fast_mode": args.fast,
                 })
                 config = loaded_config
             logger.info(f"Loaded hardware config from {config_path}: {config}")

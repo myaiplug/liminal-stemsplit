@@ -104,9 +104,27 @@ def download_youtube(url: str, output_dir: Path, mode: str = "audio_mp3_320", em
     emit("progress", message=f"Resolving ({cfg['desc']})...", percent=5)
 
     try:
-        probe_opts = {"quiet": True, "no_warnings": True, "skip_download": True, "noplaylist": True, "js_runtimes": detect_js_runtimes()}
+        probe_opts = {"quiet": True, "no_warnings": True, "skip_download": True, "extract_flat": False,
+                      "js_runtimes": detect_js_runtimes()}
         with yt_dlp.YoutubeDL(probe_opts) as ydl:
             info = ydl.extract_info(url, download=False)
+
+        # Detect playlist — if multiple entries, return the list for batch import
+        entries = info.get("entries")
+        if entries and len(entries) > 1:
+            playlist_title = info.get("title", "Playlist")
+            playlist_count = len(entries)
+            emit("progress", message=f"Playlist: {playlist_title} ({playlist_count} videos)", percent=8)
+            video_urls = []
+            for idx, entry in enumerate(entries):
+                if entry and entry.get("url"):
+                    video_urls.append(entry["url"])
+                elif entry and entry.get("id"):
+                    video_urls.append(f"https://www.youtube.com/watch?v={entry['id']}")
+                else:
+                    video_urls.append(entry.get("webpage_url", f"https://www.youtube.com/watch?v={entry.get('id', '')}"))
+            emit("playlist", urls=video_urls, title=playlist_title, count=len(video_urls))
+            return
 
         title = info.get("title", "Untitled")
         uploader = info.get("uploader", "Unknown")
@@ -131,7 +149,7 @@ def download_youtube(url: str, output_dir: Path, mode: str = "audio_mp3_320", em
             return
 
         output_template = str(work_dir / f"{safe_title}.%(ext)s")
-        ydl_opts = {"outtmpl": output_template, "quiet": True, "no_warnings": True, "noplaylist": True,
+        ydl_opts = {"outtmpl": output_template, "quiet": True, "no_warnings": True,
                     "progress_hooks": [progress_hook], "js_runtimes": detect_js_runtimes()}
 
         if cfg["type"] == "audio":

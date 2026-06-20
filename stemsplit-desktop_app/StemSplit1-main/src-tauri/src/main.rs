@@ -2950,6 +2950,9 @@ async fn execute_splice(
         cmd_args.push(license.limitations.max_duration_seconds.to_string());
     }
 
+    // Always run fast mode — skip analytics + effects + spectral cleanup for speed
+    cmd_args.push("--fast".to_string());
+
     let python_exe = resolve_python_path();
     let python_exe_path = std::path::Path::new(&python_exe);
     let script_dir = script_path.parent().unwrap_or_else(|| std::path::Path::new("."));

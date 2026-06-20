@@ -377,11 +377,6 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                         <span className={`text-[11px] font-mono font-bold uppercase tracking-[0.15em] ${colors.text}`}>
                             {stemName}
                         </span>
-                        {purityScore !== undefined && (
-                            <span className="text-[8px] font-mono text-emerald-400/70 bg-emerald-950/40 px-1.5 py-0.5 rounded border border-emerald-500/20">
-                                {purityScore}% pure
-                            </span>
-                        )}
                     </div>
 
                     {/* Right: Time display */}
