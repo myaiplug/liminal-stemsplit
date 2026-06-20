@@ -731,7 +731,7 @@ export const DEFAULT_MODEL_BY_ENGINE: Record<SeparationEngine, string> = {
   vr: 'vr_hp_vocal_4',
   spleeter: 'spleeter_2',
   drumsep: 'drumsep_mdx23c_6',
-  ensemble: 'ensemble_vocal_balanced',
+  ensemble: 'mdx23_ensemble',
   karaoke: 'karaoke_mvsep_team',
   postfx: 'postfx_apollo_vocal',
   instrument: 'inst_guitar_sw',

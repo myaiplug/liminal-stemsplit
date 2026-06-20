@@ -1710,12 +1710,6 @@ const ReactorZone: React.FC = () => {
                         [ WHISPER TRANSCRIPT ]
                     </button>
                 </div>
-                <div className="mt-3 flex flex-wrap items-center justify-center gap-3 text-[9px] font-mono uppercase tracking-[0.2em] text-slate-500">
-                    <span>{loadedFilePath || pendingFilePath ? 'Source Ready' : 'No Source Loaded'}</span>
-                    {(loadedFilePath || pendingFilePath) && (
-                        <span className="text-cyan-500/70">Transcript and YouTube ingest follow Cyber-HUD pipeline styling</span>
-                    )}
-                </div>
             </div>
 
             {/* Config Modal */}

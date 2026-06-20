@@ -170,18 +170,23 @@ export async function buildAudioSourceCandidates(filePath: string): Promise<Reso
     throw new Error('Audio path is empty');
   }
 
-  await waitForReadableAudioFile(normalizedPath);
-
   if (!isTauriRuntime()) {
     return [{ url: normalizedPath, strategy: 'asset' }];
   }
 
-  // FS blob first — always works for disk files, no protocol issues
+  // FS blob first — reads file directly, no protocol roundtrip
   const candidates: ResolvedAudioUrl[] = [];
   try {
     candidates.push(await loadViaFsBlob(normalizedPath));
   } catch (error) {
     console.warn('[audio-loader] FS blob candidate failed:', error);
+    // If FS blob fails, wait for file to be ready then retry once
+    try {
+      await waitForReadableAudioFile(normalizedPath, { timeoutMs: 3000, pollMs: 50 });
+      candidates.push(await loadViaFsBlob(normalizedPath));
+    } catch (retryError) {
+      console.warn('[audio-loader] FS blob retry failed:', retryError);
+    }
   }
 
   // Backend blob fallback
