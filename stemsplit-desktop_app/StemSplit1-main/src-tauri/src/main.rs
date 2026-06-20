@@ -251,6 +251,32 @@ fn clear_free_session() {
     let _ = std::fs::remove_file(path);
 }
 
+fn send_onboarding_via_server(email: &str, username: &str) -> Result<bool, String> {
+    let server_url = std::env::var("STEMSPLIT_API_URL")
+        .unwrap_or_else(|_| "https://liminal-stemsplit.onrender.com".to_string());
+
+    let body = serde_json::json!({
+        "email": email,
+        "username": username,
+    });
+
+    let client = reqwest::blocking::Client::new();
+    let response = client
+        .post(format!("{}/api/onboarding", server_url))
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(10))
+        .send()
+        .map_err(|e| format!("Onboarding API call failed: {}", e))?;
+
+    if response.status().is_success() {
+        let data: serde_json::Value = response.json().unwrap_or_default();
+        Ok(data.get("sent").and_then(|v| v.as_bool()).unwrap_or(false))
+    } else {
+        Ok(false)
+    }
+}
+
 fn send_onboarding_email(email: &str, username: &str) -> Result<bool, String> {
     let resend_key = std::env::var("RESEND_API_KEY").ok().unwrap_or_default();
     let from_addr = std::env::var("STEMSPLIT_ONBOARDING_FROM").ok().unwrap_or_default();
@@ -1747,7 +1773,7 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
         };
     }
 
-    let onboarding_sent = send_onboarding_email(&email_norm, &username_norm).unwrap_or(false);
+    let onboarding_sent = send_onboarding_via_server(&email_norm, &username_norm).unwrap_or(false);
 
     AuthResult {
         success: true,
