@@ -4,6 +4,7 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useStemSplit, StemSplitStatus } from '@/hooks/useStemSplit';
 import { downloadYouTubeAudio, openResultsFolder, transcribeAudio, WhisperTranscriptionResult } from '@/lib/tauri-bridge';
+import { pingAppOpen, pingSplitComplete } from '@/lib/analytics';
 import { useLicense } from '@/contexts/LicenseContext';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { isTauriRuntime } from '@/lib/tauri-runtime';
@@ -777,6 +778,9 @@ const ReactorZone: React.FC = () => {
         })();
     }, []);
 
+    // Ping on app open (once)
+    useEffect(() => { pingAppOpen(); }, []);
+
     const splitOptions = useMemo(() => ({
         outputDir: customOutputDir || undefined,
         engine: splitEngine,
@@ -843,6 +847,7 @@ const ReactorZone: React.FC = () => {
             if (status === StemSplitStatus.COMPLETED) {
                 play('success_chime');
                 stop('process_loop');
+                pingSplitComplete();
                 if (result?.stems) setStemsLoaded(true);
                 if (result?.output_directory) {
                     // Open the folder in the default file manager once completion happens!

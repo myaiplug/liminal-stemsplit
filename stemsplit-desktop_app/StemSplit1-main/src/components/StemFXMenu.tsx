@@ -69,10 +69,11 @@ export interface VSTPlugin {
 
 interface StemFXMenuProps {
   stemType: string;
-  stemFilePath: string; // File to process
+  stemFilePath: string;
   isOpen: boolean;
   onClose: () => void;
   onApply?: (newPath: string) => void;
+  isFreeMode?: boolean;
 }
 
 // --- Constants & Presets ---
@@ -459,7 +460,7 @@ const FXKnob: React.FC<{ value: number; min: number; max: number; onChange: (v: 
 
 // --- Main Component ---
 
-const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen, onClose, onApply }) => {
+const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen, onClose, onApply, isFreeMode = false }) => {
     const { isPro } = useLicense();
     const [activeTab, setActiveTab] = useState<'daw' | 'presets' | 'vst'>('daw');
     const [fxPage, setFxPage] = useState(0); // 0 = first 4, 1 = next 4
@@ -1033,21 +1034,36 @@ const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen,
 
                         {activeTab === 'presets' && (
                             <div className="grid grid-cols-2 gap-2">
-                                {(STEM_PRESETS[stemType?.toLowerCase()] || STEM_PRESETS['other']).map(preset => (
+                                {(STEM_PRESETS[stemType?.toLowerCase()] || STEM_PRESETS['other']).map((preset, idx) => {
+                                    const locked = isFreeMode && idx >= 2;
+                                    return (
                                     <button 
                                         key={preset.id}
-                                        onClick={() => applyPreset(preset.id)}
-                                        className="pl-2 pr-3 py-2 bg-slate-900/40 border border-slate-700/50 hover:bg-slate-800 hover:border-cyan-500/30 rounded flex items-center gap-3 transition group text-left"
+                                        onClick={() => !locked && applyPreset(preset.id)}
+                                        disabled={locked}
+                                        className={`pl-2 pr-3 py-2 bg-slate-900/40 border rounded flex items-center gap-3 transition group text-left ${
+                                            locked
+                                                ? 'border-slate-800/30 opacity-40 cursor-not-allowed'
+                                                : 'border-slate-700/50 hover:bg-slate-800 hover:border-cyan-500/30'
+                                        }`}
                                     >
-                                        <div className="p-1 rounded bg-slate-800 group-hover:bg-slate-700 transition">
+                                        <div className={`p-1 rounded ${locked ? 'bg-slate-800/50' : 'bg-slate-800 group-hover:bg-slate-700'} transition`}>
                                             {preset.icon}
                                         </div>
                                         <div className="flex flex-col">
-                                            <span className="text-[10px] uppercase tracking-widest font-semibold text-slate-400 group-hover:text-cyan-100 transition">{preset.label}</span>
-                                            <span className="text-[9px] text-slate-600 group-hover:text-slate-500 hidden sm:block">Apply Chain</span>
+                                            <span className={`text-[10px] uppercase tracking-widest font-semibold transition ${
+                                                locked ? 'text-slate-600' : 'text-slate-400 group-hover:text-cyan-100'
+                                            }`}>
+                                                {preset.label}
+                                                {locked && <span className="ml-1 text-[8px] text-amber-500/60">PRO</span>}
+                                            </span>
+                                            <span className="text-[9px] text-slate-600 hidden sm:block">
+                                                {locked ? 'Upgrade to unlock' : 'Apply Chain'}
+                                            </span>
                                         </div>
                                     </button>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
 

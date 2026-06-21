@@ -234,6 +234,7 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                             isOpen={showFX}
                             onClose={() => toggleFX()}
                             onApply={(newPath) => setCurrentFilePath(newPath)}
+                            isFreeMode={fxDisabled}
                         />
                     </motion.div>
                 )}
