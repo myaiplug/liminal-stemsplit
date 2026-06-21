@@ -681,6 +681,20 @@ export async function logoutFreeUser(): Promise<AuthResult> {
   }
 }
 
+export async function verifyFreeUserEmail(email: string, code: string): Promise<AuthResult> {
+  try {
+    return await invoke<AuthResult>('verify_free_user_email', { email, code });
+  } catch (error) {
+    return {
+      success: false,
+      profile: null,
+      onboarding_email_sent: false,
+      message: 'Verification failed',
+      error: String(error),
+    };
+  }
+}
+
 export function isPro(license: LicenseInfo | null): boolean {
   return !!license?.is_valid && !license?.is_trial;
 }

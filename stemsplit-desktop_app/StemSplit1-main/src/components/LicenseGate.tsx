@@ -8,22 +8,26 @@ import {
   loginFreeUser,
   getFreeUserSession,
   logoutFreeUser,
+  verifyFreeUserEmail,
 } from '@/lib/tauri-bridge';
 
-type Mode = 'start' | 'signup' | 'signin';
+type Mode = 'start' | 'signup' | 'signin' | 'verify';
 
 export default function LicenseGate({ children }: { children: React.ReactNode }) {
   const { refresh } = useLicense();
   const [showGate, setShowGate] = useState(true);
   const [mode, setMode] = useState<Mode>('start');
   const [returningEmail, setReturningEmail] = useState<string | null>(null);
+  const [pendingVerifyEmail, setPendingVerifyEmail] = useState<string | null>(null);
 
   const [username, setUsername] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [verificationCode, setVerificationCode] = useState('');
   const [rememberMe, setRememberMe] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
 
   useEffect(() => {
     getFreeUserSession().then(s => {
@@ -53,9 +57,33 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
     setBusy(true);
     setError(null);
     try {
-      await registerFreeUser(username.trim(), email.trim(), password);
-      await refresh();
-      setShowGate(false);
+      const result = await registerFreeUser(username.trim(), email.trim(), password);
+      if (result.success) {
+        setPendingVerifyEmail(result.profile?.email || email.trim());
+        setMode('verify');
+        setSuccessMsg('Check your email for a 6-digit verification code.');
+      } else {
+        setError(result.error || 'Signup failed');
+      }
+    } catch (err: any) {
+      setError(err?.message || String(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  const handleVerify = async () => {
+    if (!pendingVerifyEmail || !verificationCode.trim()) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const result = await verifyFreeUserEmail(pendingVerifyEmail, verificationCode.trim());
+      if (result.success) {
+        await refresh();
+        setShowGate(false);
+      } else {
+        setError(result.error || 'Invalid code');
+      }
     } catch (err: any) {
       setError(err?.message || String(err));
     } finally {
@@ -227,6 +255,39 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
               className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
             >
               ← Back
+            </button>
+          </div>
+        )}
+
+        {/* Verify Email */}
+        {mode === 'verify' && (
+          <div className="space-y-3">
+            <div className="text-center">
+              <p className="text-sm text-slate-300">Verify your email</p>
+              <p className="text-xs text-cyan-400 font-mono mt-0.5">{pendingVerifyEmail}</p>
+            </div>
+            {successMsg && <p className="text-xs text-emerald-400 text-center">{successMsg}</p>}
+            <input
+              value={verificationCode}
+              onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+              placeholder="000000"
+              maxLength={6}
+              className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-center text-lg tracking-[0.5em] text-white placeholder:text-slate-600 focus:border-cyan-500 outline-none font-mono"
+              disabled={busy}
+            />
+            {error && <p className="text-xs text-red-400">{error}</p>}
+            <button
+              onClick={handleVerify}
+              disabled={busy || verificationCode.length < 6}
+              className="w-full py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-all font-semibold text-sm disabled:opacity-40"
+            >
+              {busy ? 'Verifying...' : 'Verify & Enter'}
+            </button>
+            <button
+              onClick={() => { setShowGate(false); refresh(); }}
+              className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"
+            >
+              Skip for now
             </button>
           </div>
         )}

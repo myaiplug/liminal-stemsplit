@@ -150,6 +150,8 @@ struct FreeUserRecord {
     username: String,
     email: String,
     password_sha256: String,
+    verification_code: Option<String>,
+    email_verified: bool,
     created_at: String,
     last_login_at: String,
 }
@@ -251,13 +253,14 @@ fn clear_free_session() {
     let _ = std::fs::remove_file(path);
 }
 
-fn send_onboarding_via_server(email: &str, username: &str) -> Result<bool, String> {
+fn send_onboarding_via_server(email: &str, username: &str, verification_code: &str) -> Result<bool, String> {
     let server_url = std::env::var("STEMSPLIT_API_URL")
         .unwrap_or_else(|_| "https://liminal-stemsplit.onrender.com".to_string());
 
     let body = serde_json::json!({
         "email": email,
         "username": username,
+        "verificationCode": verification_code,
     });
 
     let client = reqwest::blocking::Client::new();
@@ -1739,10 +1742,17 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
     }
 
     let now = chrono::Utc::now().to_rfc3339();
+    let code_seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .subsec_nanos();
+    let verification_code = format!("{:06}", code_seed % 1_000_000);
     let record = FreeUserRecord {
         username: username_norm.clone(),
         email: email_norm.clone(),
         password_sha256: hash_free_user_password(&email_norm, &password),
+        verification_code: Some(verification_code.clone()),
+        email_verified: false,
         created_at: now.clone(),
         last_login_at: now.clone(),
     };
@@ -1773,7 +1783,7 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
         };
     }
 
-    let onboarding_sent = send_onboarding_via_server(&email_norm, &username_norm).unwrap_or(false);
+    let onboarding_sent = send_onboarding_via_server(&email_norm, &username_norm, &verification_code).unwrap_or(false);
 
     AuthResult {
         success: true,
@@ -1891,6 +1901,72 @@ fn logout_free_user() -> AuthResult {
         profile: None,
         onboarding_email_sent: false,
         message: "Logged out".into(),
+        error: None,
+    }
+}
+
+#[tauri::command]
+fn verify_free_user_email(email: String, code: String) -> AuthResult {
+    let email_norm = normalize_email(&email);
+    let mut db = load_or_initialize_free_users_db();
+
+    let index = db.users.iter().position(|u| u.email.eq_ignore_ascii_case(&email_norm));
+    let Some(i) = index else {
+        return AuthResult {
+            success: false,
+            profile: None,
+            onboarding_email_sent: false,
+            message: "Verification failed".into(),
+            error: Some("No account found for that email".into()),
+        };
+    };
+
+    if db.users[i].email_verified {
+        return AuthResult {
+            success: true,
+            profile: Some(AuthProfile {
+                username: db.users[i].username.clone(),
+                email: db.users[i].email.clone(),
+                created_at: Some(db.users[i].created_at.clone()),
+            }),
+            onboarding_email_sent: false,
+            message: "Email already verified".into(),
+            error: None,
+        };
+    }
+
+    let stored_code = db.users[i].verification_code.as_deref().unwrap_or("");
+    if stored_code != code.trim() {
+        return AuthResult {
+            success: false,
+            profile: None,
+            onboarding_email_sent: false,
+            message: "Verification failed".into(),
+            error: Some("Incorrect verification code".into()),
+        };
+    }
+
+    db.users[i].email_verified = true;
+    db.users[i].verification_code = None;
+    if let Err(e) = save_free_users_db(&db) {
+        return AuthResult {
+            success: false,
+            profile: None,
+            onboarding_email_sent: false,
+            message: "Verification failed".into(),
+            error: Some(e),
+        };
+    }
+
+    AuthResult {
+        success: true,
+        profile: Some(AuthProfile {
+            username: db.users[i].username.clone(),
+            email: db.users[i].email.clone(),
+            created_at: Some(db.users[i].created_at.clone()),
+        }),
+        onboarding_email_sent: false,
+        message: "Email verified".into(),
         error: None,
     }
 }
@@ -5444,6 +5520,7 @@ fn main() {
             login_free_user,
             get_free_user_session,
             logout_free_user,
+            verify_free_user_email,
             get_trial_cooldown_status,
             test_security_webhook,
             get_vst_entitlements_status,
