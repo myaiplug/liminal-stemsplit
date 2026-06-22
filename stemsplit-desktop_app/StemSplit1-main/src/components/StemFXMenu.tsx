@@ -668,13 +668,13 @@ const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen,
         }
     };
 
-    const handleApplyChain = async (vstIds: string[]) => {
+    const handleApplyChain = async (vstPaths: string[]) => {
         setStatusMsg('Loading VST chain...');
         try {
             const { invoke } = await import('@tauri-apps/api/core');
             await invoke('apply_stem_fx', {
                 stemPath: stemFilePath,
-                fxConfig: JSON.stringify({ vstChain: vstIds }),
+                fxConfig: JSON.stringify({ vsts: vstPaths }),
             });
             setStatusMsg('VST chain applied');
             onApply?.(stemFilePath);
@@ -1089,14 +1089,14 @@ const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen,
                                     <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2">Quick Chains</p>
                                     <div className="grid grid-cols-2 gap-1.5">
                                         {[
-                                            { id: 'vst_cleanup', label: 'Cleanup Pass', desc: 'BleedFix → RepairIT → ReVerb-DeGloss', vsts: ['bleedfix_artifact_hunter', 'repairit', 'reverb_degloss'] },
-                                            { id: 'vst_polish', label: 'Polish Pass', desc: 'NoDAW Racks → Chronos → FanTune', vsts: ['nodaw_racks', 'chronos', 'fantune'] },
-                                            { id: 'vst_vocal', label: 'Vocal Pass', desc: 'Breath Ctrl → Consoul → ReVerb-DeGloss', vsts: ['vocal_breath_ctrl', 'consoul', 'reverb_degloss'] },
-                                            { id: 'vst_master', label: 'Master Pass', desc: 'NoDAW Racks → RepairIT → FanTune', vsts: ['nodaw_racks', 'repairit', 'fantune'] },
+                                            { id: 'vst_cleanup', label: 'Cleanup Pass', desc: 'Degloss → RepairIT → NoDAW Racks', paths: ['D:/VST/ReVerb-DeGloss.vst3', 'D:/VST/Repair-IT.vst3', 'D:/VST/NoDAW Racks.vst3'] },
+                                            { id: 'vst_polish', label: 'Polish Pass', desc: 'Chronos → FanTune → NoDAW Racks', paths: ['D:/VST/Chronos Spectral Weaver.vst3', 'D:/VST/FanTune.vst3', 'D:/VST/NoDAW Racks.vst3'] },
+                                            { id: 'vst_vocal', label: 'Vocal Pass', desc: 'Breath Ctrl → ReVerb-DeGloss → RepairIT', paths: ['D:/VST/Vocal Breath Controller.vst3', 'D:/VST/ReVerb-DeGloss.vst3', 'D:/VST/Repair-IT.vst3'] },
+                                            { id: 'vst_master', label: 'Master Pass', desc: 'NoDAW Racks → Chronos → FanTune', paths: ['D:/VST/NoDAW Racks.vst3', 'D:/VST/Chronos Spectral Weaver.vst3', 'D:/VST/FanTune.vst3'] },
                                         ].map(chain => (
                                             <button
                                                 key={chain.id}
-                                                onClick={() => handleApplyChain(chain.vsts)}
+                                                onClick={() => handleApplyChain(chain.paths)}
                                                 disabled={isFreeMode}
                                                 className={`text-left px-2.5 py-2 rounded-lg border transition-all ${
                                                     isFreeMode
