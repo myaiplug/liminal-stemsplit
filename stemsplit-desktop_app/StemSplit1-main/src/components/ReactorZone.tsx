@@ -13,6 +13,7 @@ import { APP_FOOTER_LABEL } from '@/lib/app-version';
 import StemPlayer from './StemPlayer';
 import OriginalPlayer from './OriginalPlayer';
 import ModelPicker from './ModelPicker';
+import ScrewAIPanel from './ScrewAIPanel';
 import {
     DEFAULT_MODEL_BY_ENGINE,
     SeparationEngine,
@@ -702,6 +703,7 @@ const ReactorZone: React.FC = () => {
     const [showSettings, setShowSettings] = useState(false);
     const [showYouTubeModal, setShowYouTubeModal] = useState(false);
     const [showWhisperModal, setShowWhisperModal] = useState(false);
+    const [showScrewAIModal, setShowScrewAIModal] = useState(false);
     const [splitEngine, setSplitEngine] = useState<SeparationEngine>('demucs');
     const [splitModelVariant, setSplitModelVariant] = useState(DEFAULT_MODEL_BY_ENGINE.demucs);
     const [splitStems, setSplitStems] = useState('4');
@@ -1668,6 +1670,12 @@ const ReactorZone: React.FC = () => {
                     >
                         [ WHISPER TRANSCRIPT ]
                     </button>
+                    <button 
+                        onClick={() => setShowScrewAIModal(true)}
+                        className="px-4 py-2 border border-purple-500/30 text-purple-300 hover:bg-purple-900/40 hover:border-purple-400 rounded font-mono text-xs transition-colors"
+                    >
+                        [ SCREWAI ]
+                    </button>
                 </div>
             </div>
 
@@ -2384,6 +2392,40 @@ const ReactorZone: React.FC = () => {
                                 >
                                     {isTranscribing ? 'TRANSCRIBING...' : 'RUN WHISPER'}
                                 </button>
+                            </div>
+                        </motion.div>
+                    </motion.div>
+                )}
+            </AnimatePresence>
+
+            {/* ScrewAI Modal */}
+            <AnimatePresence>
+                {showScrewAIModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
+                        onClick={() => setShowScrewAIModal(false)}
+                    >
+                        <motion.div
+                            initial={{ scale: 0.95, y: 20 }}
+                            animate={{ scale: 1, y: 0 }}
+                            exit={{ scale: 0.95, y: 20 }}
+                            className="w-full max-w-md rounded-2xl border border-purple-900/50 bg-slate-900/95 backdrop-blur-xl shadow-2xl shadow-purple-900/20 overflow-hidden"
+                            onClick={(e) => e.stopPropagation()}
+                        >
+                            <div className="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
+                                <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-purple-500">ScrewAI</p>
+                                <h2 className="mt-1 font-mono text-xl text-purple-300">Chop & Screw Engine</h2>
+                                <p className="mt-2 text-xs text-slate-400">Apply DJ Screw-style slowdowns with pitch shift, echo, and limiting.</p>
+                            </div>
+                            <div className="px-6 py-5">
+                                <ScrewAIPanel
+                                    audioPath={loadedFilePath || pendingFilePath}
+                                    audioTitle={sourceTitle || (loadedFilePath || pendingFilePath)?.split(/[\\/]/).pop()}
+                                    isPro={isPro}
+                                />
                             </div>
                         </motion.div>
                     </motion.div>

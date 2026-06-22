@@ -668,6 +668,21 @@ const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen,
         }
     };
 
+    const handleApplyChain = async (vstIds: string[]) => {
+        setStatusMsg('Loading VST chain...');
+        try {
+            const { invoke } = await import('@tauri-apps/api/core');
+            await invoke('apply_stem_fx', {
+                stemPath: stemFilePath,
+                fxConfig: JSON.stringify({ vstChain: vstIds }),
+            });
+            setStatusMsg('VST chain applied');
+            onApply?.(stemFilePath);
+        } catch (err: any) {
+            setStatusMsg(`Failed: ${err?.message || err}`);
+        }
+    };
+
     const applyPreset = (presetId: string) => {
         const typeKey = stemType?.toLowerCase() || 'other';
         const availablePresets = STEM_PRESETS[typeKey] || STEM_PRESETS['other'];
@@ -1069,6 +1084,34 @@ const StemFXMenu: React.FC<StemFXMenuProps> = ({ stemType, stemFilePath, isOpen,
 
                         {activeTab === 'vst' && (
                             <div className="space-y-4">
+                                {/* VST Preset Chains */}
+                                <div>
+                                    <p className="text-[9px] uppercase tracking-[0.2em] text-slate-500 mb-2">Quick Chains</p>
+                                    <div className="grid grid-cols-2 gap-1.5">
+                                        {[
+                                            { id: 'vst_cleanup', label: 'Cleanup Pass', desc: 'BleedFix → RepairIT → ReVerb-DeGloss', vsts: ['bleedfix_artifact_hunter', 'repairit', 'reverb_degloss'] },
+                                            { id: 'vst_polish', label: 'Polish Pass', desc: 'NoDAW Racks → Chronos → FanTune', vsts: ['nodaw_racks', 'chronos', 'fantune'] },
+                                            { id: 'vst_vocal', label: 'Vocal Pass', desc: 'Breath Ctrl → Consoul → ReVerb-DeGloss', vsts: ['vocal_breath_ctrl', 'consoul', 'reverb_degloss'] },
+                                            { id: 'vst_master', label: 'Master Pass', desc: 'NoDAW Racks → RepairIT → FanTune', vsts: ['nodaw_racks', 'repairit', 'fantune'] },
+                                        ].map(chain => (
+                                            <button
+                                                key={chain.id}
+                                                onClick={() => handleApplyChain(chain.vsts)}
+                                                disabled={isFreeMode}
+                                                className={`text-left px-2.5 py-2 rounded-lg border transition-all ${
+                                                    isFreeMode
+                                                        ? 'border-slate-800/30 opacity-40 cursor-not-allowed'
+                                                        : 'border-slate-700/50 hover:border-purple-500/30 bg-slate-900/40 hover:bg-slate-800'
+                                                }`}
+                                            >
+                                                <div className="text-[10px] font-mono text-slate-300 uppercase tracking-wider">{chain.label}</div>
+                                                <div className="text-[8px] text-slate-500 mt-0.5">{chain.desc}</div>
+                                                {isFreeMode && <div className="text-[8px] text-amber-500/60 mt-0.5">PRO</div>}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 <button 
                                     onClick={handleLoadVST}
                                     className="w-full py-3 border border-dashed border-slate-600 rounded-lg text-slate-400 hover:text-white hover:border-blue-500 hover:bg-blue-500/10 transition flex items-center justify-center gap-2"
