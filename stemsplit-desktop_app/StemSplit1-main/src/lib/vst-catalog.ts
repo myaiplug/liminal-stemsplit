@@ -7,36 +7,13 @@ export interface VstCatalogEntry {
   trialApplies: number;
 }
 
+/** v1 ships with ReVerb-DeGloss only. */
 export const VST_CATALOG: VstCatalogEntry[] = [
   {
-    id: 'screwai',
-    name: 'ScrewAI',
-    productSlug: 'vst_screwai',
+    id: 'reverb_degloss',
+    name: 'ReVerb-DeGloss',
+    productSlug: 'vst_reverb_degloss',
     priceLabel: '$19',
-    trialPreviews: 3,
-    trialApplies: 2,
-  },
-  {
-    id: 'fantune',
-    name: 'FanTune',
-    productSlug: 'vst_fantune',
-    priceLabel: '$19',
-    trialPreviews: 3,
-    trialApplies: 2,
-  },
-  {
-    id: 'timestretchx',
-    name: 'Time Stretch X',
-    productSlug: 'vst_timestretchx',
-    priceLabel: '$24',
-    trialPreviews: 3,
-    trialApplies: 2,
-  },
-  {
-    id: 'repairit',
-    name: 'Repair-IT',
-    productSlug: 'vst_repairit',
-    priceLabel: '$24',
     trialPreviews: 3,
     trialApplies: 2,
   },

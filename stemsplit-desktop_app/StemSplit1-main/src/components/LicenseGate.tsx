@@ -9,7 +9,13 @@ import {
   getFreeUserSession,
   logoutFreeUser,
   verifyFreeUserEmail,
+  resendVerificationEmail,
 } from '@/lib/tauri-bridge';
+import {
+  ensureProductionSiteWarm,
+  startSiteWarmupLoop,
+  type SiteWarmupStatus,
+} from '@/lib/site-warmup';
 
 type Mode = 'start' | 'signup' | 'signin' | 'verify';
 
@@ -28,6 +34,16 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const [fallbackCode, setFallbackCode] = useState<string | null>(null);
+  const [warmupStatus, setWarmupStatus] = useState<SiteWarmupStatus>({
+    awake: false,
+    emailReady: false,
+    latencyMs: null,
+  });
+  const [warmupBusy, setWarmupBusy] = useState(false);
+
+  // Pre-warm Render as soon as the login gate appears (cold starts can take ~60s)
+  useEffect(() => startSiteWarmupLoop(setWarmupStatus), []);
 
   useEffect(() => {
     getFreeUserSession().then(s => {
@@ -56,12 +72,21 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
   const handleSignup = async () => {
     setBusy(true);
     setError(null);
+    setFallbackCode(null);
     try {
+      if (!warmupStatus.awake || !warmupStatus.emailReady) {
+        setWarmupBusy(true);
+        setSuccessMsg('Waking up cloud services for email delivery…');
+        const warmed = await ensureProductionSiteWarm({ timeoutMs: 120_000, requireEmail: true });
+        setWarmupStatus(warmed);
+        setWarmupBusy(false);
+        setSuccessMsg(null);
+      }
+
       const result = await registerFreeUser(username.trim(), email.trim(), password);
       if (result.success) {
-        setPendingVerifyEmail(result.profile?.email || email.trim());
-        setMode('verify');
-        setSuccessMsg('Check your email for a 6-digit verification code.');
+        await refresh();
+        setShowGate(false);
       } else {
         setError(result.error || 'Signup failed');
       }
@@ -69,6 +94,39 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
       setError(err?.message || String(err));
     } finally {
       setBusy(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!pendingVerifyEmail) return;
+    setBusy(true);
+    setError(null);
+    setFallbackCode(null);
+    try {
+      if (!warmupStatus.awake || !warmupStatus.emailReady) {
+        setWarmupBusy(true);
+        setSuccessMsg('Waking up cloud services for email delivery…');
+        const warmed = await ensureProductionSiteWarm({ timeoutMs: 120_000, requireEmail: true });
+        setWarmupStatus(warmed);
+        setWarmupBusy(false);
+      }
+
+      const result = await resendVerificationEmail(pendingVerifyEmail);
+      if (result.success) {
+        if (result.onboarding_email_sent) {
+          setSuccessMsg('A new verification code was sent to your email.');
+        } else {
+          setFallbackCode(result.verification_code || null);
+          setSuccessMsg('Email delivery unavailable. Use the code shown below.');
+        }
+      } else {
+        setError(result.error || result.email_error || 'Failed to resend verification email');
+      }
+    } catch (err: any) {
+      setError(err?.message || String(err));
+    } finally {
+      setBusy(false);
+      setWarmupBusy(false);
     }
   };
 
@@ -95,8 +153,11 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
     setBusy(true);
     setError(null);
     try {
-      await loginFreeUser(email.trim(), password);
-      // Session persists via Rust backend
+      const result = await loginFreeUser(email.trim(), password);
+      if (!result.success) {
+        setError(result.error || 'Login failed');
+        return;
+      }
       await refresh();
       setShowGate(false);
     } catch (err: any) {
@@ -122,6 +183,18 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
           </div>
           <h1 className="text-xl font-bold text-white tracking-tight">Liminal StemSplit</h1>
           <p className="text-xs text-slate-400 mt-1">AI Stem Separation — 100% Local</p>
+          {!warmupStatus.emailReady && (
+            <p className="text-[10px] text-slate-500 mt-2">
+              {warmupBusy
+                ? 'Connecting email service…'
+                : warmupStatus.awake
+                  ? 'Preparing email delivery…'
+                  : 'Starting cloud services…'}
+            </p>
+          )}
+          {warmupStatus.emailReady && (
+            <p className="text-[10px] text-emerald-500/80 mt-2">Email service ready</p>
+          )}
         </div>
 
         {/* Returning user */}
@@ -162,7 +235,7 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
               Log In
             </button>
             <p className="text-center text-[9px] text-slate-600 mt-4">
-              Free = unlimited 2-stem Spleeter splits. Pro ($49 once) unlocks all engines, stems, and FX.
+              Free = unlimited 2-stem Spleeter splits. Pro ($19.99 once) unlocks all engines, stems, and FX.
             </p>
           </div>
         )}
@@ -202,7 +275,7 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
               disabled={busy || !username.trim() || !email.trim() || !password}
               className="w-full py-3 rounded-xl bg-cyan-500/10 border border-cyan-500/30 text-cyan-300 hover:bg-cyan-500/20 transition-all font-semibold text-sm disabled:opacity-40"
             >
-              {busy ? 'Creating...' : 'Create Free Account'}
+              {busy ? (warmupBusy ? 'Connecting…' : 'Creating...') : 'Create Free Account'}
             </button>
             <button
               onClick={() => { setMode('start'); setError(null); }}
@@ -267,6 +340,16 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
               <p className="text-xs text-cyan-400 font-mono mt-0.5">{pendingVerifyEmail}</p>
             </div>
             {successMsg && <p className="text-xs text-emerald-400 text-center">{successMsg}</p>}
+
+            {/* Fallback: show code directly when email can't be sent */}
+            {fallbackCode && (
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg px-4 py-3 text-center">
+                <p className="text-[9px] font-mono uppercase tracking-wider text-amber-400 mb-2">Your Code</p>
+                <p className="text-2xl font-mono tracking-[0.3em] text-amber-300 select-all">{fallbackCode}</p>
+                <p className="text-[9px] text-amber-500/70 mt-2">Enter this code below to verify</p>
+              </div>
+            )}
+
             <input
               value={verificationCode}
               onChange={e => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -274,6 +357,7 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
               maxLength={6}
               className="w-full bg-slate-900 border border-slate-700 rounded-lg px-3 py-2.5 text-center text-lg tracking-[0.5em] text-white placeholder:text-slate-600 focus:border-cyan-500 outline-none font-mono"
               disabled={busy}
+              autoFocus
             />
             {error && <p className="text-xs text-red-400">{error}</p>}
             <button
@@ -283,6 +367,16 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
             >
               {busy ? 'Verifying...' : 'Verify & Enter'}
             </button>
+
+            {/* Resend email button */}
+            <button
+              onClick={handleResendVerification}
+              disabled={busy}
+              className="w-full py-2 text-xs text-cyan-500/60 hover:text-cyan-400 transition-colors"
+            >
+              {busy ? (warmupBusy ? 'Connecting…' : 'Resending...') : 'Resend verification email'}
+            </button>
+
             <button
               onClick={() => { setShowGate(false); refresh(); }}
               className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 transition-colors"

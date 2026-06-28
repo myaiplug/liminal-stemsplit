@@ -503,18 +503,40 @@ def process_file(input_path, fx_config):
         import soundfile as sf
         
         preview_mode = fx_config.get("preview", False)
-        
+        free_taste = fx_config.get("free_taste", False)
+        preview_start_seconds = 0.0
+
         with sf.SoundFile(input_path) as f:
             sample_rate = f.samplerate
             frames_total = f.frames
-            
-            # If preview, only process first 10 seconds (or less if file is short)
-            frames_to_read = -1
+
             if preview_mode:
-                frames_to_read = min(int(10 * sample_rate), frames_total)
-                logger.info(f"PREVIEW MODE: Processing {frames_to_read/sample_rate:.1f}s")
-            
-            audio = f.read(frames=frames_to_read, dtype='float32', always_2d=True)
+                duration_sec = float(
+                    fx_config.get("preview_duration_seconds")
+                    or (5 if free_taste else 10)
+                )
+                frames_preview = min(int(duration_sec * sample_rate), frames_total)
+                use_random = bool(
+                    fx_config.get("preview_random")
+                    or free_taste
+                )
+
+                if use_random and frames_total > frames_preview:
+                    import random
+                    max_start = frames_total - frames_preview
+                    start_frame = random.randint(0, max_start)
+                    preview_start_seconds = start_frame / float(sample_rate)
+                    f.seek(start_frame)
+                    logger.info(
+                        f"PREVIEW MODE: random {frames_preview/sample_rate:.1f}s "
+                        f"from {preview_start_seconds:.1f}s"
+                    )
+                else:
+                    logger.info(f"PREVIEW MODE: Processing {frames_preview/sample_rate:.1f}s")
+
+                audio = f.read(frames=frames_preview, dtype='float32', always_2d=True)
+            else:
+                audio = f.read(dtype='float32', always_2d=True)
             
         # audio is (samples, channels) usually
     except Exception as e:
@@ -560,7 +582,10 @@ def process_file(input_path, fx_config):
             "status": "success",
             "output_path": output_path,
             "message": "Preview generated",
-            "is_preview": True
+            "is_preview": True,
+            "preview_start_seconds": round(preview_start_seconds, 3),
+            "preview_duration_seconds": round(len(output_audio) / sample_rate, 3),
+            "free_taste": free_taste,
         }
 
     # Generate descriptive suffix based on active FX

@@ -36,6 +36,8 @@ from datetime import datetime
 from model_registry import (
     resolve_model_variant,
     resolve_audio_separator_filename,
+    resolve_roformer_filename,
+    variant_supports_stems,
     INSTRUMENT_HF_BUNDLES,
     MSST_MODEL_BUNDLES,
 )
@@ -54,8 +56,29 @@ _root_logger.addHandler(_file_handler)
 logger = logging.getLogger(__name__)
 
 MDX_FOLDER_NAME = "MVSEP-MDX23-music-separation-model-main"
-DEFAULT_WINDOWS_MODELS_ROOT = Path("D:/AudioSeperationModels")
-DEFAULT_WINDOWS_UVR_INSTALL = Path("D:/Ultimate Vocal Remover")
+LEGACY_MODEL_ROOTS = [
+    Path("D:/AudioSeperationModels"),
+    Path("D:/Ultimate Vocal Remover"),
+]
+
+
+def default_models_root() -> Path:
+    """Canonical per-user model library: %LOCALAPPDATA%/StemSplit/models."""
+    local_app_data = os.environ.get("LOCALAPPDATA", "").strip()
+    if local_app_data:
+        return Path(local_app_data) / "StemSplit" / "models"
+    return Path.home() / ".stemsplit" / "models"
+
+
+def models_root_has_payload(root: Path) -> bool:
+    return any([
+        (root / MDX_FOLDER_NAME / "inference.py").is_file(),
+        (root / "drumsep-main" / "model").is_dir(),
+        (root / "VR_Models").is_dir(),
+        (root / "UVR" / "models" / "VR_Models").is_dir(),
+        (root / "MDX_Net_Models").is_dir(),
+        (root / "Demucs_Models").is_dir(),
+    ])
 
 ROFORMER_MODEL_ALIASES = {
     "vocals_mel_band_roformer.ckpt": [
@@ -84,7 +107,7 @@ def resolve_models_root() -> Path:
     """Resolve the shared on-disk model library root."""
     script_dir = Path(__file__).resolve().parent
     app_root = script_dir.parent
-    local_app_data = Path(os.environ.get("LOCALAPPDATA", app_root)) / "StemSplit" / "models"
+    canonical = default_models_root()
 
     candidates = []
     env_override = os.environ.get("STEMSPLIT_MODELS_ROOT", "").strip()
@@ -102,13 +125,11 @@ def resolve_models_root() -> Path:
         candidates.append(Path(mdx_override).parent)
 
     candidates.extend([
-        DEFAULT_WINDOWS_MODELS_ROOT,
-        local_app_data,
+        canonical,
+        app_root / "models",
         app_root,
         app_root / "Stem Split Models" / "audio-separator-models",
-        app_root.parent,
-        Path("E:/Projects/1_StemSplit"),
-        Path("E:/Projects/1_StemSplit/Stem Split Models/audio-separator-models"),
+        *LEGACY_MODEL_ROOTS,
     ])
 
     seen = set()
@@ -121,14 +142,11 @@ def resolve_models_root() -> Path:
         if key in seen or not resolved.exists():
             continue
         seen.add(key)
-        if (resolved / MDX_FOLDER_NAME / "inference.py").is_file():
-            return resolved
-        if (resolved / "drumsep-main" / "model").is_dir():
-            return resolved
-        if (resolved / "VR_Models").is_dir() or (resolved / "UVR" / "models" / "VR_Models").is_dir():
+        if models_root_has_payload(resolved):
             return resolved
 
-    return app_root
+    canonical.mkdir(parents=True, exist_ok=True)
+    return canonical
 
 
 def resolve_mdx_folder() -> str:
@@ -161,13 +179,11 @@ def resolve_mdx_folder() -> str:
         if (resolved / "inference.py").is_file():
             return str(resolved)
 
-    expected = models_root / MDX_FOLDER_NAME
+    expected = default_models_root() / MDX_FOLDER_NAME
     raise Exception(
         "MDX engine is not installed. "
         f"Expected bundle at {expected}. "
-        "Place MVSEP-MDX23 under D:\\AudioSeperationModels, "
-        "run scripts/install_mdx_model.ps1, "
-        "or set STEMSPLIT_MDX_MODEL_PATH to your MVSEP-MDX23 folder."
+        "Run scripts/install_mdx_model.ps1 or let StemSplit download models on first use."
     )
 
 
@@ -201,9 +217,10 @@ def resolve_uvr_install_dir() -> Optional[Path]:
             candidates.append(Path(persisted))
 
     candidates.extend([
-        DEFAULT_WINDOWS_UVR_INSTALL,
+        default_models_root() / "UVR",
         models_root / "UVR",
         app_root / "UVR",
+        *LEGACY_MODEL_ROOTS,
     ])
 
     seen = set()
@@ -241,6 +258,12 @@ def resolve_uvr_vr_models_dirs() -> List[Path]:
         models_root / "UVR" / "models" / "VR_Models",
         app_root / "UVR" / "models" / "VR_Models",
     ])
+    for legacy in LEGACY_MODEL_ROOTS:
+        candidates.extend([
+            legacy / "VR_Models",
+            legacy / "models" / "VR_Models",
+            legacy / "UVR" / "models" / "VR_Models",
+        ])
 
     found: List[Path] = []
     seen = set()
@@ -277,6 +300,11 @@ def resolve_mdx_net_models_dirs() -> List[Path]:
     uvr_install = resolve_uvr_install_dir()
     if uvr_install:
         candidates.append(uvr_install / "models" / "MDX_Net_Models")
+    for legacy in LEGACY_MODEL_ROOTS:
+        candidates.extend([
+            legacy / "MDX_Net_Models",
+            legacy / "models" / "MDX_Net_Models",
+        ])
 
     found: List[Path] = []
     seen = set()
@@ -1138,6 +1166,13 @@ class AudioSeparator:
                 self.engine = 'drumsep'
                 variant_meta = resolve_model_variant(self.model_variant)
             self.variant_meta = variant_meta
+
+            if self.model_variant and not variant_supports_stems(self.model_variant, self.stems_count):
+                raise ValueError(
+                    f"Model {self.model_variant} cannot produce {self.stems_count} stems. "
+                    f"Pick a supported stem count for this model."
+                )
+
             self.post_fx = config.get('post_fx', '').strip()
             self.reference_file = config.get('reference_file', '').strip()
             self.extra_models = config.get('extra_models') or []
@@ -1149,6 +1184,30 @@ class AudioSeparator:
                 logger.warning(f"MDX engine only supports 4 stems. Fallback to Demucs (htdemucs_6s) for {self.stems_count} stems.")
                 self.engine = 'demucs'
                 config['demucs_model'] = 'htdemucs_6s'
+
+            # MDX23 full ensemble needs ~12GB+ VRAM; on 8GB it thrashes for 15+ minutes at ~20%.
+            gpu_vram_gb = float(config.get('gpu_vram', 0) or 0)
+            if (
+                self.model_variant == 'mdx23_ensemble'
+                and self.device == 'cuda'
+                and 0 < gpu_vram_gb < 12
+            ):
+                if self.stems_count <= 2:
+                    logger.warning(
+                        f"MDX23 Ensemble requires ≥12GB VRAM (detected {gpu_vram_gb:.1f}GB). "
+                        "Using Kim Vocal 2 ONNX instead."
+                    )
+                    self.model_variant = 'mdx_kim_vocal_2'
+                    self.engine = 'mdx_net'
+                else:
+                    logger.warning(
+                        f"MDX23 Ensemble requires ≥12GB VRAM (detected {gpu_vram_gb:.1f}GB). "
+                        "Using HTDemucs v4 instead."
+                    )
+                    self.model_variant = 'demucs_htdemucs'
+                    self.engine = 'demucs'
+                    config['demucs_model'] = 'htdemucs'
+                self.variant_meta = resolve_model_variant(self.model_variant)
 
             # Store model name and configuration
             self.model = config.get('demucs_model', 'htdemucs')
@@ -1362,6 +1421,18 @@ class AudioSeparator:
             logger.error(f"Separation failed: {e}", exc_info=True)
             raise
 
+    def _mdx_chunk_size_for_vram(self, gpu_vram_gb: float, is_gpu_available: bool) -> int:
+        """MVSEP defaults to 1M chunks; larger chunks OOM or stall on 8GB cards."""
+        if not is_gpu_available:
+            return 500000
+        if gpu_vram_gb >= 12:
+            return 1500000
+        if gpu_vram_gb >= 10:
+            return 1200000
+        if gpu_vram_gb >= 6:
+            return 896000
+        return 640000
+
     def _separate_mdx(self, input_file: str, audio: np.ndarray, sr: int, progress_hook=None) -> Dict[str, np.ndarray]:
         """
         Perform stem separation using MVSEP-MDX23 model.
@@ -1369,6 +1440,7 @@ class AudioSeparator:
         logger.info("Starting MDX-Net stem separation...")
         separation_start = time.time()
         import importlib.util
+        import threading
         
         try:
             mdx_folder = resolve_mdx_folder()
@@ -1386,36 +1458,57 @@ class AudioSeparator:
                 logger.error(f"Error during import of inference module: {e}")
                 raise
 
+            gpu_vram_gb = float(self.config.get('gpu_vram', 0) if hasattr(self, 'config') else 0)
+            is_gpu_available = self.device == 'cuda'
+            has_large_gpu = is_gpu_available and gpu_vram_gb >= 6.0
+            chunk_size = self._mdx_chunk_size_for_vram(gpu_vram_gb, is_gpu_available)
+            # Full MDX23 runs two ONNX passes — skip the second on 8–10GB to avoid VRAM stalls.
+            single_onnx = is_gpu_available and gpu_vram_gb > 0 and gpu_vram_gb < 10
+
             # Reconstruct the options struct MDX inference expects
             options = {
                 'input_audio': [input_file],
                 'output_folder': '', # Memory only
-                'overlap_large': 0.6,
-                'overlap_small': 0.5,
-                'cpu': self.device == 'cpu',
-                'single_onnx': False,
-                'chunk_size': 500000 if self.device == 'cpu' else 1000000,
-                'large_gpu': False,
+                'overlap_large': 0.55 if single_onnx else 0.6,
+                'overlap_small': 0.45 if single_onnx else 0.5,
+                'cpu': not is_gpu_available,
+                'single_onnx': single_onnx,
+                'chunk_size': chunk_size,
+                'large_gpu': has_large_gpu,
             }
+            logger.info(
+                f"MDX options: device={'cuda' if is_gpu_available else 'cpu'}, "
+                f"chunk_size={options['chunk_size']}, single_onnx={single_onnx}, "
+                f"large_gpu={has_large_gpu}, vram={gpu_vram_gb:.1f}GB"
+            )
             
             # Since the MDX23 script natively writes to disk, 
             # we will extract its model initialization and processing logic and process in memory
             try:
-                # LowGPU ignores only_vocals and always runs 4 Demucs backing models.
-                # For 2-stem mode use the base class, which skips that heavy path.
                 only_vocals = (getattr(self, 'stems_count', 4) == 2)
-                if only_vocals and hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModel'):
+                use_low_gpu = is_gpu_available and 0 < gpu_vram_gb < 12
+                if use_low_gpu and hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModelLowGPU'):
+                    logger.info(
+                        f"VRAM {gpu_vram_gb:.1f}GB — using EnsembleDemucsMDXMusicSeparationModelLowGPU"
+                    )
+                    model = mdx_inference.EnsembleDemucsMDXMusicSeparationModelLowGPU(options)
+                    logger.info("MDX Model LowGPU initialized")
+                elif only_vocals and hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModel'):
                     logger.info("Initializing MDX base model (2-stem / only_vocals fast path)...")
                     model = mdx_inference.EnsembleDemucsMDXMusicSeparationModel(options)
                     logger.info("MDX Model Base initialized")
+                elif is_gpu_available and gpu_vram_gb >= 12 and hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModel'):
+                    logger.info("GPU available — using full EnsembleDemucsMDXMusicSeparationModel")
+                    model = mdx_inference.EnsembleDemucsMDXMusicSeparationModel(options)
+                    logger.info("MDX Model (full GPU) initialized")
+                elif hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModel'):
+                    logger.info("Using EnsembleDemucsMDXMusicSeparationModel...")
+                    model = mdx_inference.EnsembleDemucsMDXMusicSeparationModel(options)
+                    logger.info("MDX Model initialized")
                 elif hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModelLowGPU'):
-                    logger.info("Initializing EnsembleDemucsMDXMusicSeparationModelLowGPU...")
+                    logger.info("Falling back to LowGPU variant...")
                     model = mdx_inference.EnsembleDemucsMDXMusicSeparationModelLowGPU(options)
                     logger.info("MDX Model LowGPU initialized")
-                elif hasattr(mdx_inference, 'EnsembleDemucsMDXMusicSeparationModel'):
-                    logger.info("LowGPU model class not found, trying base EnsembleDemucsMDXMusicSeparationModel...")
-                    model = mdx_inference.EnsembleDemucsMDXMusicSeparationModel(options)
-                    logger.info("MDX Model Base initialized")
                 else:
                     raise Exception("Available classes in inference: " + str(dir(mdx_inference)))
 
@@ -1441,15 +1534,86 @@ class AudioSeparator:
                      real_p = 40 + int(p * 0.5)
                      progress_hook(3, 5, f"MDX Processing ({p}%)...", real_p)
 
-            logger.info(f"Calling separate_music_file (only_vocals={only_vocals})...")
-            separated_music_arrays, _ = model.separate_music_file(
-                mdx_audio,
-                sr,
-                update_percent_func=callback,
-                current_file_number=0,
-                total_files=1,
-                only_vocals=only_vocals,
+            duration_s = float(audio.shape[-1]) / float(sr) if sr else 0.0
+            logger.info(
+                f"Calling separate_music_file (only_vocals={only_vocals}, "
+                f"duration={duration_s:.1f}s) — MDX23 can take 3–15 min; progress may pause between steps"
             )
+
+            heartbeat_stop = threading.Event()
+            last_mdx_pct = {'value': 0}
+
+            def _mdx_heartbeat():
+                elapsed = 0
+                while not heartbeat_stop.wait(12):
+                    elapsed += 12
+                    if not progress_hook:
+                        continue
+                    stalled = elapsed >= 36 and last_mdx_pct['value'] <= 25
+                    if stalled:
+                        progress_hook(
+                            3,
+                            5,
+                            f"MDX Processing ({last_mdx_pct['value']}%) — still working ({elapsed // 60}m {elapsed % 60}s)",
+                            min(88, 50 + elapsed // 20),
+                        )
+                    else:
+                        progress_hook(
+                            3,
+                            5,
+                            f"MDX Processing ({last_mdx_pct['value']}%)…",
+                            min(88, 45 + last_mdx_pct['value'] // 2),
+                        )
+
+            if progress_hook:
+                wrapped_callback = callback
+                def callback(p):
+                    last_mdx_pct['value'] = int(p)
+                    if wrapped_callback:
+                        wrapped_callback(p)
+            else:
+                def callback(p):
+                    last_mdx_pct['value'] = int(p)
+
+            heartbeat_thread = threading.Thread(target=_mdx_heartbeat, daemon=True)
+            heartbeat_thread.start()
+
+            try:
+                if is_gpu_available:
+                    import torch
+                    torch.cuda.empty_cache()
+
+                separated_music_arrays, _ = model.separate_music_file(
+                    mdx_audio,
+                    sr,
+                    update_percent_func=callback,
+                    current_file_number=0,
+                    total_files=1,
+                    only_vocals=only_vocals,
+                )
+            except RuntimeError as runtime_err:
+                err_text = str(runtime_err).lower()
+                if is_gpu_available and ('out of memory' in err_text or 'cuda' in err_text):
+                    logger.warning("MDX CUDA OOM — retrying with smaller chunks and single ONNX pass")
+                    if progress_hook:
+                        progress_hook(3, 5, "MDX retrying with lighter GPU settings…", 48)
+                    options['chunk_size'] = max(480000, int(options['chunk_size'] * 0.6))
+                    options['single_onnx'] = True
+                    import torch
+                    torch.cuda.empty_cache()
+                    model = mdx_inference.EnsembleDemucsMDXMusicSeparationModel(options)
+                    separated_music_arrays, _ = model.separate_music_file(
+                        mdx_audio,
+                        sr,
+                        update_percent_func=callback,
+                        current_file_number=0,
+                        total_files=1,
+                        only_vocals=only_vocals,
+                    )
+                else:
+                    raise
+            finally:
+                heartbeat_stop.set()
             
             stems = {}
             if only_vocals and 'vocals' in separated_music_arrays:
@@ -1780,6 +1944,35 @@ class AudioSeparator:
             logger.error(f"Ensemble failed: {e}", exc_info=True)
             raise
 
+    @staticmethod
+    def _normalize_drum_stem_keys(stems: Dict[str, np.ndarray]) -> Dict[str, np.ndarray]:
+        """Map audio-separator drum filenames to canonical keys (hh, ride, crash, etc.)."""
+        aliases = {
+            'hi_hat': 'hh',
+            'hi-hat': 'hh',
+            'hihat': 'hh',
+            'hat': 'hh',
+            'open_hat': 'hh',
+            'closed_hat': 'hh',
+            'ride_cymbal': 'ride',
+            'crash_cymbal': 'crash',
+            'cymbal': 'cymbals',
+            'overhead': 'overheads',
+            'oh': 'overheads',
+        }
+        normalized: Dict[str, np.ndarray] = {}
+        for key, audio in stems.items():
+            canonical = aliases.get(key.lower(), key)
+            if canonical in normalized:
+                if normalized[canonical].shape == audio.shape:
+                    normalized[canonical] = normalized[canonical] + audio
+                else:
+                    min_len = min(normalized[canonical].shape[-1], audio.shape[-1])
+                    normalized[canonical][..., :min_len] += audio[..., :min_len]
+            else:
+                normalized[canonical] = audio
+        return normalized
+
     def _separate_drumsep_mdx(self, input_file: str, audio: np.ndarray, sr: int, progress_hook=None) -> Dict[str, np.ndarray]:
         variant_meta = getattr(self, 'variant_meta', {}) or resolve_model_variant(getattr(self, 'model_variant', ''))
         model_filename = variant_meta.get('filename')
@@ -1788,6 +1981,7 @@ class AudioSeparator:
         stems = self._separate_audio_separator(
             input_file, sr, model_filename, progress_hook, label='Drumsep-MDX23C', variant_meta=variant_meta
         )
+        stems = self._normalize_drum_stem_keys(stems)
         merge_map = variant_meta.get('merge_6stem') or {}
         for src, dst in merge_map.items():
             if src not in stems:
@@ -2154,13 +2348,9 @@ class AudioSeparator:
 
     def _separate_roformer(self, input_file: str, audio: np.ndarray, sr: int, progress_hook=None) -> Dict[str, np.ndarray]:
         """Perform stem separation using Roformer via audio-separator."""
-        variant_meta = resolve_model_variant(getattr(self, 'model_variant', ''))
-        if variant_meta.get('filename'):
-            model_name = variant_meta['filename']
-        elif self.stems_count == 4:
-            model_name = 'model_bs_roformer_ep_317_sdr_12.9755.ckpt'
-        else:
-            model_name = 'vocals_mel_band_roformer.ckpt'
+        variant_id = getattr(self, 'model_variant', '')
+        variant_meta = resolve_model_variant(variant_id)
+        model_name = resolve_roformer_filename(variant_id, self.stems_count)
 
         bundle_key = _msst_bundle_key(variant_meta, model_name)
         bundle = MSST_MODEL_BUNDLES.get(bundle_key) if bundle_key else None
@@ -2328,6 +2518,51 @@ class AudioSeparator:
             logger.warning(f"Error calculating purity score: {e}")
             return 85.0 # Fallback "good" score
 
+    @staticmethod
+    def _compute_peaks(stem_audio: np.ndarray, bar_count: int = 512) -> List[float]:
+        """Downsample stem audio into normalized peak bars for instant UI waveform display."""
+        if stem_audio.ndim == 1:
+            mono = stem_audio
+        elif stem_audio.shape[0] <= 8:
+            mono = stem_audio[0]
+        else:
+            mono = stem_audio[:, 0]
+
+        mono = np.abs(mono.astype(np.float32))
+        total_samples = int(mono.shape[0])
+        samples_per_bar = max(1, total_samples // bar_count)
+        peaks: List[float] = []
+
+        for i in range(bar_count):
+            start = i * samples_per_bar
+            chunk = mono[start:start + samples_per_bar]
+            peaks.append(float(chunk.max()) if chunk.size else 0.0)
+
+        max_peak = max(peaks) if peaks else 1.0
+        if max_peak > 1e-9:
+            peaks = [p / max_peak for p in peaks]
+        return peaks
+
+    def _write_peaks_file(
+        self,
+        stem_audio: np.ndarray,
+        sr: int,
+        audio_path: str,
+        bar_count: int = 512,
+    ) -> str:
+        peaks_path = str(Path(audio_path).with_suffix('.peaks.json'))
+        duration_seconds = float(stem_audio.shape[-1] / sr) if sr else 0.0
+        payload = {
+            "version": 1,
+            "bar_count": bar_count,
+            "duration_seconds": duration_seconds,
+            "sample_rate": sr,
+            "peaks": self._compute_peaks(stem_audio, bar_count),
+        }
+        with open(peaks_path, 'w', encoding='utf-8') as peaks_file:
+            json.dump(payload, peaks_file, separators=(',', ':'))
+        return peaks_path
+
     def _save_stems(
         self,
         stems: Dict[str, np.ndarray],
@@ -2422,6 +2657,11 @@ class AudioSeparator:
                 if success:
                     logger.info(f" Saved {stem_name}: {file_path} ({message})")
                     saved_files[stem_name] = str(file_path)
+                    try:
+                        peaks_path = self._write_peaks_file(stem_audio, sr, str(file_path))
+                        logger.info(f" Peaks written: {peaks_path}")
+                    except Exception as peaks_error:
+                        logger.warning(f" Failed to write peaks for {stem_name}: {peaks_error}")
                     if progress_hook:
                         # Stems saved: 92% -> 98%
                         progress_pct = 92 + int((len(saved_files) / len(stems)) * 6)
@@ -2438,6 +2678,10 @@ class AudioSeparator:
                         if success_fallback:
                             logger.info(f" Saved {stem_name} (Fallback WAV): {wav_path} ({message_fallback})")
                             saved_files[stem_name] = wav_path
+                            try:
+                                self._write_peaks_file(stem_audio, sr, wav_path)
+                            except Exception as peaks_error:
+                                logger.warning(f" Failed to write peaks for {stem_name}: {peaks_error}")
                             continue
                     
                     raise Exception(f"Failed to encode {stem_name}: {message}")
@@ -2531,6 +2775,22 @@ class AudioSeparator:
             if uvr_path in sys.path:
                 sys.path.remove(uvr_path)
 
+    def _validate_stem_output(self, stems: Dict[str, np.ndarray]) -> None:
+        """Fail fast if the model did not produce the requested number of stems."""
+        engine = getattr(self, 'engine', '')
+        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke', 'postfx', 'analyze'):
+            return
+        requested = getattr(self, 'stems_count', None)
+        if not requested:
+            return
+        actual = len(stems)
+        if actual != requested:
+            raise ValueError(
+                f"Requested {requested} stems but got {actual} "
+                f"({', '.join(sorted(stems.keys()))}). "
+                f"Model {getattr(self, 'model_variant', '') or engine} cannot satisfy this stem count."
+            )
+
     def separate(
         self,
         input_file: str,
@@ -2597,68 +2857,61 @@ class AudioSeparator:
                 device_notice = " (CPU mode - may take 10-30 minutes)" if self.device == 'cpu' else ""
                 progress_hook(3, 5, f"Step 3/5: Performing stem separation{device_notice}...", 40)
                 
-            # Run background progress updater since Demucs is slow
-            import threading
-            stop_progress = threading.Event()
+            # Determine engine with real progress callbacks (mdx, ensemble, etc.)
+            # Skip fake progress thread for these — prevents % regression (90% → 55%)
+            engine_with_real_progress = None
+            if hasattr(self, 'engine'):
+                eng = self.engine
+                if eng in ('mdx', 'ensemble', 'karaoke', 'drumsep_mdx', 'mdx_net', 'instrument', 'vr', 'roformer'):
+                    engine_with_real_progress = eng
+
             is_cpu = self.device == 'cpu'
-            def update_progress():
-                import time
-                current = 40
-                while not stop_progress.is_set() and current < 90:
-                    if is_cpu:
-                        if current < 50:
-                            delay = 3.0
-                        elif current < 70:
-                            delay = 5.0
-                        elif current < 85:
-                            delay = 8.0
-                        else:
-                            delay = 12.0
-                    else:
-                        if current < 60:
-                            delay = 0.8
-                        elif current < 80:
-                            delay = 1.5
-                        elif current < 88:
-                            delay = 2.5
-                        else:
-                            delay = 4.0
-                    
-                    time.sleep(delay)
-                    current += 1
-                    
-                    if progress_hook and not stop_progress.is_set():
+            import threading
+            stop_progress = None
+
+            # Fake progress thread ONLY for engines WITHOUT real callbacks
+            if not engine_with_real_progress:
+                stop_progress = threading.Event()
+                def update_progress():
+                    import time
+                    current = 40
+                    while not stop_progress.is_set() and current < 90:
                         if is_cpu:
-                            msg = f"Step 3/5: Processing on CPU ({current}%)... This may take 10-30 mins for long tracks."
+                            if current < 50: delay = 3.0
+                            elif current < 70: delay = 5.0
+                            elif current < 85: delay = 8.0
+                            else: delay = 12.0
                         else:
-                            msg = f"Step 3/5: AI model processing ({current}%)..."
-                            if current > 85:
-                                msg = f"Step 3/5: Matrix calculation ({current}%)..."
-                        
-                        progress_hook(3, 5, msg, current)
+                            if current < 60: delay = 0.8
+                            elif current < 80: delay = 1.5
+                            elif current < 88: delay = 2.5
+                            else: delay = 4.0
+                        time.sleep(delay)
+                        current += 1
+                        if progress_hook and not stop_progress.is_set():
+                            msg = f"Step 3/5: Processing on CPU ({current}%)..." if is_cpu else f"Step 3/5: AI model processing ({current}%)..."
+                            progress_hook(3, 5, msg, current)
+                progress_thread = threading.Thread(target=update_progress)
+                progress_thread.daemon = True
+                progress_thread.start()
 
-            progress_thread = threading.Thread(target=update_progress)
-            progress_thread.daemon = True
-            progress_thread.start()
-
-            
-            if hasattr(self, 'engine') and self.engine == 'mdx':
+            if engine_with_real_progress == 'mdx':
                 stems = self._separate_mdx(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'ensemble':
+            elif engine_with_real_progress == 'ensemble':
                 stems = self._separate_ensemble(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'karaoke':
+            elif engine_with_real_progress == 'karaoke':
                 stems = self._separate_ensemble(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'drumsep_mdx':
+            elif engine_with_real_progress == 'drumsep_mdx':
                 stems = self._separate_drumsep_mdx(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'mdx_net':
+            elif engine_with_real_progress == 'mdx_net':
                 stems = self._separate_mdx_net(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'instrument':
+            elif engine_with_real_progress == 'instrument':
                 stems = self._separate_instrument(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'vr':
+            elif engine_with_real_progress == 'vr':
                 stems = self._separate_vr(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'roformer':
+            elif engine_with_real_progress == 'roformer':
                 stems = self._separate_roformer(input_file, audio, sr, progress_hook)
-            elif hasattr(self, 'engine') and self.engine == 'spleeter':
+            elif self.engine == 'spleeter':
                 stems = self._separate_spleeter(audio, sr)
             elif hasattr(self, 'engine') and self.engine == 'postfx':
                 if audio.ndim == 1:
@@ -2667,7 +2920,8 @@ class AudioSeparator:
             else:
                 stems = self._separate_stems(audio, sr)
 
-            stop_progress.set()
+            if stop_progress:
+                stop_progress.set()
             if progress_hook:
                 progress_hook(3, 5, " Stem separation complete", 91)
                 
@@ -2727,6 +2981,8 @@ class AudioSeparator:
                     else:
                         stems = {'vocals': stems['vocals']}
 
+            self._validate_stem_output(stems)
+
             # Step 5: Global Analysis (for tagging and filenames)
             bpm, key, pitch_hz = 0.0, "", 0.0
             if not self.fast_mode:
@@ -2783,8 +3039,10 @@ class AudioSeparator:
                     logger.warning(f"Failed to read duration for {file_path}: {e}")
                     duration_seconds = 0.0
 
+                peaks_path = str(Path(file_path).with_suffix('.peaks.json'))
                 manifest["stems"][stem_name] = {
                     "file_path": str(file_path),
+                    "peaks_path": peaks_path if os.path.exists(peaks_path) else None,
                     "format": format_str,
                     "duration_seconds": duration_seconds,
                     "purity_score": round(purity_score, 1),
@@ -3058,16 +3316,81 @@ def main():
             }
     else:
         # Standard Separation
-        manifest = separator.separate(args.input_file, output_dir=args.output, progress_hook=progress_printer)
+        error_log_path = None
+        try:
+            # Set up a log file in the output directory for detailed diagnostics
+            if args.output:
+                os.makedirs(args.output, exist_ok=True)
+                error_log_path = os.path.join(args.output, "splitter_error.log")
+                # Also tee INFO+ logging to a persistent log in %LOCALAPPDATA%
+                appdata_log_dir = os.path.join(
+                    os.environ.get("LOCALAPPDATA",
+                                   os.path.join(os.path.expanduser("~"), "AppData", "Local")),
+                    "StemSplit", "logs"
+                )
+                os.makedirs(appdata_log_dir, exist_ok=True)
+                file_handler = logging.FileHandler(os.path.join(appdata_log_dir, "splitter.log"), encoding='utf-8')
+                file_handler.setLevel(logging.INFO)
+                file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
+                logging.getLogger().addHandler(file_handler)
+            manifest = separator.separate(args.input_file, output_dir=args.output, progress_hook=progress_printer)
+        except Exception as sep_err:
+            error_code = f"SEP-{int(time.time()) % 100000:05d}"
+            error_type = type(sep_err).__name__
+            error_msg = str(sep_err)[:500]
+            # Write detailed error log to output directory
+            if error_log_path:
+                import traceback
+                try:
+                    with open(error_log_path, 'w', encoding='utf-8') as f_err:
+                        f_err.write(f"=== Liminal StemSplit Error Report ===\n")
+                        f_err.write(f"Timestamp: {datetime.now().isoformat()}\n")
+                        f_err.write(f"Error Code: {error_code}\n")
+                        f_err.write(f"Error Type: {error_type}\n")
+                        f_err.write(f"Message: {error_msg}\n")
+                        f_err.write(f"Input: {args.input_file}\n")
+                        f_err.write(f"Engine: {args.engine}\n")
+                        f_err.write(f"Model: {args.model_variant or '(default)'}\n")
+                        f_err.write(f"Device: {default_device}\n")
+                        if config.get('gpu_vram'):
+                            f_err.write(f"GPU VRAM: {config['gpu_vram']}GB\n")
+                        f_err.write(f"\n--- Full Traceback ---\n")
+                        traceback.print_exc(file=f_err)
+                except Exception:
+                    logger.error("Failed to write error log", exc_info=True)
+            # Print clean JSON error for Rust to parse
+            manifest = {
+                "status": "failed",
+                "error_code": error_code,
+                "error_type": error_type,
+                "error_message": error_msg,
+                "timestamp": datetime.now().isoformat(),
+                "input_file": args.input_file,
+                "config": {k: v for k, v in config.items() if k not in ('fx_config',)},
+                "stems": {},
+                "process_duration_seconds": 0,
+                "errors": [f"[{error_code}] {error_type}: {error_msg}"],
+                "_error_log": error_log_path,
+            }
 
     # Export manifest to file
     try:
         manifest_path = separator.export_manifest(manifest)
-        if args.emit_json:
-            print(json.dumps(manifest), flush=True)
     except Exception:
-        # Already logged inside export_manifest
-        pass
+        # If export_manifest fails, write manifest directly
+        try:
+            if args.output:
+                manifest_path = os.path.join(args.output, "manifest.json")
+                with open(manifest_path, 'w') as fm:
+                    json.dump(manifest, fm, indent=2)
+        except Exception:
+            pass
+    finally:
+        if args.emit_json:
+            try:
+                print(json.dumps(manifest), flush=True)
+            except Exception:
+                pass
 
     # Exit with non-zero on failure
     if manifest.get('status') != 'success':

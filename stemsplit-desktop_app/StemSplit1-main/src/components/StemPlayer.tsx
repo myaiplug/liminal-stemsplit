@@ -1,11 +1,13 @@
 // src/components/StemPlayer.tsx
 'use client';
 
-import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
+import { motion } from 'framer-motion';
 import StemFXMenu from './StemFXMenu';
+import SurgicalEditor from './SurgicalEditor';
 import CanvasWaveform, { CanvasWaveformHandle } from './CanvasWaveform';
-
+import type { AudioLoadProgress } from '@/lib/audio-loader';
 // --- Types ---
 type StemType = 'vocals' | 'drums' | 'bass' | 'other' | 'piano' | 'guitar' | 'kick' | 'snare' | 'toms' | 'cymbals' | 'instrumental';
 
@@ -16,6 +18,7 @@ interface StemPlayerProps {
     purityScore?: number;
     index: number;
     deferLoadMs?: number;
+    peaksPath?: string;
     isFxOpen?: boolean;
     onToggleFX?: () => void;
     onResplitStem?: () => void;
@@ -33,7 +36,15 @@ const stemColors: Record<string, { wave: string; progress: string; border: strin
     kick:         { wave: '#ef4444', progress: '#dc2626', border: 'border-red-600/30',    text: 'text-red-500',     glow: 'shadow-red-600/20',    bg: 'bg-red-600' },
     snare:        { wave: '#fbbf24', progress: '#f59e0b', border: 'border-amber-500/30',  text: 'text-amber-400',   glow: 'shadow-amber-500/20',  bg: 'bg-amber-500' },
     toms:         { wave: '#818cf8', progress: '#6366f1', border: 'border-indigo-500/30', text: 'text-indigo-400',  glow: 'shadow-indigo-500/20', bg: 'bg-indigo-500' },
+    hh:           { wave: '#2dd4bf', progress: '#14b8a6', border: 'border-teal-500/30',   text: 'text-teal-400',    glow: 'shadow-teal-500/20',   bg: 'bg-teal-500' },
+    ride:         { wave: '#a5b4fc', progress: '#818cf8', border: 'border-violet-400/30', text: 'text-violet-300',  glow: 'shadow-violet-400/20', bg: 'bg-violet-400' },
+    crash:        { wave: '#f472b6', progress: '#ec4899', border: 'border-pink-500/30',   text: 'text-pink-400',    glow: 'shadow-pink-500/20',   bg: 'bg-pink-500' },
     cymbals:      { wave: '#7dd3fc', progress: '#38bdf8', border: 'border-sky-400/30',    text: 'text-sky-400',     glow: 'shadow-sky-400/20',    bg: 'bg-sky-400' },
+    overheads:    { wave: '#94a3b8', progress: '#64748b', border: 'border-slate-500/30',  text: 'text-slate-400',   glow: 'shadow-slate-500/20',  bg: 'bg-slate-500' },
+    lead:         { wave: '#c084fc', progress: '#a855f7', border: 'border-purple-400/30', text: 'text-purple-300',  glow: 'shadow-purple-400/20', bg: 'bg-purple-400' },
+    back:         { wave: '#f0abfc', progress: '#e879f9', border: 'border-fuchsia-400/30',text: 'text-fuchsia-300', glow: 'shadow-fuchsia-400/20',bg: 'bg-fuchsia-400' },
+    backing:      { wave: '#f0abfc', progress: '#e879f9', border: 'border-fuchsia-400/30',text: 'text-fuchsia-300', glow: 'shadow-fuchsia-400/20',bg: 'bg-fuchsia-400' },
+    adlibs:       { wave: '#fda4af', progress: '#fb7185', border: 'border-rose-400/30',   text: 'text-rose-300',    glow: 'shadow-rose-400/20',   bg: 'bg-rose-400' },
     instrumental: { wave: '#34d399', progress: '#10b981', border: 'border-emerald-500/30',text: 'text-emerald-400', glow: 'shadow-emerald-500/20',bg: 'bg-emerald-500' },
 };
 const defaultColors = stemColors.other;
@@ -45,7 +56,7 @@ function formatTime(seconds: number): string {
     return `${m}:${s.toString().padStart(2, '0')}.${ms}`;
 }
 
-const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, purityScore, index, deferLoadMs = 0, isFxOpen, onToggleFX, onResplitStem, fxDisabled = false, resplitDisabled = false }) => {
+const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, peaksPath, duration, purityScore, index, deferLoadMs = 0, isFxOpen, onToggleFX, onResplitStem, fxDisabled = false, resplitDisabled = false }) => {
     const colors = stemColors[stemName] || defaultColors;
 
     const [currentFilePath, setCurrentFilePath] = useState(filePath);
@@ -55,12 +66,6 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
     const showFX = isFxOpen !== undefined ? isFxOpen : localShowFX;
     const toggleFX = onToggleFX || (() => setLocalShowFX(prev => !prev));
 
-    useEffect(() => {
-        if (!fxDisabled || !showFX) return;
-        if (onToggleFX) onToggleFX();
-        else setLocalShowFX(false);
-    }, [fxDisabled, showFX, onToggleFX]);
-
     const canvasWaveformRef = useRef<CanvasWaveformHandle>(null);
 
     const [isPlaying, setIsPlaying] = useState(false);
@@ -69,8 +74,37 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
     const [volume, setVolume] = useState(0.85);
     const [isMuted, setIsMuted] = useState(false);
     const [isReady, setIsReady] = useState(false);
-    const [loadProgress, setLoadProgress] = useState(0);
+    const [loadProgress, setLoadProgress] = useState<AudioLoadProgress | null>(null);
     const [loadError, setLoadError] = useState<string | null>(null);
+    const [fxPortalReady, setFxPortalReady] = useState(false);
+    const [showEditor, setShowEditor] = useState(false);
+    const [editorSelection, setEditorSelection] = useState({ start: 0, end: 0 });
+
+    useEffect(() => { setFxPortalReady(true); }, []);
+
+    const openEditor = useCallback(() => {
+        const playhead = canvasWaveformRef.current?.getCurrentTime() ?? 0;
+        const dur = canvasWaveformRef.current?.getDuration() ?? totalDuration;
+        const end = Math.min(dur, Math.max(playhead + 0.25, playhead + 1));
+        setEditorSelection({ start: playhead, end });
+        setShowEditor(true);
+    }, [totalDuration]);
+
+    const handleWaveformReady = useCallback((dur: number) => {
+        setTotalDuration(dur);
+        setIsReady(true);
+        setLoadError(null);
+        setLoadProgress(null);
+    }, []);
+
+    const handleLoadError = useCallback(() => {
+        setLoadError('waveform');
+        setIsReady(false);
+    }, []);
+
+    const handleLoadProgress = useCallback((p: AudioLoadProgress) => {
+        setLoadProgress(p);
+    }, []);
 
     // Volume / mute sync to CanvasWaveform
     useEffect(() => {
@@ -129,7 +163,7 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                          style={{ boxShadow: isPlaying ? `0 0 8px ${colors.wave}` : 'none' }}
                     />
                     <span className={`text-[11px] font-mono font-bold uppercase tracking-[0.15em] ${colors.text}`}>
-                        {stemName}
+                        {stemName === 'hh' ? 'hi-hat' : stemName}
                     </span>
                 </div>
                 <div className="flex items-center gap-1.5">
@@ -148,17 +182,17 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                 <CanvasWaveform
                     ref={canvasWaveformRef}
                     filePath={currentFilePath}
+                    peaksPath={peaksPath}
+                    fallbackDuration={duration}
                     height={48}
+                    deferLoadMs={deferLoadMs}
                     waveColor={colors.wave}
                     progressColor={colors.progress}
-                    onReady={(dur) => {
-                        setTotalDuration(dur);
-                        setLoadProgress(100);
-                        setIsReady(true);
-                    }}
-                    onTimeUpdate={(t) => setCurrentTime(t)}
-                    onPlayStateChange={(p) => setIsPlaying(p)}
-                    onLoadError={() => setLoadError('waveform')}
+                    onReady={handleWaveformReady}
+                    onTimeUpdate={setCurrentTime}
+                    onPlayStateChange={setIsPlaying}
+                    onLoadProgress={handleLoadProgress}
+                    onLoadError={handleLoadError}
                 />
             </div>
 
@@ -203,12 +237,33 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                         onChange={e => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
                         className="stem-vol-slider w-14 h-1 accent-cyan-400" title={`Volume: ${Math.round(volume * 100)}%`}
                     />
-                    {!fxDisabled && (
-                        <button onClick={() => toggleFX()}
-                            className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider transition-all ${showFX ? 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300' : 'border border-slate-700 text-slate-500 hover:text-cyan-400 hover:border-cyan-700'}`}>
-                            FX
-                        </button>
-                    )}
+                    <button
+                        onClick={openEditor}
+                        disabled={!isReady}
+                        title="Open waveform editor"
+                        className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider transition-all ${
+                            showEditor
+                                ? 'bg-violet-500/20 border border-violet-500/40 text-violet-300'
+                                : 'border border-slate-700 text-slate-500 hover:text-violet-300 hover:border-violet-700 disabled:opacity-30'
+                        }`}
+                    >
+                        EDIT
+                    </button>
+                    <button
+                        onClick={() => toggleFX()}
+                        title={fxDisabled ? 'Preview Pro FX (5s free)' : 'Open FX rack'}
+                        className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider transition-all ${
+                            showFX
+                                ? fxDisabled
+                                    ? 'bg-amber-500/15 border border-amber-500/35 text-amber-300'
+                                    : 'bg-cyan-500/20 border border-cyan-500/40 text-cyan-300'
+                                : fxDisabled
+                                    ? 'border border-slate-700/80 text-slate-500 hover:text-amber-300/80 hover:border-amber-700/50 opacity-80'
+                                    : 'border border-slate-700 text-slate-500 hover:text-cyan-400 hover:border-cyan-700'
+                        }`}
+                    >
+                        FX{fxDisabled ? ' ✦' : ''}
+                    </button>
                     {onResplitStem && !resplitDisabled && (
                         <button onClick={onResplitStem}
                             className="px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider border border-purple-500/30 text-purple-400/70 hover:text-purple-300 hover:bg-purple-500/10 transition-all" title="Re-split this stem">
@@ -218,27 +273,30 @@ const StemPlayer: React.FC<StemPlayerProps> = ({ stemName, filePath, duration, p
                 </div>
             </div>
 
-            {/* FX Menu */}
-            <AnimatePresence>
-                {showFX && (
-                    <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.25 }}
-                        className="overflow-hidden"
-                    >
-                        <StemFXMenu
-                            stemType={stemName}
-                            stemFilePath={currentFilePath}
-                            isOpen={showFX}
-                            onClose={() => toggleFX()}
-                            onApply={(newPath) => setCurrentFilePath(newPath)}
-                            isFreeMode={fxDisabled}
-                        />
-                    </motion.div>
-                )}
-            </AnimatePresence>
+            {fxPortalReady && showFX && createPortal(
+                <StemFXMenu
+                    stemType={stemName}
+                    stemFilePath={currentFilePath}
+                    isOpen={showFX}
+                    onClose={() => toggleFX()}
+                    onApply={(newPath) => setCurrentFilePath(newPath)}
+                    isFreeMode={fxDisabled}
+                />,
+                document.body,
+            )}
+
+            {fxPortalReady && showEditor && createPortal(
+                <SurgicalEditor
+                    filePath={currentFilePath}
+                    stemName={stemName}
+                    isOpen={showEditor}
+                    onClose={() => setShowEditor(false)}
+                    onApply={(newPath) => setCurrentFilePath(newPath)}
+                    selectionStart={editorSelection.start}
+                    selectionEnd={editorSelection.end}
+                />,
+                document.body,
+            )}
         </motion.div>
     );
 };

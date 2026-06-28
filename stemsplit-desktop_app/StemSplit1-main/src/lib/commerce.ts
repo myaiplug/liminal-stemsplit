@@ -2,7 +2,8 @@
 
 import { open } from '@tauri-apps/plugin-shell';
 
-const PRO_PRICE_LABEL = '$49';
+const PRO_PRICE_LABEL = '$19.99';
+const PRO_PRICE_ORIGINAL = '$49';
 const PRODUCTION_SITE = 'https://liminal-stemsplit.onrender.com';
 const DEFAULT_PRICING_URL =
   process.env.NEXT_PUBLIC_PRICING_PAGE_URL || `${PRODUCTION_SITE}/#pricing`;

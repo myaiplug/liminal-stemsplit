@@ -1,16 +1,13 @@
-// src/components/OriginalPlayer.tsx
 'use client';
 
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import WaveSurfer from 'wavesurfer.js';
-import { loadWaveSurferSource } from '@/lib/audio-loader';
+import { motion } from 'framer-motion';
 import CanvasWaveform, { CanvasWaveformHandle } from './CanvasWaveform';
 
 interface OriginalPlayerProps {
     filePath: string;
     displayTitle?: string;
-    onBassEnergy?: (energy: number) => void; // 0-1 bass energy for reactor
+    onBassEnergy?: (energy: number) => void;
 }
 
 function formatTime(seconds: number): string {
@@ -22,17 +19,12 @@ function formatTime(seconds: number): string {
 function getFileName(filePath: string): string {
     const parts = filePath.replace(/\\/g, '/').split('/');
     const name = parts[parts.length - 1] || 'Unknown';
-    // Strip extension
     return name.replace(/\.[^.]+$/, '');
 }
 
 const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle, onBassEnergy }) => {
-    const waveRef = useRef<HTMLDivElement>(null);
-    const wsRef = useRef<WaveSurfer | null>(null);
-    const analyserRef = useRef<AnalyserNode | null>(null);
-    const audioCtxRef = useRef<AudioContext | null>(null);
-    const rafRef = useRef<number>(0);
     const canvasWaveformRef = useRef<CanvasWaveformHandle>(null);
+    const rafRef = useRef<number>(0);
 
     const [isPlaying, setIsPlaying] = useState(false);
     const [isReady, setIsReady] = useState(false);
@@ -40,38 +32,10 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
     const [duration, setDuration] = useState(0);
     const [volume, setVolume] = useState(0.8);
     const [isMuted, setIsMuted] = useState(false);
-    const [loadProgress, setLoadProgress] = useState(0);
-    const [reloadToken, setReloadToken] = useState(0);
-    const [useCanvasFallback, setUseCanvasFallback] = useState(false);
-    const fallbackRef = useRef(false);
-    fallbackRef.current = useCanvasFallback;
 
-    // Bass analysis loop
-    const startBassAnalysis = useCallback(() => {
-        if (!analyserRef.current || !onBassEnergy) return;
+    const isFreshImport = filePath.includes('StemSplit') && filePath.includes('imports');
 
-        const analyser = analyserRef.current;
-        const bufferLength = analyser.frequencyBinCount;
-        const dataArray = new Uint8Array(bufferLength);
-
-        const analyze = () => {
-            analyser.getByteFrequencyData(dataArray);
-
-            // Bass: bins 0-8 (~0-340Hz at 44100 sample rate, 2048 fft)
-            let bassSum = 0;
-            const bassBins = Math.min(8, bufferLength);
-            for (let i = 0; i < bassBins; i++) {
-                bassSum += dataArray[i];
-            }
-            const bassEnergy = bassSum / (bassBins * 255); // normalize 0-1
-            onBassEnergy(bassEnergy);
-
-            rafRef.current = requestAnimationFrame(analyze);
-        };
-        analyze();
-    }, [onBassEnergy]);
-
-    const stopBassAnalysis = useCallback(() => {
+    const stopBassPulse = useCallback(() => {
         if (rafRef.current) {
             cancelAnimationFrame(rafRef.current);
             rafRef.current = 0;
@@ -79,204 +43,55 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
         onBassEnergy?.(0);
     }, [onBassEnergy]);
 
-    // Init WaveSurfer
-    useEffect(() => {
-        if (!waveRef.current) return;
-        let cancelled = false;
-        let revokeAudioUrl: (() => void) | undefined;
+    const startBassPulse = useCallback(() => {
+        if (!onBassEnergy) return;
+        stopBassPulse();
+        const pulse = () => {
+            const t = canvasWaveformRef.current?.getCurrentTime() ?? 0;
+            onBassEnergy(0.15 + Math.min(0.35, Math.abs(Math.sin(t * 3)) * 0.25));
+            rafRef.current = requestAnimationFrame(pulse);
+        };
+        pulse();
+    }, [onBassEnergy, stopBassPulse]);
 
-        setUseCanvasFallback(false);
+    useEffect(() => {
         setIsReady(false);
-        setLoadProgress(0);
+        setCurrentTime(0);
+        setDuration(0);
+        setIsPlaying(false);
+        stopBassPulse();
+    }, [filePath, stopBassPulse]);
 
-        const init = async () => {
-            if (cancelled || !waveRef.current) return;
-
-            const ws = WaveSurfer.create({
-                container: waveRef.current,
-                height: 32,
-                waveColor: '#475569',
-                progressColor: '#22d3ee',
-                cursorColor: '#67e8f9',
-                cursorWidth: 1,
-                barWidth: 1,
-                barGap: 1,
-                barRadius: 1,
-                normalize: true,
-                fillParent: true,
-                hideScrollbar: true,
-            });
-
-            ws.on('loading', (pct: number) => {
-                if (!cancelled) setLoadProgress(pct);
-            });
-
-            ws.on('ready', () => {
-                if (cancelled) return;
-                setDuration(ws.getDuration());
-                setLoadProgress(100);
-                setIsReady(true);
-                ws.setVolume(volume);
-
-                // Hook up AnalyserNode for bass detection via MediaElementAudioSourceNode
-                if (onBassEnergy) {
-                    try {
-                        // WaveSurfer v7 default backend uses an internal <audio> element
-                        const mediaEl = (ws as any).getMediaElement?.() || (ws as any).media;
-                        if (mediaEl instanceof HTMLMediaElement) {
-                            const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
-                            const source = ctx.createMediaElementSource(mediaEl);
-                            const analyser = ctx.createAnalyser();
-                            analyser.fftSize = 2048;
-                            analyser.smoothingTimeConstant = 0.8;
-                            source.connect(analyser);
-                            analyser.connect(ctx.destination);
-                            analyserRef.current = analyser;
-                            audioCtxRef.current = ctx;
-                            // Resume if suspended (browser autoplay policy)
-                            if (ctx.state === 'suspended') ctx.resume();
-                        } else {
-                            console.warn('[OriginalPlayer] No HTMLMediaElement available for bass analysis');
-                        }
-                    } catch (e) {
-                        console.warn('[OriginalPlayer] Could not set up bass analyser:', e);
-                    }
-                }
-            });
-
-            ws.on('audioprocess', () => {
-                if (!cancelled) setCurrentTime(ws.getCurrentTime());
-            });
-            ws.on('seeking', () => {
-                if (!cancelled) setCurrentTime(ws.getCurrentTime());
-            });
-            ws.on('play', () => {
-                if (!cancelled) {
-                    setIsPlaying(true);
-                    startBassAnalysis();
-                }
-            });
-            ws.on('pause', () => {
-                if (!cancelled) {
-                    setIsPlaying(false);
-                    stopBassAnalysis();
-                }
-            });
-            ws.on('finish', () => {
-                if (!cancelled) {
-                    setIsPlaying(false);
-                    setCurrentTime(0);
-                    stopBassAnalysis();
-                }
-            });
-            ws.on('error', (err) => {
-                if (!cancelled) {
-                    console.warn('[OriginalPlayer] load error, trying canvas fallback:', err);
-                    setUseCanvasFallback(true);
-                }
-            });
-
-            wsRef.current = ws;
-
-            try {
-                const resolved = await loadWaveSurferSource(
-                    filePath,
-                    async (url) => {
-                        await ws.load(url);
-                    },
-                    { maxPasses: 8 },
-                );
-                revokeAudioUrl = resolved.revoke;
-            } catch (err: any) {
-                if (!cancelled && err?.name !== 'AbortError') {
-                    console.warn('[OriginalPlayer] resolver failed, trying canvas fallback:', err);
-                    setUseCanvasFallback(true);
-                }
-            }
-        };
-
-        init().catch((err) => {
-            if (!cancelled) {
-                console.warn('[OriginalPlayer] resolver failed, trying canvas fallback:', err);
-                setUseCanvasFallback(true);
-            }
-        });
-
-        return () => {
-            cancelled = true;
-            stopBassAnalysis();
-            revokeAudioUrl?.();
-            try { wsRef.current?.destroy(); } catch { /* ignore */ }
-            try { audioCtxRef.current?.close(); } catch { /* ignore */ }
-            wsRef.current = null;
-            analyserRef.current = null;
-            audioCtxRef.current = null;
-        };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filePath, reloadToken]);
-
-    // Volume sync
     useEffect(() => {
-        if (useCanvasFallback) {
-            canvasWaveformRef.current?.setVolume(isMuted ? 0 : volume);
-            return;
-        }
-        if (wsRef.current && isReady) {
-            wsRef.current.setVolume(isMuted ? 0 : volume);
-        }
-    }, [volume, isMuted, isReady, useCanvasFallback]);
+        canvasWaveformRef.current?.setVolume(isMuted ? 0 : volume);
+    }, [volume, isMuted, filePath]);
+
+    useEffect(() => () => stopBassPulse(), [stopBassPulse]);
 
     const togglePlay = useCallback(() => {
-        if (fallbackRef.current) {
-            canvasWaveformRef.current?.playPause();
-            return;
-        }
-        if (audioCtxRef.current?.state === 'suspended') {
-            audioCtxRef.current.resume();
-        }
-        wsRef.current?.playPause();
+        canvasWaveformRef.current?.playPause();
     }, []);
 
     const handleStop = useCallback(() => {
-        if (fallbackRef.current) {
-            canvasWaveformRef.current?.stop();
-            return;
-        }
-        if (wsRef.current) {
-            wsRef.current.stop();
-            setCurrentTime(0);
-            setIsPlaying(false);
-            stopBassAnalysis();
-        }
-    }, [stopBassAnalysis]);
+        canvasWaveformRef.current?.stop();
+        setCurrentTime(0);
+        setIsPlaying(false);
+        stopBassPulse();
+    }, [stopBassPulse]);
 
     const skipBack = useCallback(() => {
-        if (fallbackRef.current) {
-            const cw = canvasWaveformRef.current;
-            if (!cw) return;
-            const t = Math.max(0, cw.getCurrentTime() - 5);
-            cw.seekTo(t / cw.getDuration());
-            return;
-        }
-        if (wsRef.current) {
-            const t = Math.max(0, wsRef.current.getCurrentTime() - 5);
-            wsRef.current.seekTo(t / wsRef.current.getDuration());
-        }
+        const cw = canvasWaveformRef.current;
+        if (!cw) return;
+        const t = Math.max(0, cw.getCurrentTime() - 5);
+        cw.seekTo(cw.getDuration() > 0 ? t / cw.getDuration() : 0);
     }, []);
 
     const skipForward = useCallback(() => {
-        if (fallbackRef.current) {
-            const cw = canvasWaveformRef.current;
-            if (!cw) return;
-            const t = Math.min(cw.getDuration(), cw.getCurrentTime() + 5);
-            cw.seekTo(t / cw.getDuration());
-            return;
-        }
-        if (wsRef.current) {
-            const d = wsRef.current.getDuration();
-            const t = Math.min(d, wsRef.current.getCurrentTime() + 5);
-            wsRef.current.seekTo(t / d);
-        }
+        const cw = canvasWaveformRef.current;
+        if (!cw) return;
+        const d = cw.getDuration();
+        const t = Math.min(d, cw.getCurrentTime() + 5);
+        cw.seekTo(d > 0 ? t / d : 0);
     }, []);
 
     const fileName = displayTitle || getFileName(filePath);
@@ -289,67 +104,42 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
             transition={{ duration: 0.4, ease: 'easeOut' }}
             className="fixed bottom-0 left-0 right-0 z-40"
         >
-            {/* Glass bar */}
             <div className="mx-auto max-w-2xl px-3 pb-2">
                 <div className="relative rounded-t-xl border border-slate-700/40 border-b-0 bg-slate-950/70 backdrop-blur-xl overflow-hidden">
-                    {/* Top glow line */}
                     <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-cyan-500/30 to-transparent" />
 
-                    {/* Waveform row */}
                     <div className="px-4 pt-3 pb-1">
                         <div className="flex items-center gap-3">
-                            {/* Track name */}
                             <div className="flex-shrink-0 max-w-[120px]">
                                 <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider block truncate" title={fileName}>
                                     {fileName}
                                 </span>
                             </div>
 
-                            {/* Waveform — always shows animated bars, overlays real waveform on top */}
                             <div className="flex-1 relative min-w-0">
-                                {/* Permanent animated placeholder bars */}
-                                <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
-                                    <div className="relative w-full h-8 flex items-center justify-center overflow-hidden px-1">
-                                        <div className="flex items-end gap-[1px] h-8 w-full justify-center">
-                                            {Array.from({ length: 50 }).map((_, i) => {
-                                                const barH = 2 + Math.sin(i * 0.35) * 6 + Math.cos(i * 0.8) * 4;
-                                                return (
-                                                    <div key={i} className="rounded-full flex-shrink-0"
-                                                        style={{ width: 1.5, height: `${Math.max(2, barH)}px`, backgroundColor: 'rgba(34,211,238,0.07)' }} />
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {useCanvasFallback ? (
-                                    <CanvasWaveform
-                                        ref={canvasWaveformRef}
-                                        filePath={filePath}
-                                        height={32}
-                                        waveColor="#475569"
-                                        progressColor="#22d3ee"
-                                        onReady={(dur) => {
-                                            setDuration(dur);
-                                            setLoadProgress(100);
-                                            setIsReady(true);
-                                        }}
-                                        onTimeUpdate={(t) => setCurrentTime(t)}
-                                        onPlayStateChange={(p) => {
-                                            setIsPlaying(p);
-                                            if (p) startBassAnalysis();
-                                            else stopBassAnalysis();
-                                        }}
-                                    />
-                                ) : (
-                                    <div
-                                        ref={waveRef}
-                                        className={`w-full cursor-pointer transition-opacity duration-300 ${isReady ? 'opacity-100' : 'opacity-0'}`}
-                                    />
-                                )}
+                                <CanvasWaveform
+                                    ref={canvasWaveformRef}
+                                    filePath={filePath}
+                                    height={32}
+                                    waveColor="#475569"
+                                    progressColor="#22d3ee"
+                                    deferLoadMs={isFreshImport ? 800 : 0}
+                                    onReady={(dur) => {
+                                        setDuration(dur);
+                                        setIsReady(true);
+                                    }}
+                                    onTimeUpdate={(t) => setCurrentTime(t)}
+                                    onPlayStateChange={(playing) => {
+                                        setIsPlaying(playing);
+                                        if (playing) startBassPulse();
+                                        else stopBassPulse();
+                                    }}
+                                    onLoadError={() => {
+                                        setIsReady(true);
+                                    }}
+                                />
                             </div>
 
-                            {/* Time */}
                             <div className="flex-shrink-0 text-right">
                                 <span className="text-[10px] font-mono text-cyan-400 tabular-nums">
                                     {formatTime(currentTime)}
@@ -362,11 +152,8 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                         </div>
                     </div>
 
-                    {/* Controls row */}
                     <div className="px-4 pb-3 pt-1 flex items-center justify-between">
-                        {/* Transport controls */}
                         <div className="flex items-center gap-1">
-                            {/* Skip back */}
                             <button
                                 onClick={skipBack}
                                 disabled={!isReady}
@@ -378,7 +165,6 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                                 </svg>
                             </button>
 
-                            {/* Stop */}
                             <button
                                 onClick={handleStop}
                                 disabled={!isReady}
@@ -390,7 +176,6 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                                 </svg>
                             </button>
 
-                            {/* Play/Pause - larger center button */}
                             <button
                                 onClick={togglePlay}
                                 disabled={!isReady}
@@ -409,7 +194,6 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                                 )}
                             </button>
 
-                            {/* Skip forward */}
                             <button
                                 onClick={skipForward}
                                 disabled={!isReady}
@@ -422,9 +206,7 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                             </button>
                         </div>
 
-                        {/* Right side: volume + label */}
                         <div className="flex items-center gap-3">
-                            {/* Volume */}
                             <div className="flex items-center gap-1.5">
                                 <button
                                     onClick={() => setIsMuted(!isMuted)}
@@ -448,13 +230,15 @@ const OriginalPlayer: React.FC<OriginalPlayerProps> = ({ filePath, displayTitle,
                                     max="1"
                                     step="0.01"
                                     value={isMuted ? 0 : volume}
-                                    onChange={e => { setVolume(parseFloat(e.target.value)); setIsMuted(false); }}
+                                    onChange={(e) => {
+                                        setVolume(parseFloat(e.target.value));
+                                        setIsMuted(false);
+                                    }}
                                     className="stem-vol-slider w-16 h-1 accent-cyan-400"
                                     title={`Volume: ${Math.round(volume * 100)}%`}
                                 />
                             </div>
 
-                            {/* Original label */}
                             <span className="text-[8px] font-mono text-slate-600 tracking-[0.2em] uppercase border border-slate-800 rounded px-1.5 py-0.5">
                                 ORIGINAL
                             </span>

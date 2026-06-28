@@ -69,7 +69,7 @@ export default function SalesModal({ isOpen, onClose }: SalesModalProps) {
                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-amber-300">Free</p>
                 <h3 className="font-mono text-xl text-amber-200 mt-2">Trial</h3>
                 <ul className="mt-4 space-y-2 text-xs text-slate-400 font-mono">
-                  <li>1 free Spleeter 2-stem split</li>
+                  <li>Unlimited Spleeter 2-stem splits</li>
                   <li>MP3 output only</li>
                   <li>Advanced engines locked</li>
                 </ul>

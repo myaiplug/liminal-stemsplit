@@ -9,10 +9,9 @@ fn main() {
     let pricing_page = std::env::var("NEXT_PUBLIC_PRICING_PAGE_URL")
         .unwrap_or_else(|_| format!("{}/#pricing", production_site.trim_end_matches('/')));
 
-    let models_root = std::env::var("STEMSPLIT_MODELS_ROOT")
-        .unwrap_or_else(|_| "D:\\AudioSeperationModels".to_string());
-    let uvr_path = std::env::var("STEMSPLIT_UVR_PATH")
-        .unwrap_or_else(|_| "D:\\Ultimate Vocal Remover".to_string());
+    // Legacy dev override only — new installs use %LOCALAPPDATA%/StemSplit/models
+    let models_root = std::env::var("STEMSPLIT_MODELS_ROOT").unwrap_or_default();
+    let uvr_path = std::env::var("STEMSPLIT_UVR_PATH").unwrap_or_default();
 
     println!("cargo:rustc-env=STEMSPLIT_LICENSE_SERVER_URL={}", license_server);
     println!("cargo:rustc-env=STEMSPLIT_CHECKOUT_API_URL={}", checkout_api);

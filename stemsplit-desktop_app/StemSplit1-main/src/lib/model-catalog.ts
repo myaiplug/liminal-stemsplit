@@ -66,7 +66,7 @@ export const ENGINE_META: Record<
   },
   spleeter: {
     label: 'Quick Split',
-    subtitle: 'Lightning fast — free tier included',
+    subtitle: 'Lightning-fast 2-stem vocal split',
     color: '#94a3b8',
     glow: 'rgba(148,163,184,0.25)',
   },
@@ -167,7 +167,7 @@ export const SEPARATION_MODELS: SeparationModel[] = [
     name: 'MDX23 Ensemble',
     tagline: 'MVSEP multi-model fusion',
     description:
-      'Full MVSEP-MDX23 ensemble combining multiple MDX and Demucs passes. Highest overall fidelity for 2-stem and 4-stem extraction with aggressive bleed control on vocals.',
+      'Full MVSEP-MDX23 ensemble combining multiple MDX and Demucs passes. Highest fidelity — requires 12GB+ GPU VRAM. On 8GB cards the app auto-falls back to HTDemucs or Kim Vocal 2.',
     stems: [2, 4],
     tier: 'S',
     accent: '#c084fc',
@@ -359,7 +359,7 @@ export const SEPARATION_MODELS: SeparationModel[] = [
     tagline: 'Kimberley Jensen — S-tier vocals',
     filename: 'vocals_mel_band_roformer.ckpt',
     description:
-      'Mel-band Roformer vocals model (Kimberley Jensen). State-of-the-art 2-stem fidelity. Auto-downloads or uses your local MelBandRoformer.ckpt from AudioSeperationModels.',
+      'Mel-band Roformer vocals model (Kimberley Jensen). State-of-the-art 2-stem fidelity. Downloads into your local StemSplit models library on first use.',
     stems: [2],
     tier: 'S',
     accent: '#f472b6',
@@ -726,7 +726,7 @@ export { SEPARATION_MODELS_ALL as SEPARATION_MODELS_MERGED };
 
 export const DEFAULT_MODEL_BY_ENGINE: Record<SeparationEngine, string> = {
   demucs: 'demucs_htdemucs',
-  mdx: 'mdx23_ensemble',
+  mdx: 'mdx_kim_vocal_2',
   roformer: 'roformer_melband',
   vr: 'vr_hp_vocal_4',
   spleeter: 'spleeter_2',
@@ -747,6 +747,72 @@ export function getModelById(id: string): SeparationModel | undefined {
 
 export function supportsStems(model: SeparationModel, stemCount: number): boolean {
   return model.stems.includes(stemCount);
+}
+
+/** Models on this engine that can output the requested stem count (best quality first). */
+export function getModelsSupportingStems(
+  engine: SeparationEngine,
+  stemCount: number,
+): SeparationModel[] {
+  return getModelsForEngine(engine)
+    .filter((m) => supportsStems(m, stemCount))
+    .sort((a, b) => b.quality - a.quality);
+}
+
+export function engineSupportsStemCount(
+  engine: SeparationEngine,
+  stemCount: number,
+): boolean {
+  return getModelsSupportingStems(engine, stemCount).length > 0;
+}
+
+/** When the selected model cannot output the requested count, pick the closest it supports. */
+export function snapStemCountForModel(
+  model: SeparationModel,
+  requested: number,
+): number {
+  if (supportsStems(model, requested)) return requested;
+  const sorted = [...model.stems].sort((a, b) => a - b);
+  const atOrBelow = sorted.filter((s) => s <= requested);
+  if (atOrBelow.length > 0) return Math.max(...atOrBelow);
+  return Math.min(...sorted);
+}
+
+/** Pick the best model for an engine + stem count; keeps current if already compatible. */
+export function pickModelForStemCount(
+  engine: SeparationEngine,
+  stemCount: number,
+  currentModelId?: string,
+): string {
+  const current = currentModelId ? getModelById(currentModelId) : undefined;
+  if (current && supportsStems(current, stemCount)) {
+    return current.id;
+  }
+  const candidates = getModelsSupportingStems(engine, stemCount);
+  if (candidates.length > 0) {
+    return candidates[0].id;
+  }
+  return current?.id ?? DEFAULT_MODEL_BY_ENGINE[engine];
+}
+
+export const STEM_COUNT_OPTIONS = [2, 3, 4, 5, 6, 7] as const;
+
+export function stemCountLabel(count: number, engine: SeparationEngine): string {
+  if (count === 2) return '2-Stem (Vocal / Instrumental)';
+  if (count === 3) return '3-Stem (Lead / Backing / Instrumental)';
+  if (count === 4) {
+    return engine === 'drumsep'
+      ? '4-Stem (Kick, Snare, Toms, Cymbals)'
+      : '4-Stem (Vocal, Drum, Bass, Other)';
+  }
+  if (count === 5) return '5-Stem (Adds Piano/Keys)';
+  if (count === 6) {
+    return engine === 'drumsep'
+      ? '6-Stem (Kick, Snare, Toms, HH, Ride, Crash)'
+      : '6-Stem (Guitar, Piano, etc.)';
+  }
+  if (count === 7) return '7-Stem (Kick, Snare, Toms, HH, Ride, Crash, Overheads)';
+  return `${count}-Stem`;
 }
 
 /** Expected output stem labels for instrument engine variants. */

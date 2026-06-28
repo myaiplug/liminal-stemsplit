@@ -261,6 +261,10 @@ export interface ModelPickerProps {
   selectedModelId: string;
   stemCount: number;
   disabled?: boolean;
+  /** When false (Pro), stem mismatches auto-adjust instead of greying models out. */
+  greyIncompatibleModels?: boolean;
+  /** Jump to this category tab when set (e.g. drums on drum re-split). */
+  preferredCategory?: string;
   onEngineChange: (engine: SeparationEngine) => void;
   onModelChange: (modelId: string) => void;
   onPlaySound?: (name: string) => void;
@@ -271,12 +275,20 @@ const ModelPicker: React.FC<ModelPickerProps> = ({
   selectedModelId,
   stemCount,
   disabled = false,
+  greyIncompatibleModels = true,
+  preferredCategory,
   onEngineChange,
   onModelChange,
   onPlaySound,
 }) => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [search, setSearch] = useState('');
+
+  useEffect(() => {
+    if (preferredCategory && preferredCategory !== 'all') {
+      setCategoryFilter(preferredCategory);
+    }
+  }, [preferredCategory, engine]);
 
   const engineModels = useMemo(() => getModelsForEngine(engine), [engine]);
   const selectedModel = useMemo(() => getModelById(selectedModelId), [selectedModelId]);
@@ -312,7 +324,7 @@ const ModelPicker: React.FC<ModelPickerProps> = ({
   );
 
   const engines: SeparationEngine[] = [
-    'ensemble', 'demucs', 'mdx', 'roformer', 'karaoke', 'vr', 'drumsep', 'instrument', 'postfx',
+    'spleeter', 'demucs', 'mdx', 'roformer', 'ensemble', 'karaoke', 'vr', 'drumsep', 'instrument', 'postfx',
   ];
 
   return (
@@ -404,7 +416,7 @@ const ModelPicker: React.FC<ModelPickerProps> = ({
               key={model.id}
               model={model}
               selected={model.id === selectedModelId}
-              disabled={disabled || !supportsStems(model, stemCount)}
+              disabled={disabled || (greyIncompatibleModels && !supportsStems(model, stemCount))}
               onSelect={() => {
                 onModelChange(model.id);
                 onPlaySound?.('click_engage');
@@ -425,10 +437,10 @@ const ModelPicker: React.FC<ModelPickerProps> = ({
         {selectedModel && (
           <motion.div
             key={selectedModel.id}
-            initial={{ opacity: 0, y: 8, filter: 'blur(4px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            exit={{ opacity: 0, y: -4, filter: 'blur(4px)' }}
-            transition={{ duration: 0.35 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.15 }}
             className="relative rounded-xl border overflow-hidden"
             style={{
               borderColor: selectedModel.accent + '44',

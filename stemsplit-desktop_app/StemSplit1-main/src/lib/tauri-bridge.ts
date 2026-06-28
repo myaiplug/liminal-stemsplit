@@ -31,6 +31,7 @@ export interface SeparationResult {
 
 export interface StemInfo {
   file_path: string;
+  peaks_path?: string;
   format: string;
   duration_seconds: number;
   purity_score?: number;
@@ -434,7 +435,7 @@ export async function onPythonSetupProgress(
 
 export async function downloadYouTubeAudio(
   url: string,
-  mode: string = 'audio_mp3_320',
+  mode: string = 'audio_mp3_192',
   onProgress?: (progress: YouTubeDownloadProgress) => void
 ): Promise<YouTubeDownloadResult> {
   try {
@@ -584,6 +585,7 @@ export interface AuthProfile {
   username: string;
   email: string;
   created_at?: string | null;
+  email_verified?: boolean;
 }
 
 export interface AuthResult {
@@ -592,6 +594,8 @@ export interface AuthResult {
   onboarding_email_sent: boolean;
   message: string;
   error?: string | null;
+  verification_code?: string | null;
+  email_error?: string | null;
 }
 
 export async function getLicenseStatus(): Promise<LicenseInfo> {
@@ -690,6 +694,21 @@ export async function verifyFreeUserEmail(email: string, code: string): Promise<
       profile: null,
       onboarding_email_sent: false,
       message: 'Verification failed',
+      error: String(error),
+    };
+  }
+}
+
+export async function resendVerificationEmail(email: string): Promise<AuthResult> {
+  try {
+    return await invoke<AuthResult>('resend_verification_email', { email });
+  } catch (error) {
+    console.error('Failed to resend verification email:', error);
+    return {
+      success: false,
+      profile: null,
+      onboarding_email_sent: false,
+      message: 'Resend failed',
       error: String(error),
     };
   }

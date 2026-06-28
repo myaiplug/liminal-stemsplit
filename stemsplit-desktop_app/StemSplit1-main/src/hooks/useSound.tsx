@@ -2,62 +2,84 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { Howl } from 'howler';
 
-// Store global so we don't recreate on re-render
 const sounds: Record<string, Howl> = {};
 
-export type SoundEffect = 
-  | 'hover_tick' 
-  | 'hover_core' 
-  | 'click_engage' 
-  | 'process_start' 
-  | 'success_chime' 
-  | 'error_buzz' 
+export type SoundEffect =
+  | 'hover_tick'
+  | 'hover_core'
+  | 'click_engage'
+  | 'process_start'
+  | 'process_loop'
+  | 'success_chime'
+  | 'error_buzz'
   | 'stem_active';
+
+function soundUrl(file: string): string {
+  const base = typeof window !== 'undefined' ? window.location.origin : '';
+  return `${base}/sounds/${file}`;
+}
+
+function ensureSound(key: SoundEffect, file: string, loop = false, volume = 0.6): Howl {
+  if (!sounds[key]) {
+    sounds[key] = new Howl({
+      src: [soundUrl(file)],
+      loop,
+      volume,
+      preload: true,
+      html5: true,
+    });
+  }
+  return sounds[key];
+}
+
+function playHowl(howl: Howl) {
+  const start = () => {
+    howl.stop();
+    howl.play();
+  };
+  const state = howl.state();
+  if (state === 'unloaded') {
+    howl.once('load', start);
+    howl.load();
+    return;
+  }
+  start();
+}
 
 export const useSound = () => {
   const isSetup = useRef(false);
 
   useEffect(() => {
     if (isSetup.current) return;
-    
-    const loadSound = (key: SoundEffect, file: string, loop: boolean = false) => {
-      if (!sounds[key]) {
-        sounds[key] = new Howl({
-          src: [`/sounds/${file}`],
-          loop,
-          volume: loop ? 0.3 : 0.6,
-          preload: true,
-        });
-      }
-    };
 
-    loadSound('hover_tick', 'hover_tick.wav');
-    loadSound('hover_core', 'hover_core.wav');
-    loadSound('click_engage', 'click_engage.wav');
-    loadSound('process_start', 'process_start.wav');
-    loadSound('success_chime', 'success_chime.wav');
-    loadSound('error_buzz', 'error_buzz.wav');
-    loadSound('stem_active', 'stem_active.wav');
+    ensureSound('hover_tick', 'hover_tick.wav');
+    ensureSound('hover_core', 'hover_core.wav');
+    ensureSound('click_engage', 'click_engage.wav');
+    ensureSound('process_start', 'process_start.wav');
+    ensureSound('process_loop', 'process_start.wav', true, 0.28);
+    ensureSound('success_chime', 'success_chime.wav', false, 0.75);
+    ensureSound('error_buzz', 'error_buzz.wav');
+    ensureSound('stem_active', 'stem_active.wav', false, 0.55);
 
     isSetup.current = true;
   }, []);
 
-  const play = useCallback((effect: SoundEffect, volume: number = 0.5) => {
-    if (sounds[effect]) {
-      sounds[effect].volume(volume);
-      sounds[effect].play();
-    }
+  const play = useCallback((effect: SoundEffect, volume?: number) => {
+    const howl = sounds[effect];
+    if (!howl) return;
+    if (volume !== undefined) howl.volume(volume);
+    playHowl(howl);
   }, []);
 
   const stop = useCallback((effect: SoundEffect) => {
-    if (sounds[effect]) {
-      sounds[effect].stop();
-    }
+    const howl = sounds[effect];
+    if (howl) howl.stop();
   }, []);
 
   const fade = useCallback((effect: SoundEffect, to: number, duration: number) => {
-    if (sounds[effect]) {
-        sounds[effect].fade(sounds[effect].playing() ? 1 : 0, to, duration);
+    const howl = sounds[effect];
+    if (howl) {
+      howl.fade(howl.volume(), to, duration);
     }
   }, []);
 

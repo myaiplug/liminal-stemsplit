@@ -132,7 +132,7 @@ export default function ScrewAIPanel({ audioPath, audioTitle, onScrewedFile, isP
           onClick={() => window.dispatchEvent(new CustomEvent('open-sales-modal'))}
           className="mt-4 px-4 py-2 rounded-lg bg-purple-500/10 border border-purple-500/30 text-purple-300 hover:bg-purple-500/20 text-xs font-mono uppercase tracking-wider transition-all"
         >
-          Upgrade $49
+          Upgrade $19.99
         </button>
       </div>
     );
