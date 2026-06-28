@@ -8,7 +8,7 @@ export async function sendPing(event: string) {
     await fetch(`${serverUrl}/api/ping`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event, version: '0.4.9' }),
+      body: JSON.stringify({ event, version: '0.5.0' }),
       signal: AbortSignal.timeout(3000),
     });
   } catch {

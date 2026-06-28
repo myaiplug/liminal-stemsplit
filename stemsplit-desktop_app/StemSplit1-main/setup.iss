@@ -1,7 +1,7 @@
 ; usage: iscc setup.iss
 
 #define MyAppName "NoDAW Liminal"
-#define MyAppVersion "0.4.6"
+#define MyAppVersion "0.5.0"
 #define MyAppPublisher "NoDAW"
 #define MyAppBuildExeName "stem-split.exe"
 #define MyAppExeName "Liminal™.exe"
@@ -24,7 +24,7 @@ SolidCompression=yes
 DiskSpanning=yes
 DiskSliceSize=max
 OutputDir=installers
-OutputBaseFilename=Liminal-StemSplit-Setup-v0.4.6-Windows-x64
+OutputBaseFilename=Liminal-StemSplit-Setup-v0.5.0-Windows-x64
 ; "ArchitecturesAllowed=x64" specifies that Setup cannot run on anything but x64.
 ArchitecturesAllowed=x64
 ; "ArchitecturesInstallIn64BitMode=x64" requests that the install be done in "64-bit mode" on x64, meaning it should use the native 64-bit Program Files directory and the 64-bit view of the registry.
@@ -61,6 +61,9 @@ Source: "ffmpeg\bin\ffprobe.exe"; DestDir: "{app}\ffmpeg"; Flags: ignoreversion
 
 ; Icons & Assets
 Source: "ss2.ico"; DestDir: "{app}"; Flags: ignoreversion
+
+; Bundled VST — ReVerb-DeGloss (Pro FX, resolved at runtime from {app}\VST\)
+Source: "bundled-vst\ReVerb-DeGloss.vst3\*"; DestDir: "{app}\VST\ReVerb-DeGloss.vst3"; Flags: recursesubdirs createallsubdirs skipifsourcedoesntexist
 
 ; =============================================================================
 ; OPTIONAL COMPONENTS (skip if not present during build)

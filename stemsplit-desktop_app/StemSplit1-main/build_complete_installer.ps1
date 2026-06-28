@@ -257,6 +257,14 @@ if ($Offline) {
     Write-Host "`n[5/6] Skipping model verification (online mode - models download on first use)..." -ForegroundColor Yellow
 }
 
+# Step 5b: Stage bundled VST (ReVerb-DeGloss)
+Write-Host "`nStaging bundled VST..." -ForegroundColor Yellow
+.\scripts\stage_bundled_vst.ps1
+if ($LASTEXITCODE -ne 0) {
+    Write-Error "Failed to stage bundled VST"
+    exit $LASTEXITCODE
+}
+
 # Step 6: Create Installer
 Write-Host "`n[6/6] Creating installer..." -ForegroundColor Yellow
 

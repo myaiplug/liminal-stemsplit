@@ -1,8 +1,7 @@
 'use client';
 
-import dynamic from 'next/dynamic';
-const ReactorZone = dynamic(() => import('@/components/ReactorZone'), { ssr: false });
+import AppShell from '@/components/AppShell';
 
 export default function CrowdRemovalPage() {
-  return <main><ReactorZone /></main>;
+  return <AppShell />;
 }

@@ -27,6 +27,10 @@ Write-Host "Publishing release $Version..." -ForegroundColor Cyan
 $Assets = @()
 $patterns = @(
     "installers/Liminal-StemSplit-Setup-*-Windows-x64-Online.exe",
+    "installers/Liminal-StemSplit-Setup-*-Windows-x64.exe",
+    "src-tauri/target/release/bundle/msi/*.msi",
+    "src-tauri/target/release/bundle/nsis/*.exe",
+    "src-tauri/target/aarch64-apple-darwin/release/bundle/dmg/*.dmg",
     "installers/release-staging/Liminal-StemSplit-Setup-*-Windows-x64-Online.exe",
     "dist/Liminal-StemSplit-Setup-*-Windows-x64-Online.exe",
     "installers/StemSplit_Setup_*_Online.exe",
@@ -53,7 +57,7 @@ if ($Assets.Count -eq 0) {
 
 $releaseExists = $false
 try {
-    gh release view $Version --repo myaiplug/StemSplit1 1>$null 2>$null
+    gh release view $Version --repo myaiplug/liminal-stemsplit 1>$null 2>$null
     if ($LASTEXITCODE -eq 0) { $releaseExists = $true }
 } catch {
     $releaseExists = $false
@@ -62,16 +66,16 @@ try {
 if ($releaseExists) {
     Write-Host "Release $Version already exists — uploading assets..." -ForegroundColor Yellow
     foreach ($asset in $Assets) {
-        gh release upload $Version $asset --clobber --repo myaiplug/StemSplit1
+        gh release upload $Version $asset --clobber --repo myaiplug/liminal-stemsplit
         if ($LASTEXITCODE -ne 0) { throw "Failed to upload $asset" }
     }
     if ($Notes) {
-        gh release edit $Version --notes $Notes --repo myaiplug/StemSplit1
+        gh release edit $Version --notes $Notes --repo myaiplug/liminal-stemsplit
     }
 } else {
     $args = @(
         "release", "create", $Version,
-        "--repo", "myaiplug/StemSplit1",
+        "--repo", "myaiplug/liminal-stemsplit",
         "--title", "Liminal StemSplit $Version",
         "--notes", $Notes
     )
@@ -83,4 +87,4 @@ if ($releaseExists) {
 }
 
 Write-Host "Release $Version is live:" -ForegroundColor Green
-Write-Host "https://github.com/myaiplug/StemSplit1/releases/tag/$Version" -ForegroundColor Yellow
+Write-Host "https://github.com/myaiplug/liminal-stemsplit/releases/tag/$Version" -ForegroundColor Yellow

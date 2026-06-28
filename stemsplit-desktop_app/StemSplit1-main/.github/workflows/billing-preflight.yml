@@ -62,6 +62,9 @@ jobs:
             sleep 1
           done
 
+          npm run billing:test:webhooks
+          node ./billing-service/activation-email-smoke.mjs
+
           python ./scripts/ci/release_preflight.py \
             --repo-root . \
             --json-out ./installers/release-preflight.billing.ci.json \

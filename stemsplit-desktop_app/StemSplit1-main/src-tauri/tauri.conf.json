@@ -1,6 +1,6 @@
 {
   "productName": "NoDAW Liminal",
-  "version": "0.4.9",
+  "version": "0.5.0",
   "identifier": "com.stemsplit.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -17,7 +17,7 @@
         "resizable": true,
         "decorations": false,
         "transparent": true,
-        "title": "NoDAW™ Liminal™ StemSplit v0.4.9",
+        "title": "NoDAW™ Liminal™ StemSplit v0.5.0",
         "width": 1280,
         "minHeight": 640,
         "minWidth": 840,
@@ -29,7 +29,7 @@
       "capabilities": ["default"],
       "assetProtocol": {
         "enable": true,
-        "scope": ["**"]
+        "scope": ["**", "C:/**", "D:/**", "$LOCALDATA/**", "$APPDATA/**", "$HOME/**"]
       }
     }
   },

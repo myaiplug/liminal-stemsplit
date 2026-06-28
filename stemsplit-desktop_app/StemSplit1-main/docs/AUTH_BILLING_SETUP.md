@@ -35,14 +35,22 @@ Set these in your app environment:
 
 ## Stripe Flow (Current)
 
-Current implementation provides checkout handoff only.
-After Stripe purchase, users still need a mapped activation path.
+Production Render billing (`liminal-stemsplit.onrender.com`) handles the full post-purchase path:
 
-Recommended production pattern:
+1. Stripe `checkout.session.completed` webhook fires.
+2. Server saves the Pro license + access password immediately.
+3. Activation email delivery **waits for Render readiness** (DB + `RESEND_API_KEY` + short warmup delay), then sends via Resend with retries.
+4. If Stripe's 20s webhook window expires first, delivery continues in a background worker queue.
+5. The checkout success page also calls `POST /api/activation-emails/dispatch` after `/billing/health` reports ready — a backup nudge for cold starts.
 
-1. Stripe checkout success -> webhook on your server.
-2. Server creates or maps license credentials to user email.
-3. User activates in app using email + issued license credential.
+Optional tuning env vars:
+
+- `ACTIVATION_EMAIL_MIN_WARMUP_MS` (default `3000`)
+- `ACTIVATION_EMAIL_WARMUP_TIMEOUT_MS` (default `120000`)
+- `ACTIVATION_EMAIL_WEBHOOK_WAIT_MS` (default `15000`)
+- `ACTIVATION_EMAIL_SEND_ATTEMPTS` (default `5`)
+
+User activates in the desktop app with purchase email + access password from the email.
 
 ## Free User Auth Storage
 

@@ -6,7 +6,14 @@ import http from 'node:http';
 import { URL } from 'node:url';
 import { checkoutConfigStatus, createCheckoutSession } from './stripe-checkout.mjs';
 import { ALL_VST_ENTITLEMENTS, productToEntitlement } from './vst-products.mjs';
-import { sendProActivationEmail } from './send-email.mjs';
+import {
+  assessBillingReadiness,
+  deliverActivationEmailAfterPurchase,
+  dispatchActivationEmailForEmail,
+  getActivationEmailQueueSummary,
+  processPendingActivationEmails,
+  startActivationEmailWorker,
+} from './activation-email-delivery.mjs';
 
 const port = Number(process.env.PORT || 8787);
 const dbPath = resolve(process.env.BILLING_DB_PATH || './billing-service/data/licenses.json');
@@ -296,11 +303,15 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && url.pathname === '/health') {
+    const readiness = assessBillingReadiness();
+    const queue = getActivationEmailQueueSummary();
     return sendJson(res, 200, {
-      ok: true,
+      ok: readiness.ready,
       service: 'billing-webhooks',
       checkout: checkoutConfigStatus(),
-      email: { configured: !!process.env.RESEND_API_KEY },
+      email: { configured: readiness.emailConfigured },
+      readiness,
+      activationEmailQueue: queue,
     });
   }
 
@@ -384,7 +395,12 @@ const server = http.createServer(async (req, res) => {
         email: email || null,
       });
 
-      const emailResult = await sendProActivationEmail(saved.email, saved.credential);
+      const emailResult = await deliverActivationEmailAfterPurchase({
+        email: saved.email,
+        credential: saved.credential,
+        source: 'stripe',
+        eventKey: stripeEventKey,
+      });
 
       return sendJson(res, 200, {
         ok: true,
@@ -394,7 +410,9 @@ const server = http.createServer(async (req, res) => {
           source: saved.source,
         },
         emailSent: emailResult.sent,
+        emailQueued: !!emailResult.queued,
         emailError: emailResult.sent ? null : emailResult.reason,
+        readiness: emailResult.readiness || null,
       });
     } catch (error) {
       return sendJson(res, 400, { ok: false, error: String(error) });
@@ -441,10 +459,43 @@ const server = http.createServer(async (req, res) => {
         email: email || null,
       });
 
-      return sendJson(res, 200, { ok: true, saved });
+      const emailResult = await deliverActivationEmailAfterPurchase({
+        email: saved.email,
+        credential: saved.credential,
+        source: 'gumroad',
+        eventKey: gumroadEventKey,
+      });
+
+      return sendJson(res, 200, {
+        ok: true,
+        saved,
+        emailSent: emailResult.sent,
+        emailQueued: !!emailResult.queued,
+        emailError: emailResult.sent ? null : emailResult.reason,
+      });
     } catch (error) {
       return sendJson(res, 400, { ok: false, error: String(error) });
     }
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/activation-emails/dispatch') {
+    const rawBody = await readBody(req);
+    const body = tryParseJson(rawBody) || {};
+    const result = await dispatchActivationEmailForEmail(body.email);
+    return sendJson(res, 200, {
+      ok: result.sent || !!result.queued,
+      sent: result.sent,
+      queued: !!result.queued,
+      reason: result.reason || null,
+    });
+  }
+
+  if (req.method === 'POST' && url.pathname === '/api/activation-emails/process') {
+    if (!isAdminAuthorized(req)) {
+      return sendJson(res, 401, { ok: false, error: 'Unauthorized' });
+    }
+    const results = await processPendingActivationEmails(20);
+    return sendJson(res, 200, { ok: true, processed: results.length, results });
   }
 
   if (req.method === 'POST' && url.pathname === '/api/licenses/issue') {
@@ -475,6 +526,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(port, () => {
   ensureDb();
+  startActivationEmailWorker();
   const checkout = checkoutConfigStatus();
   console.log(`StemSplit billing service listening on http://localhost:${port}`);
   console.log(`DB: ${dbPath}`);

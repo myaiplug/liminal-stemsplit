@@ -1,0 +1,111 @@
+name: Billing Smoke Tests
+
+on:
+  workflow_call:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'lib/**'
+      - 'server.js'
+      - 'scripts/production-billing-smoke.mjs'
+      - 'stemsplit-desktop_app/StemSplit1-main/billing-service/**'
+      - '.github/workflows/billing-smoke.yml'
+  pull_request:
+    paths:
+      - 'lib/**'
+      - 'server.js'
+      - 'scripts/production-billing-smoke.mjs'
+      - 'stemsplit-desktop_app/StemSplit1-main/billing-service/**'
+
+permissions:
+  contents: read
+
+jobs:
+  production-billing:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET || 'whsec_ci_smoke' }}
+      GUMROAD_WEBHOOK_SECRET: ${{ secrets.GUMROAD_WEBHOOK_SECRET || 'gumroad_ci_smoke' }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || '' }}
+      ACTIVATION_EMAIL_MIN_WARMUP_MS: '500'
+      ACTIVATION_EMAIL_WEBHOOK_WAIT_MS: '20000'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install root dependencies
+        run: npm install
+
+      - name: Start production billing server
+        run: |
+          PORT=4011 node server.js > /tmp/production-billing.log 2>&1 &
+          echo $! > /tmp/production-billing.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:4011/billing/health > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Production billing server failed to start"
+          cat /tmp/production-billing.log
+          exit 1
+
+      - name: Run production billing smoke
+        run: BILLING_TEST_BASE_URL=http://127.0.0.1:4011 node scripts/production-billing-smoke.mjs
+
+      - name: Stop production billing server
+        if: always()
+        run: kill "$(cat /tmp/production-billing.pid)" 2>/dev/null || true
+
+  desktop-billing-service:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: stemsplit-desktop_app/StemSplit1-main
+    env:
+      STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET || 'whsec_ci_smoke' }}
+      GUMROAD_WEBHOOK_SECRET: ${{ secrets.GUMROAD_WEBHOOK_SECRET || 'gumroad_ci_smoke' }}
+      RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || '' }}
+      ACTIVATION_EMAIL_MIN_WARMUP_MS: '500'
+      ACTIVATION_EMAIL_WEBHOOK_WAIT_MS: '20000'
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install desktop app dependencies
+        run: npm ci --legacy-peer-deps
+
+      - name: Start billing-service
+        run: |
+          node ./billing-service/server.mjs > /tmp/desktop-billing.log 2>&1 &
+          echo $! > /tmp/desktop-billing.pid
+          for i in {1..30}; do
+            if curl -fsS http://127.0.0.1:8787/health > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "Desktop billing-service failed to start"
+          cat /tmp/desktop-billing.log
+          exit 1
+
+      - name: Run webhook smoke
+        run: npm run billing:test:webhooks
+
+      - name: Run activation email smoke
+        run: node ./billing-service/activation-email-smoke.mjs
+
+      - name: Stop billing-service
+        if: always()
+        run: kill "$(cat /tmp/desktop-billing.pid)" 2>/dev/null || true

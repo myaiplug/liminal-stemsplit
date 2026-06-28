@@ -103,7 +103,7 @@ fn default_max_free_splits() -> u32 {
     1
 }
 
-const FREE_TIER_MAX_SPLITS: u32 = 1;
+const FREE_TIER_MAX_SPLITS: u32 = u32::MAX;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 struct StoredLicense {
@@ -173,6 +173,8 @@ struct AuthProfile {
     username: String,
     email: String,
     created_at: Option<String>,
+    #[serde(default)]
+    email_verified: bool,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -182,6 +184,34 @@ struct AuthResult {
     onboarding_email_sent: bool,
     message: String,
     error: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    verification_code: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    email_error: Option<String>,
+}
+
+fn auth_fail(message: &str, error: String) -> AuthResult {
+    AuthResult {
+        success: false,
+        profile: None,
+        onboarding_email_sent: false,
+        message: message.into(),
+        error: Some(error),
+        verification_code: None,
+        email_error: None,
+    }
+}
+
+fn auth_ok(profile: AuthProfile, message: &str, onboarding_email_sent: bool) -> AuthResult {
+    AuthResult {
+        success: true,
+        profile: Some(profile),
+        onboarding_email_sent,
+        message: message.into(),
+        error: None,
+        verification_code: None,
+        email_error: None,
+    }
 }
 
 fn get_free_users_path() -> std::path::PathBuf {
@@ -253,9 +283,153 @@ fn clear_free_session() {
     let _ = std::fs::remove_file(path);
 }
 
+fn production_site_url() -> String {
+    std::env::var("STEMSPLIT_API_URL")
+        .or_else(|_| std::env::var("SITE_URL"))
+        .unwrap_or_else(|_| "https://liminal-stemsplit.onrender.com".to_string())
+}
+
+fn load_runtime_env_files() {
+    let manifest_dir = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"));
+    let Some(project_root) = manifest_dir.parent() else {
+        return;
+    };
+
+    for file_name in [".env.local", ".env"] {
+        let path = project_root.join(file_name);
+        let Ok(content) = std::fs::read_to_string(&path) else {
+            continue;
+        };
+
+        for line in content.lines() {
+            let trimmed = line.trim();
+            if trimmed.is_empty() || trimmed.starts_with('#') {
+                continue;
+            }
+            let Some((key, value)) = trimmed.split_once('=') else {
+                continue;
+            };
+            let key = key.trim();
+            let mut value = value.trim().to_string();
+            if (value.starts_with('"') && value.ends_with('"'))
+                || (value.starts_with('\'') && value.ends_with('\''))
+            {
+                value = value[1..value.len() - 1].to_string();
+            }
+            if std::env::var(key).is_err() && !value.is_empty() {
+                std::env::set_var(key, value);
+            }
+        }
+    }
+}
+
+fn onboarding_from_address() -> String {
+    std::env::var("STEMSPLIT_ONBOARDING_FROM")
+        .or_else(|_| std::env::var("FROM_EMAIL"))
+        .unwrap_or_else(|_| "Liminal StemSplit <onboarding@myaiplug.com>".to_string())
+}
+
+fn build_onboarding_email_html(username: &str, verification_code: &str) -> String {
+    format!(
+        r#"<div style="font-family:Inter,Arial,sans-serif;background:#020617;color:#e2e8f0;padding:24px">
+  <h2 style="color:#fff">Welcome to Liminal StemSplit, {username}.</h2>
+  <p>Your free account is ready. Enter this verification code in the app:</p>
+  <p style="font-family:monospace;font-size:28px;letter-spacing:0.2em;color:#22d3ee;font-weight:700">{verification_code}</p>
+  <p style="color:#94a3b8">Free tier includes unlimited 2-stem Spleeter splits. Upgrade anytime for all engines, stems, and FX.</p>
+</div>"#
+    )
+}
+
+fn send_onboarding_via_resend_direct(
+    email: &str,
+    username: &str,
+    verification_code: &str,
+) -> Result<(bool, Option<String>), String> {
+    let resend_key = std::env::var("RESEND_API_KEY").unwrap_or_default();
+    if resend_key.trim().is_empty() {
+        return Ok((false, Some("RESEND_API_KEY not configured".into())));
+    }
+
+    let body = serde_json::json!({
+        "from": onboarding_from_address(),
+        "to": [email],
+        "subject": format!("Your Liminal StemSplit verification code: {}", verification_code),
+        "html": build_onboarding_email_html(username, verification_code),
+    });
+
+    let client = reqwest::blocking::Client::new();
+    let response = client
+        .post("https://api.resend.com/emails")
+        .header("Authorization", format!("Bearer {}", resend_key))
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .timeout(std::time::Duration::from_secs(30))
+        .send()
+        .map_err(|e| format!("Direct Resend call failed: {}", e))?;
+
+    if response.status().is_success() {
+        return Ok((true, None));
+    }
+
+    let details = response
+        .text()
+        .unwrap_or_else(|_| "Unknown Resend error".to_string());
+    Ok((false, Some(details)))
+}
+
+fn deliver_onboarding_email(
+    email: &str,
+    username: &str,
+    verification_code: &str,
+) -> (bool, Option<String>) {
+    if let Ok(sent) = send_onboarding_via_server(email, username, verification_code) {
+        if sent {
+            return (true, None);
+        }
+    }
+
+    match send_onboarding_via_resend_direct(email, username, verification_code) {
+        Ok((true, _)) => (true, None),
+        Ok((false, reason)) => (false, reason),
+        Err(reason) => (false, Some(reason)),
+    }
+}
+
+fn warm_production_site_background() {
+    std::thread::spawn(|| {
+        let server_url = production_site_url();
+        let client = match reqwest::blocking::Client::builder()
+            .timeout(std::time::Duration::from_secs(90))
+            .build()
+        {
+            Ok(client) => client,
+            Err(_) => return,
+        };
+
+        let paths = ["/", "/api/health", "/billing/health"];
+        for attempt in 0..15 {
+            let mut awake = false;
+            for path in paths {
+                let url = format!("{}{}", server_url, path);
+                if client
+                    .get(&url)
+                    .send()
+                    .map(|response| response.status().is_success())
+                    .unwrap_or(false)
+                {
+                    awake = true;
+                }
+            }
+            if awake {
+                break;
+            }
+            std::thread::sleep(std::time::Duration::from_secs(5));
+        }
+    });
+}
+
 fn send_onboarding_via_server(email: &str, username: &str, verification_code: &str) -> Result<bool, String> {
-    let server_url = std::env::var("STEMSPLIT_API_URL")
-        .unwrap_or_else(|_| "https://liminal-stemsplit.onrender.com".to_string());
+    let server_url = production_site_url();
 
     let body = serde_json::json!({
         "email": email,
@@ -268,7 +442,7 @@ fn send_onboarding_via_server(email: &str, username: &str, verification_code: &s
         .post(format!("{}/api/onboarding", server_url))
         .header("Content-Type", "application/json")
         .json(&body)
-        .timeout(std::time::Duration::from_secs(10))
+        .timeout(std::time::Duration::from_secs(45))
         .send()
         .map_err(|e| format!("Onboarding API call failed: {}", e))?;
 
@@ -276,41 +450,9 @@ fn send_onboarding_via_server(email: &str, username: &str, verification_code: &s
         let data: serde_json::Value = response.json().unwrap_or_default();
         Ok(data.get("sent").and_then(|v| v.as_bool()).unwrap_or(false))
     } else {
+        let details = response.text().unwrap_or_default();
+        eprintln!("[onboarding] server error: {}", details);
         Ok(false)
-    }
-}
-
-fn send_onboarding_email(email: &str, username: &str) -> Result<bool, String> {
-    let resend_key = std::env::var("RESEND_API_KEY").ok().unwrap_or_default();
-    let from_addr = std::env::var("STEMSPLIT_ONBOARDING_FROM").ok().unwrap_or_default();
-
-    if resend_key.trim().is_empty() || from_addr.trim().is_empty() {
-        return Ok(false);
-    }
-
-    let body = serde_json::json!({
-        "from": from_addr,
-        "to": [email],
-        "subject": "Welcome to StemSplit",
-        "html": format!(
-            "<div style='font-family:Arial,sans-serif;line-height:1.5'><h2>Welcome to StemSplit, {}.</h2><p>Your free account is ready.</p><p>You can start with Spleeter 2-stem splits and upgrade anytime from inside the app.</p><p>Thanks for joining.</p></div>",
-            username
-        )
-    });
-
-    let client = reqwest::blocking::Client::new();
-    let response = client
-        .post("https://api.resend.com/emails")
-        .header("Authorization", format!("Bearer {}", resend_key))
-        .header("Content-Type", "application/json")
-        .json(&body)
-        .send()
-        .map_err(|e| format!("Failed to call onboarding email API: {}", e))?;
-
-    if response.status().is_success() {
-        Ok(true)
-    } else {
-        Err(format!("Onboarding email API returned status {}", response.status()))
     }
 }
 
@@ -508,16 +650,6 @@ fn save_trial_usage(usage: &TrialUsage) {
     if let Ok(content) = serde_json::to_string_pretty(usage) {
         let _ = std::fs::write(usage_path, content);
     }
-}
-
-fn enforce_trial_free_allowance() -> Result<(), String> {
-    let usage = load_trial_usage();
-    if usage.completed_splits >= FREE_TIER_MAX_SPLITS {
-        return Err(
-            "Your free Spleeter 2-stem split has been used. Upgrade to Pro for unlimited Demucs, MDX, batch processing, and more.".into(),
-        );
-    }
-    Ok(())
 }
 
 fn free_splits_remaining(completed_splits: u32) -> u32 {
@@ -1067,7 +1199,7 @@ fn get_full_features() -> Vec<String> {
 /// Get trial features
 fn get_trial_features() -> Vec<String> {
     vec![
-        "1 free Spleeter 2-stem split".into(),
+        "Unlimited Spleeter 2-stem splits".into(),
         "2-stem separation (vocals + instrumental)".into(),
         "Files under 3 minutes".into(),
         "MP3 output only".into(),
@@ -1316,16 +1448,23 @@ fn get_license_status() -> LicenseInfo {
     }
 
     if stored.source == LICENSE_SOURCE_DEV_BYPASS && stored.is_valid {
-        return LicenseInfo {
-            is_valid: true,
-            is_trial: false,
-            email: Some(stored.email),
-            purchase_date: Some(stored.activated_at),
-            license_key: Some("DEV-****-ACCESS".into()),
-            features: get_full_features(),
-            limitations: get_no_limitations(),
-            error: None,
-        };
+        #[cfg(debug_assertions)]
+        {
+            return LicenseInfo {
+                is_valid: true,
+                is_trial: false,
+                email: Some(stored.email),
+                purchase_date: Some(stored.activated_at),
+                license_key: Some("DEV-****-ACCESS".into()),
+                features: get_full_features(),
+                limitations: get_no_limitations(),
+                error: None,
+            };
+        }
+        #[cfg(not(debug_assertions))]
+        {
+            let _ = std::fs::remove_file(&license_path);
+        }
     }
     
     // If we need to re-verify online
@@ -1700,6 +1839,8 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some("Username must be at least 3 characters".into()),
+            verification_code: None,
+            email_error: None,
         };
     }
     if !email_norm.contains('@') || !email_norm.contains('.') {
@@ -1709,6 +1850,8 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some("A valid email address is required".into()),
+            verification_code: None,
+            email_error: None,
         };
     }
     if password.len() < 8 {
@@ -1718,6 +1861,8 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some("Password must be at least 8 characters".into()),
+            verification_code: None,
+            email_error: None,
         };
     }
 
@@ -1729,6 +1874,8 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some("That email is already registered".into()),
+            verification_code: None,
+            email_error: None,
         };
     }
     if db.users.iter().any(|u| u.username.eq_ignore_ascii_case(&username_norm)) {
@@ -1738,7 +1885,28 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some("That username is already taken".into()),
+            verification_code: None,
+            email_error: None,
         };
+    }
+
+    // Only clear non-pro trial licenses when creating a free account — keep valid Pro access.
+    let license_path = get_license_path();
+    if license_path.exists() {
+        let keep_license = std::fs::read_to_string(&license_path)
+            .ok()
+            .and_then(|content| serde_json::from_str::<StoredLicense>(&content).ok())
+            .map(|stored| {
+                stored.is_valid
+                    && (stored.source == LICENSE_SOURCE_MANAGED_PRO
+                        && is_managed_pro_email_enabled(&stored.email)
+                        || stored.source == LICENSE_SOURCE_REMOTE
+                        || stored.source == LICENSE_SOURCE_DEV_BYPASS)
+            })
+            .unwrap_or(false);
+        if !keep_license {
+            let _ = std::fs::remove_file(&license_path);
+        }
     }
 
     let now = chrono::Utc::now().to_rfc3339();
@@ -1752,7 +1920,7 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
         email: email_norm.clone(),
         password_sha256: hash_free_user_password(&email_norm, &password),
         verification_code: Some(verification_code.clone()),
-        email_verified: false,
+        email_verified: true,
         created_at: now.clone(),
         last_login_at: now.clone(),
     };
@@ -1765,6 +1933,8 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some(e),
+            verification_code: None,
+            email_error: None,
         };
     }
 
@@ -1780,10 +1950,13 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             onboarding_email_sent: false,
             message: "Signup failed".into(),
             error: Some(e),
+            verification_code: None,
+            email_error: None,
         };
     }
 
-    let onboarding_sent = send_onboarding_via_server(&email_norm, &username_norm, &verification_code).unwrap_or(false);
+    let (onboarding_sent, email_error) =
+        deliver_onboarding_email(&email_norm, &username_norm, &verification_code);
 
     AuthResult {
         success: true,
@@ -1791,14 +1964,96 @@ fn register_free_user(username: String, email: String, password: String) -> Auth
             username: username_norm,
             email: email_norm,
             created_at: Some(now),
+            email_verified: true,
         }),
         onboarding_email_sent: onboarding_sent,
         message: if onboarding_sent {
-            "Free account created. Onboarding email sent.".into()
+            "Account created. Welcome email sent — you're ready to split.".into()
         } else {
-            "Free account created.".into()
+            "Account created. You're ready to split.".into()
         },
         error: None,
+        verification_code: None,
+        email_error,
+    }
+}
+
+#[tauri::command]
+fn resend_verification_email(email: String) -> AuthResult {
+    let email_norm = normalize_email(&email);
+    let mut db = load_or_initialize_free_users_db();
+
+    let Some(index) = db
+        .users
+        .iter()
+        .position(|user| user.email.eq_ignore_ascii_case(&email_norm))
+    else {
+        return AuthResult {
+            success: false,
+            profile: None,
+            onboarding_email_sent: false,
+            message: "Resend failed".into(),
+            error: Some("No account found for that email".into()),
+            verification_code: None,
+            email_error: None,
+        };
+    };
+
+    if db.users[index].email_verified {
+        return AuthResult {
+            success: true,
+            profile: Some(AuthProfile {
+                username: db.users[index].username.clone(),
+                email: db.users[index].email.clone(),
+                created_at: Some(db.users[index].created_at.clone()),
+                email_verified: true,
+            }),
+            onboarding_email_sent: false,
+            message: "Email already verified".into(),
+            error: None,
+            verification_code: None,
+            email_error: None,
+        };
+    }
+
+    let code_seed = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .subsec_nanos();
+    let verification_code = format!("{:06}", code_seed % 1_000_000);
+    db.users[index].verification_code = Some(verification_code.clone());
+    if let Err(e) = save_free_users_db(&db) {
+        return AuthResult {
+            success: false,
+            profile: None,
+            onboarding_email_sent: false,
+            message: "Resend failed".into(),
+            error: Some(e),
+            verification_code: None,
+            email_error: None,
+        };
+    }
+
+    let username = db.users[index].username.clone();
+    let (sent, email_error) = deliver_onboarding_email(&email_norm, &username, &verification_code);
+
+    AuthResult {
+        success: sent || verification_code.len() == 6,
+        profile: Some(AuthProfile {
+            username,
+            email: email_norm,
+            created_at: Some(db.users[index].created_at.clone()),
+            email_verified: false,
+        }),
+        onboarding_email_sent: sent,
+        message: if sent {
+            "Verification email resent.".into()
+        } else {
+            "Email delivery failed. Use the code shown in the app.".into()
+        },
+        error: if sent { None } else { email_error.clone() },
+        verification_code: if sent { None } else { Some(verification_code) },
+        email_error,
     }
 }
 
@@ -1819,6 +2074,8 @@ fn login_free_user(identifier: String, password: String) -> AuthResult {
             onboarding_email_sent: false,
             message: "Login failed".into(),
             error: Some("No user found with that email or username".into()),
+            verification_code: None,
+            email_error: None,
         };
     };
 
@@ -1831,6 +2088,8 @@ fn login_free_user(identifier: String, password: String) -> AuthResult {
             onboarding_email_sent: false,
             message: "Login failed".into(),
             error: Some("Invalid password".into()),
+            verification_code: None,
+            email_error: None,
         };
     }
 
@@ -1846,42 +2105,42 @@ fn login_free_user(identifier: String, password: String) -> AuthResult {
         signed_in_at: now.clone(),
     };
     if let Err(e) = save_free_session(&session) {
-        return AuthResult {
-            success: false,
-            profile: None,
-            onboarding_email_sent: false,
-            message: "Login failed".into(),
-            error: Some(e),
-        };
+        return auth_fail("Login failed", e);
     }
 
-    AuthResult {
-        success: true,
-        profile: Some(AuthProfile {
+    auth_ok(
+        AuthProfile {
             username: user.username,
             email: user.email,
             created_at: Some(user.created_at),
-        }),
-        onboarding_email_sent: false,
-        message: "Login successful".into(),
-        error: None,
-    }
+            email_verified: user.email_verified,
+        },
+        "Login successful",
+        false,
+    )
 }
 
 #[tauri::command]
 fn get_free_user_session() -> AuthResult {
     if let Some(session) = load_free_session() {
-        AuthResult {
-            success: true,
-            profile: Some(AuthProfile {
+        let db = load_or_initialize_free_users_db();
+        let email_verified = db
+            .users
+            .iter()
+            .find(|user| user.email.eq_ignore_ascii_case(&session.email))
+            .map(|user| user.email_verified)
+            .unwrap_or(false);
+
+        auth_ok(
+            AuthProfile {
                 username: session.username,
                 email: session.email,
                 created_at: None,
-            }),
-            onboarding_email_sent: false,
-            message: "Session active".into(),
-            error: None,
-        }
+                email_verified,
+            },
+            "Session active",
+            false,
+        )
     } else {
         AuthResult {
             success: false,
@@ -1889,6 +2148,8 @@ fn get_free_user_session() -> AuthResult {
             onboarding_email_sent: false,
             message: "No active session".into(),
             error: None,
+            verification_code: None,
+            email_error: None,
         }
     }
 }
@@ -1902,6 +2163,8 @@ fn logout_free_user() -> AuthResult {
         onboarding_email_sent: false,
         message: "Logged out".into(),
         error: None,
+        verification_code: None,
+        email_error: None,
     }
 }
 
@@ -1912,63 +2175,43 @@ fn verify_free_user_email(email: String, code: String) -> AuthResult {
 
     let index = db.users.iter().position(|u| u.email.eq_ignore_ascii_case(&email_norm));
     let Some(i) = index else {
-        return AuthResult {
-            success: false,
-            profile: None,
-            onboarding_email_sent: false,
-            message: "Verification failed".into(),
-            error: Some("No account found for that email".into()),
-        };
+        return auth_fail("Verification failed", "No account found for that email".into());
     };
 
     if db.users[i].email_verified {
-        return AuthResult {
-            success: true,
-            profile: Some(AuthProfile {
+        return auth_ok(
+            AuthProfile {
                 username: db.users[i].username.clone(),
                 email: db.users[i].email.clone(),
                 created_at: Some(db.users[i].created_at.clone()),
-            }),
-            onboarding_email_sent: false,
-            message: "Email already verified".into(),
-            error: None,
-        };
+                email_verified: true,
+            },
+            "Email already verified",
+            false,
+        );
     }
 
     let stored_code = db.users[i].verification_code.as_deref().unwrap_or("");
     if stored_code != code.trim() {
-        return AuthResult {
-            success: false,
-            profile: None,
-            onboarding_email_sent: false,
-            message: "Verification failed".into(),
-            error: Some("Incorrect verification code".into()),
-        };
+        return auth_fail("Verification failed", "Incorrect verification code".into());
     }
 
     db.users[i].email_verified = true;
     db.users[i].verification_code = None;
     if let Err(e) = save_free_users_db(&db) {
-        return AuthResult {
-            success: false,
-            profile: None,
-            onboarding_email_sent: false,
-            message: "Verification failed".into(),
-            error: Some(e),
-        };
+        return auth_fail("Verification failed", e);
     }
 
-    AuthResult {
-        success: true,
-        profile: Some(AuthProfile {
+    auth_ok(
+        AuthProfile {
             username: db.users[i].username.clone(),
             email: db.users[i].email.clone(),
             created_at: Some(db.users[i].created_at.clone()),
-        }),
-        onboarding_email_sent: false,
-        message: "Email verified".into(),
-        error: None,
-    }
+            email_verified: true,
+        },
+        "Email verified",
+        false,
+    )
 }
 
 // ============================================================================
@@ -1978,7 +2221,7 @@ fn verify_free_user_email(email: String, code: String) -> AuthResult {
 const VST_TRIAL_PREVIEWS: u32 = 3;
 const VST_TRIAL_APPLIES: u32 = 2;
 
-const KNOWN_VST_PLUGIN_IDS: &[&str] = &["screwai", "fantune", "timestretchx", "repairit"];
+const KNOWN_VST_PLUGIN_IDS: &[&str] = &["reverb_degloss"];
 
 #[derive(Clone, Serialize, Deserialize, Debug, Default)]
 struct VstPluginUsage {
@@ -2268,6 +2511,20 @@ fn enforce_vst_fx_access(
         .cloned()
         .unwrap_or_default();
     if !modules.is_empty() {
+        let is_preview = payload
+            .get("preview")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+        let free_taste = payload
+            .get("free_taste")
+            .and_then(|value| value.as_bool())
+            .unwrap_or(false);
+
+        if is_preview && free_taste {
+            // Free tier: short random FX preview snippet only — never full apply
+            return Ok(vec![]);
+        }
+
         return Err("FX processing is available for Pro users only.".to_string());
     }
 
@@ -2333,6 +2590,8 @@ pub struct ProgressEvent {
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct StemInfo {
     pub file_path: String,
+    #[serde(default)]
+    pub peaks_path: Option<String>,
     pub format: String,
     pub duration_seconds: f64,
     #[serde(default)]
@@ -2375,7 +2634,41 @@ pub struct YouTubeDownloadRequest {
 }
 
 fn default_youtube_mode() -> String {
-    "audio_mp3_320".to_string()
+    "audio_mp3_192".to_string()
+}
+
+const FREE_YOUTUBE_MODE: &str = "audio_mp3_192";
+
+const PRO_YOUTUBE_MODES: &[&str] = &[
+    "audio_mp3_320",
+    "audio_mp3_128",
+    "audio_wav",
+    "audio_flac",
+    "video_360p",
+    "video_480p",
+    "video_720p",
+    "video_1080p",
+    "video_1440p",
+    "video_4k",
+    "thumbnail",
+];
+
+fn enforce_youtube_download_mode(mode: &str) -> Result<String, String> {
+    let license = get_license_status();
+    if !license.is_trial {
+        if mode == FREE_YOUTUBE_MODE || PRO_YOUTUBE_MODES.contains(&mode) {
+            return Ok(mode.to_string());
+        }
+        return Err(format!("Unsupported YouTube download mode: {}", mode));
+    }
+
+    if mode != FREE_YOUTUBE_MODE {
+        return Err(
+            "YouTube format selection is limited to MP3 192kbps on the free tier. Upgrade to Pro for higher-quality audio and video downloads.".to_string(),
+        );
+    }
+
+    Ok(FREE_YOUTUBE_MODE.to_string())
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -2619,19 +2912,35 @@ fn persist_models_root(path: &str) {
     let _ = std::fs::write(get_models_root_config_path(), format!("{}\n", path.trim()));
 }
 
+fn get_default_models_root() -> PathBuf {
+    get_stemsplit_data_dir().join("models")
+}
+
 fn models_root_has_payload(root: &Path) -> bool {
     let mdx = root.join("MVSEP-MDX23-music-separation-model-main").join("inference.py");
     let drumsep = root.join("drumsep-main").join("model");
     let vr = root.join("VR_Models");
-    mdx.is_file() || drumsep.is_dir() || vr.is_dir()
+    let uvr_vr = root.join("UVR").join("models").join("VR_Models");
+    let mdx_net = root.join("MDX_Net_Models");
+    let demucs = root.join("Demucs_Models");
+    mdx.is_file()
+        || drumsep.is_dir()
+        || vr.is_dir()
+        || uvr_vr.is_dir()
+        || mdx_net.is_dir()
+        || demucs.is_dir()
 }
 
 fn resolve_models_root() -> Option<String> {
     if let Ok(value) = std::env::var("STEMSPLIT_MODELS_ROOT") {
         let trimmed = value.trim().to_string();
-        if !trimmed.is_empty() && Path::new(&trimmed).exists() {
-            persist_models_root(&trimmed);
-            return Some(trimmed);
+        if !trimmed.is_empty() {
+            let candidate = Path::new(&trimmed);
+            let _ = std::fs::create_dir_all(candidate);
+            if candidate.exists() {
+                persist_models_root(&trimmed);
+                return Some(trimmed);
+            }
         }
     }
 
@@ -2639,6 +2948,14 @@ fn resolve_models_root() -> Option<String> {
         if Path::new(&value).exists() {
             return Some(value);
         }
+    }
+
+    let default_root = get_default_models_root();
+    let _ = std::fs::create_dir_all(&default_root);
+    if models_root_has_payload(&default_root) {
+        let path = default_root.to_string_lossy().to_string();
+        persist_models_root(&path);
+        return Some(path);
     }
 
     let baked = env!("STEMSPLIT_DEFAULT_MODELS_ROOT").trim().to_string();
@@ -2650,7 +2967,9 @@ fn resolve_models_root() -> Option<String> {
         }
     }
 
-    None
+    let path = default_root.to_string_lossy().to_string();
+    persist_models_root(&path);
+    Some(path)
 }
 
 fn get_uvr_path_config_path() -> PathBuf {
@@ -2675,6 +2994,10 @@ fn uvr_install_has_lib_v5(root: &Path) -> bool {
     root.join("lib_v5").is_dir()
 }
 
+fn get_default_uvr_root() -> PathBuf {
+    get_default_models_root().join("UVR")
+}
+
 fn resolve_uvr_install_dir() -> Option<String> {
     if let Ok(value) = std::env::var("STEMSPLIT_UVR_PATH") {
         let trimmed = value.trim().to_string();
@@ -2692,6 +3015,13 @@ fn resolve_uvr_install_dir() -> Option<String> {
         if candidate.exists() && uvr_install_has_lib_v5(candidate) {
             return Some(value);
         }
+    }
+
+    let default_uvr = get_default_uvr_root();
+    if default_uvr.exists() && uvr_install_has_lib_v5(&default_uvr) {
+        let path = default_uvr.to_string_lossy().to_string();
+        persist_uvr_path(&path);
+        return Some(path);
     }
 
     let baked = env!("STEMSPLIT_DEFAULT_UVR_PATH").trim().to_string();
@@ -2862,19 +3192,19 @@ async fn execute_splice(
     if license.is_trial {
         // Auto-enforce trial limitations (coerce values instead of rejecting)
         
-        // Free tier: allow Vocals (roformer) & Instrumental (mdx), block everything else
+        // Free tier: Spleeter 2-stem only
         if let Some(ref engine) = request.engine {
             let engine_lower = engine.to_lowercase();
-            let is_allowed_free = engine_lower == "roformer" || engine_lower == "mdx";
-            if !is_allowed_free {
-                println!("[License] Trial: Engine '{}' is Pro-only. Auto-correcting to 'roformer'", engine);
-                request.engine = Some("roformer".into());
-                request.model_variant = Some("roformer_bs_317".into());
+            if engine_lower != "spleeter" {
+                println!(
+                    "[License] Trial: Engine '{}' is Pro-only. Auto-correcting to 'spleeter'",
+                    engine
+                );
             }
-        } else {
-            request.engine = Some("roformer".into());
-            request.model_variant = Some("roformer_bs_317".into());
         }
+        request.engine = Some("spleeter".into());
+        request.model_variant = Some("spleeter_2".into());
+        request.stems_count = Some(2);
         
         // Force MP3 output for trial (auto-correct, don't reject)
         if let Some(ref format) = request.output_format {
@@ -2905,8 +3235,7 @@ async fn execute_splice(
             request.apply_effects = Some(false);
         }
 
-        // One free Spleeter 2-stem split across all engine/options choices.
-        enforce_trial_free_allowance()?;
+        // Free tier: unlimited Spleeter 2-stem splits (duration/format/engine enforced above).
     }
     // ========================================================================
 
@@ -3231,6 +3560,19 @@ struct AudioFilePayload {
     mime_type: String,
 }
 
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct AudioFileBytesPayload {
+    data: Vec<u8>,
+    mime_type: String,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct PeaksFilePayload {
+    bar_count: u32,
+    duration_seconds: f64,
+    peaks: Vec<f32>,
+}
+
 fn audio_mime_type(path: &Path) -> &'static str {
     match path
         .extension()
@@ -3297,6 +3639,15 @@ fn finalize_separation_result(mut result: SeparationResult) -> Result<Separation
 
         let mut normalized = stem_info;
         normalized.file_path = canonical.to_string_lossy().to_string();
+
+        let mut peaks_candidate = canonical.clone();
+        peaks_candidate.set_extension("peaks.json");
+        normalized.peaks_path = if peaks_candidate.exists() {
+            Some(peaks_candidate.to_string_lossy().to_string())
+        } else {
+            normalized.peaks_path
+        };
+
         verified_stems.insert(stem_name, normalized);
     }
 
@@ -3325,6 +3676,68 @@ fn read_audio_file(path: String) -> Result<AudioFilePayload, String> {
     Ok(AudioFilePayload {
         data_base64: STANDARD.encode(bytes),
         mime_type: audio_mime_type(file_path).to_string(),
+    })
+}
+
+#[tauri::command]
+fn read_audio_file_bytes(path: String) -> Result<AudioFileBytesPayload, String> {
+    let file_path = Path::new(&path);
+    wait_for_readable_file(file_path, 15000)?;
+
+    let bytes = std::fs::read(file_path)
+        .map_err(|error| format!("Failed to read audio file '{}': {}", file_path.display(), error))?;
+
+    if bytes.len() < 1024 {
+        return Err(format!(
+            "Audio file is too small to play ({} bytes): {}",
+            bytes.len(),
+            file_path.display()
+        ));
+    }
+
+    Ok(AudioFileBytesPayload {
+        data: bytes,
+        mime_type: audio_mime_type(file_path).to_string(),
+    })
+}
+
+#[tauri::command]
+fn read_peaks_file(path: String) -> Result<PeaksFilePayload, String> {
+    let file_path = Path::new(&path);
+    wait_for_readable_file(file_path, 5000)?;
+
+    let raw = std::fs::read_to_string(file_path)
+        .map_err(|error| format!("Failed to read peaks file '{}': {}", file_path.display(), error))?;
+
+    let parsed: serde_json::Value = serde_json::from_str(&raw)
+        .map_err(|error| format!("Invalid peaks JSON '{}': {}", file_path.display(), error))?;
+
+    let bar_count = parsed
+        .get("bar_count")
+        .and_then(|v| v.as_u64())
+        .unwrap_or(512) as u32;
+    let duration_seconds = parsed
+        .get("duration_seconds")
+        .and_then(|v| v.as_f64())
+        .unwrap_or(0.0);
+    let peaks: Vec<f32> = parsed
+        .get("peaks")
+        .and_then(|v| v.as_array())
+        .map(|arr| {
+            arr.iter()
+                .filter_map(|item| item.as_f64().map(|n| n as f32))
+                .collect()
+        })
+        .ok_or_else(|| format!("Peaks array missing in '{}'", file_path.display()))?;
+
+    if peaks.is_empty() {
+        return Err(format!("Peaks array empty in '{}'", file_path.display()));
+    }
+
+    Ok(PeaksFilePayload {
+        bar_count,
+        duration_seconds,
+        peaks,
     })
 }
 
@@ -3524,11 +3937,45 @@ async fn preprocess_audio_for_split(
     Ok(result)
 }
 
+fn parse_python_event_line(line: &str) -> Option<serde_json::Value> {
+    let trimmed = line.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+
+    if trimmed.starts_with('{') {
+        if let Ok(value) = serde_json::from_str::<serde_json::Value>(trimmed) {
+            return Some(value);
+        }
+    }
+
+    if let Some(start) = line.find("{\"event\"") {
+        if let Ok(value) = serde_json::from_str::<serde_json::Value>(&line[start..]) {
+            return Some(value);
+        }
+    }
+
+    None
+}
+
+fn collect_process_stdout_lines(
+    stdout: std::process::ChildStdout,
+) -> Result<Vec<String>, String> {
+    let reader = BufReader::new(stdout);
+    let mut lines = Vec::new();
+    for line in reader.lines() {
+        lines.push(line.map_err(|e| format!("Failed to read process output: {}", e))?);
+    }
+    Ok(lines)
+}
+
 #[tauri::command]
 async fn download_youtube_audio(
     request: YouTubeDownloadRequest,
     window: tauri::Window,
 ) -> Result<YouTubeDownloadResult, String> {
+    let mode = enforce_youtube_download_mode(&request.mode)?;
+
     let python_exe = get_python_executable().ok_or_else(|| {
         "Python runtime is not available. Run the built-in environment setup first.".to_string()
     })?;
@@ -3555,25 +4002,27 @@ async fn download_youtube_audio(
 
     let mut cmd = Command::new(&python_exe);
     cmd.args(&[
+        "-u".to_string(),
         script_path.to_string_lossy().to_string(),
         "--url".to_string(),
         request.url.clone(),
         "--output".to_string(),
         output_dir.to_string_lossy().to_string(),
         "--mode".to_string(),
-        request.mode.clone(),
+        mode.clone(),
     ])
     .stdout(Stdio::piped())
     .stderr(Stdio::piped());
     apply_python_runtime_env(&mut cmd);
+    cmd.env("PYTHONUNBUFFERED", "1");
 
     #[cfg(target_os = "windows")]
     cmd.creation_flags(CREATE_NO_WINDOW);
 
     let mut child = cmd.spawn().map_err(|e| format!("Failed to start YouTube import: {}", e))?;
     let stdout = child.stdout.take().ok_or("Failed to capture YouTube downloader output")?;
-    let reader = BufReader::new(stdout);
     let stderr = child.stderr.take();
+    let stdout_handle = std::thread::spawn(move || collect_process_stdout_lines(stdout));
     let stderr_handle = std::thread::spawn(move || -> String {
         if let Some(stderr_stream) = stderr {
             let mut buf = String::new();
@@ -3590,57 +4039,57 @@ async fn download_youtube_audio(
         "percent": 2
     }));
 
+    let status = child.wait().map_err(|e| format!("Failed to await YouTube downloader: {}", e))?;
+    let stdout_lines = stdout_handle
+        .join()
+        .map_err(|_| "Failed to join YouTube downloader stdout reader".to_string())??;
+    let stderr_output = stderr_handle.join().unwrap_or_default();
+
     let mut final_result: Option<YouTubeDownloadResult> = None;
     let mut last_error: Option<String> = None;
 
-    for line in reader.lines() {
-        let line = line.map_err(|e| format!("Failed to read YouTube download output: {}", e))?;
-        if line.trim().is_empty() {
+    for line in stdout_lines {
+        let Some(payload) = parse_python_event_line(&line) else {
             continue;
-        }
+        };
 
-        if let Ok(payload) = serde_json::from_str::<serde_json::Value>(&line) {
-            match payload.get("event").and_then(|value| value.as_str()) {
-                Some("progress") => {
-                    let percent = payload.get("percent").and_then(|value| value.as_u64()).unwrap_or(0) as u32;
-                    let message = payload.get("message").and_then(|value| value.as_str()).unwrap_or("Downloading audio...");
-                    let _ = window.emit("youtube-download-progress", serde_json::json!({
-                        "message": message,
-                        "percent": percent
-                    }));
-                }
-                Some("result") => {
-                    let formats_available: Vec<String> = payload.get("formats_available")
-                        .and_then(|v| v.as_array())
-                        .map(|arr| arr.iter().filter_map(|v| v.as_str()).map(String::from).collect())
-                        .unwrap_or_default();
-                    
-                    final_result = Some(YouTubeDownloadResult {
-                        status: "ok".to_string(),
-                        file_path: payload.get("file").and_then(|value| value.as_str()).unwrap_or_default().to_string(),
-                        title: payload.get("title").and_then(|value| value.as_str()).unwrap_or("Untitled Import").to_string(),
-                        duration_seconds: payload.get("duration").and_then(|value| value.as_f64()).unwrap_or(0.0),
-                        output_directory: payload
-                            .get("output_directory")
-                            .and_then(|value| value.as_str())
-                            .map(|value| value.to_string())
-                            .unwrap_or_else(|| output_dir.to_string_lossy().to_string()),
-                        uploader: payload.get("uploader").and_then(|value| value.as_str()).map(|value| value.to_string()),
-                        webpage_url: payload.get("webpage_url").and_then(|value| value.as_str()).map(|value| value.to_string()),
-                        mode_used: payload.get("mode_used").and_then(|value| value.as_str()).unwrap_or("audio_mp3_320").to_string(),
-                        formats_available,
-                    });
-                }
-                Some("error") => {
-                    last_error = payload.get("message").and_then(|value| value.as_str()).map(|value| value.to_string());
-                }
-                _ => {}
+        match payload.get("event").and_then(|value| value.as_str()) {
+            Some("progress") => {
+                let percent = payload.get("percent").and_then(|value| value.as_u64()).unwrap_or(0) as u32;
+                let message = payload.get("message").and_then(|value| value.as_str()).unwrap_or("Downloading audio...");
+                let _ = window.emit("youtube-download-progress", serde_json::json!({
+                    "message": message,
+                    "percent": percent
+                }));
             }
+            Some("result") => {
+                let formats_available: Vec<String> = payload.get("formats_available")
+                    .and_then(|v| v.as_array())
+                    .map(|arr| arr.iter().filter_map(|v| v.as_str()).map(String::from).collect())
+                    .unwrap_or_default();
+
+                final_result = Some(YouTubeDownloadResult {
+                    status: "ok".to_string(),
+                    file_path: payload.get("file").and_then(|value| value.as_str()).unwrap_or_default().to_string(),
+                    title: payload.get("title").and_then(|value| value.as_str()).unwrap_or("Untitled Import").to_string(),
+                    duration_seconds: payload.get("duration").and_then(|value| value.as_f64()).unwrap_or(0.0),
+                    output_directory: payload
+                        .get("output_directory")
+                        .and_then(|value| value.as_str())
+                        .map(|value| value.to_string())
+                        .unwrap_or_else(|| output_dir.to_string_lossy().to_string()),
+                    uploader: payload.get("uploader").and_then(|value| value.as_str()).map(|value| value.to_string()),
+                    webpage_url: payload.get("webpage_url").and_then(|value| value.as_str()).map(|value| value.to_string()),
+                    mode_used: payload.get("mode_used").and_then(|value| value.as_str()).unwrap_or("audio_mp3_192").to_string(),
+                    formats_available,
+                });
+            }
+            Some("error") => {
+                last_error = payload.get("message").and_then(|value| value.as_str()).map(|value| value.to_string());
+            }
+            _ => {}
         }
     }
-
-    let status = child.wait().map_err(|e| format!("Failed to await YouTube downloader: {}", e))?;
-    let stderr_output = stderr_handle.join().unwrap_or_default();
 
     if !status.success() {
         return Err(last_error.unwrap_or_else(|| {
@@ -3656,10 +4105,22 @@ async fn download_youtube_audio(
     let result = final_result.ok_or_else(|| {
         if let Some(error) = last_error {
             error
+        } else if !stderr_output.trim().is_empty() {
+            format!(
+                "YouTube import failed: {}",
+                truncate_diagnostic_details(&stderr_output)
+            )
         } else {
-            "YouTube import finished without returning a result payload.".to_string()
+            format!(
+                "YouTube import finished without returning a result payload (script: {}). Restart the app and try a direct video URL.",
+                script_path.display()
+            )
         }
     })?;
+
+    if result.file_path.trim().is_empty() {
+        return Err("YouTube import completed but no output file path was returned.".to_string());
+    }
 
     let _ = window.emit("youtube-download-progress", serde_json::json!({
         "message": "Audio imported successfully.",
@@ -3952,8 +4413,15 @@ async fn apply_stem_fx(
         .find(|l| l.trim_start().starts_with('{'))
         .ok_or("No JSON output from apply_fx.py")?;
 
+    let payload = decode_fx_json_payload(&fx_json)?;
+    let is_preview = payload
+        .get("preview")
+        .and_then(|value| value.as_bool())
+        .unwrap_or(false);
+    let trial_action = if is_preview { "preview" } else { "apply" };
+
     for plugin_id in consumed_plugin_ids {
-        let _ = consume_vst_trial_internal(&plugin_id, "apply");
+        let _ = consume_vst_trial_internal(&plugin_id, trial_action);
     }
 
     Ok(json_line.to_string())
@@ -4069,6 +4537,323 @@ fn stop_vst_plugin() -> Result<String, String> {
     } else {
         Ok("No VST preview running".to_string())
     }
+}
+
+// ============================================================================
+// Surgical Editor — clip export + sample bank
+// ============================================================================
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct AudioClipExportResult {
+    status: String,
+    output_path: String,
+    duration_seconds: f64,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+struct SampleBankEntry {
+    id: String,
+    name: String,
+    path: String,
+    category: String,
+    bpm: f64,
+    key: String,
+    duration: f64,
+    #[serde(rename = "stemType")]
+    stem_type: String,
+    #[serde(rename = "createdAt")]
+    created_at: String,
+}
+
+fn sanitize_filename_part(name: &str) -> String {
+    let cleaned: String = name
+        .chars()
+        .map(|c| {
+            if c.is_ascii_alphanumeric() || c == '-' || c == '_' {
+                c
+            } else {
+                '_'
+            }
+        })
+        .collect();
+    let trimmed = cleaned.trim_matches('_');
+    if trimmed.is_empty() {
+        "clip".to_string()
+    } else {
+        trimmed.to_string()
+    }
+}
+
+fn get_sample_bank_dir() -> PathBuf {
+    let data_dir = dirs::data_local_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("StemSplit")
+        .join("sample_bank");
+    std::fs::create_dir_all(&data_dir).ok();
+    data_dir
+}
+
+fn get_sample_bank_index_path() -> PathBuf {
+    get_sample_bank_dir().join("index.json")
+}
+
+fn load_sample_bank_index() -> Vec<SampleBankEntry> {
+    let path = get_sample_bank_index_path();
+    if !path.exists() {
+        return Vec::new();
+    }
+    let raw = std::fs::read_to_string(&path).unwrap_or_default();
+    serde_json::from_str(&raw).unwrap_or_default()
+}
+
+fn save_sample_bank_index(entries: &[SampleBankEntry]) -> Result<(), String> {
+    let path = get_sample_bank_index_path();
+    let json = serde_json::to_string_pretty(entries)
+        .map_err(|error| format!("Failed to serialize sample bank index: {}", error))?;
+    std::fs::write(&path, json)
+        .map_err(|error| format!("Failed to write sample bank index: {}", error))
+}
+
+fn category_for_stem(stem_type: &str) -> String {
+    match stem_type.to_lowercase().as_str() {
+        "kick" => "drums_kick".to_string(),
+        "snare" => "drums_snare".to_string(),
+        "hh" | "hihat" | "hi-hat" => "drums_hihat".to_string(),
+        "toms" | "tom" => "drums_percussion".to_string(),
+        "ride" | "crash" | "cymbals" | "overheads" => "drums_percussion".to_string(),
+        "drums" => "drums_loop".to_string(),
+        "vocals" | "lead" | "back" | "backing" | "adlibs" => "vocals_oneshot".to_string(),
+        "bass" => "bass_loop".to_string(),
+        "piano" => "instrument_piano".to_string(),
+        "guitar" => "instrument_guitar".to_string(),
+        "other" | "instrumental" => "instrument_fx".to_string(),
+        _ => "instrument_fx".to_string(),
+    }
+}
+
+fn run_audio_editor_export(
+    input_path: &str,
+    start_sec: f64,
+    end_sec: f64,
+    output_path: &Path,
+) -> Result<AudioClipExportResult, String> {
+    if end_sec <= start_sec {
+        return Err(format!("Invalid clip range: {}s – {}s", start_sec, end_sec));
+    }
+
+    let source = Path::new(input_path);
+    if !source.exists() {
+        return Err(format!("Source audio not found: {}", input_path));
+    }
+
+    if let Some(parent) = output_path.parent() {
+        std::fs::create_dir_all(parent)
+            .map_err(|error| format!("Failed to create output directory: {}", error))?;
+    }
+
+    let script_path = resolve_python_script_path("audio_editor.py");
+    if !script_path.exists() {
+        return Err(format!(
+            "audio_editor.py not found at: {}",
+            script_path.display()
+        ));
+    }
+
+    let work_dir = script_path
+        .parent()
+        .and_then(|p| p.parent())
+        .map(Path::to_path_buf)
+        .unwrap_or_else(|| PathBuf::from("."));
+
+    let python_exe = resolve_python_path();
+    let mut cmd = Command::new(&python_exe);
+    cmd.args([
+        script_path.to_string_lossy().to_string(),
+        input_path.to_string(),
+        "--start".to_string(),
+        start_sec.to_string(),
+        "--end".to_string(),
+        end_sec.to_string(),
+        "--output".to_string(),
+        output_path.to_string_lossy().to_string(),
+    ])
+    .stdout(Stdio::piped())
+    .stderr(Stdio::piped())
+    .current_dir(work_dir);
+    apply_python_runtime_env(&mut cmd);
+
+    #[cfg(target_os = "windows")]
+    cmd.creation_flags(CREATE_NO_WINDOW);
+
+    let output = cmd
+        .output()
+        .map_err(|error| format!("Failed to run audio_editor.py: {}", error))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("Clip export failed: {}", stderr.trim()));
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json_line = stdout
+        .lines()
+        .rev()
+        .find(|line| line.trim_start().starts_with('{'))
+        .ok_or("No JSON output from audio_editor.py")?;
+
+    let parsed: serde_json::Value = serde_json::from_str(json_line)
+        .map_err(|error| format!("Invalid audio_editor.py JSON: {}", error))?;
+
+    if parsed.get("status").and_then(|v| v.as_str()) != Some("success") {
+        let message = parsed
+            .get("message")
+            .and_then(|v| v.as_str())
+            .unwrap_or("Unknown export error");
+        return Err(message.to_string());
+    }
+
+    Ok(AudioClipExportResult {
+        status: "success".to_string(),
+        output_path: parsed
+            .get("output_path")
+            .and_then(|v| v.as_str())
+            .unwrap_or("")
+            .to_string(),
+        duration_seconds: parsed
+            .get("duration_seconds")
+            .and_then(|v| v.as_f64())
+            .unwrap_or(end_sec - start_sec),
+    })
+}
+
+#[tauri::command]
+fn export_audio_clip(
+    file_path: String,
+    start_sec: f64,
+    end_sec: f64,
+    stem_name: String,
+) -> Result<String, String> {
+    let source = Path::new(&file_path);
+    let parent = source
+        .parent()
+        .ok_or_else(|| format!("Invalid source path: {}", file_path))?;
+
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    let safe_stem = sanitize_filename_part(&stem_name);
+    let output_path = parent.join(format!("{}_{}_edited.wav", safe_stem, stamp));
+
+    let result = run_audio_editor_export(&file_path, start_sec, end_sec, &output_path)?;
+    Ok(result.output_path)
+}
+
+#[tauri::command]
+fn save_to_sample_bank(
+    source_path: String,
+    start_sec: f64,
+    end_sec: f64,
+    stem_type: String,
+    bpm: f64,
+    key: String,
+) -> Result<SampleBankEntry, String> {
+    let bank_dir = get_sample_bank_dir();
+    let stamp = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_millis())
+        .unwrap_or(0);
+    let safe_stem = sanitize_filename_part(&stem_type);
+    let id = format!("sample_{}_{}", safe_stem, stamp);
+    let output_path = bank_dir.join(format!("{}.wav", id));
+
+    let export = run_audio_editor_export(&source_path, start_sec, end_sec, &output_path)?;
+
+    let entry = SampleBankEntry {
+        id: id.clone(),
+        name: format!("{} clip", stem_type),
+        path: export.output_path,
+        category: category_for_stem(&stem_type),
+        bpm,
+        key,
+        duration: export.duration_seconds,
+        stem_type,
+        created_at: chrono_lite_now_iso(),
+    };
+
+    let mut entries = load_sample_bank_index();
+    entries.push(entry.clone());
+    save_sample_bank_index(&entries)?;
+
+    Ok(entry)
+}
+
+#[tauri::command]
+fn list_sample_bank() -> Result<Vec<SampleBankEntry>, String> {
+    let entries = load_sample_bank_index();
+    let valid: Vec<SampleBankEntry> = entries
+        .into_iter()
+        .filter(|entry| Path::new(&entry.path).exists())
+        .collect();
+    save_sample_bank_index(&valid)?;
+    Ok(valid)
+}
+
+#[tauri::command]
+fn delete_sample_from_bank(sample_id: String) -> Result<(), String> {
+    let mut entries = load_sample_bank_index();
+    let Some(index) = entries.iter().position(|entry| entry.id == sample_id) else {
+        return Ok(());
+    };
+    let removed = entries.remove(index);
+    if Path::new(&removed.path).exists() {
+        std::fs::remove_file(&removed.path)
+            .map_err(|error| format!("Failed to delete sample file: {}", error))?;
+    }
+    save_sample_bank_index(&entries)?;
+    Ok(())
+}
+
+fn chrono_lite_now_iso() -> String {
+    use std::time::{SystemTime, UNIX_EPOCH};
+    let secs = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0);
+    format!("{}Z", secs)
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct BundledVstEntry {
+    pub id: String,
+    pub name: String,
+    pub path: String,
+}
+
+fn resolve_reverb_degloss_vst_path() -> Option<String> {
+    if let Ok(app_root) = get_app_root_dir() {
+        let bundled = app_root.join("VST").join("ReVerb-DeGloss.vst3");
+        if bundled.exists() {
+            return Some(bundled.to_string_lossy().to_string());
+        }
+    }
+
+    let legacy = Path::new("D:/VST/ReVerb-DeGloss.vst3");
+    if legacy.exists() {
+        return Some(legacy.to_string_lossy().to_string());
+    }
+
+    None
+}
+
+#[tauri::command]
+fn get_bundled_vst_paths() -> Vec<BundledVstEntry> {
+    let path = resolve_reverb_degloss_vst_path().unwrap_or_default();
+    vec![BundledVstEntry {
+        id: "reverb_degloss".into(),
+        name: "ReVerb-DeGloss".into(),
+        path,
+    }]
 }
 
 // ============================================================================
@@ -5484,12 +6269,14 @@ fn check_python_available() -> bool {
 }
 
 fn main() {
+    load_runtime_env_files();
     tauri::Builder::default()
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
         .setup(|app| {
             enforce_window_security_policy(&app.app_handle());
+            warm_production_site_background();
             tauri::async_runtime::spawn(async {
                 flush_queued_security_incidents().await;
             });
@@ -5505,6 +6292,8 @@ fn main() {
             health_check,
             open_results_folder,
             read_audio_file,
+            read_audio_file_bytes,
+            read_peaks_file,
             apply_stem_fx,
             preview_vst_plugin,
             stop_vst_plugin,
@@ -5521,12 +6310,18 @@ fn main() {
             get_free_user_session,
             logout_free_user,
             verify_free_user_email,
+            resend_verification_email,
             get_trial_cooldown_status,
             test_security_webhook,
             get_vst_entitlements_status,
             check_vst_access,
             sync_vst_entitlements_from_server,
             record_vst_usage,
+            export_audio_clip,
+            save_to_sample_bank,
+            list_sample_bank,
+            delete_sample_from_bank,
+            get_bundled_vst_paths,
             // Hardware and downloading
             hardware::get_system_profile,
             downloader::download_file,

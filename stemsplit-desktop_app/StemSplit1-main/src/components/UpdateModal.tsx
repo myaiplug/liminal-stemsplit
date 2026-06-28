@@ -49,7 +49,7 @@ export default function UpdateModal() {
         const currentVersion = await getVersion();
         
         // Fetch latest release from GitHub API
-        const response = await fetch('https://api.github.com/repos/myaiplug/StemSplit1/releases/latest');
+        const response = await fetch('https://api.github.com/repos/myaiplug/liminal-stemsplit/releases/latest');
         if (!response.ok) return;
         
         const data = await response.json();

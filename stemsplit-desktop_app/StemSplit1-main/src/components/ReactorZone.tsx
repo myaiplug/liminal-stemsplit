@@ -4,64 +4,52 @@ import React, { useState, useRef, useEffect, useCallback, useMemo } from 'react'
 import { motion, AnimatePresence, useAnimation } from 'framer-motion';
 import { useStemSplit, StemSplitStatus } from '@/hooks/useStemSplit';
 import { downloadYouTubeAudio, openResultsFolder, transcribeAudio, WhisperTranscriptionResult } from '@/lib/tauri-bridge';
+import { expandResplitIntoStems, isMicroStem, sortStemEntries } from '@/lib/stem-display';
+import { useSound, type SoundEffect } from '@/hooks/useSound';
 import { pingAppOpen, pingSplitComplete } from '@/lib/analytics';
 import { useLicense } from '@/contexts/LicenseContext';
 import { open as dialogOpen } from '@tauri-apps/plugin-dialog';
 import { isTauriRuntime } from '@/lib/tauri-runtime';
+
 import TitleBar from './TitleBar';
 import { APP_FOOTER_LABEL } from '@/lib/app-version';
 import StemPlayer from './StemPlayer';
 import OriginalPlayer from './OriginalPlayer';
 import ModelPicker from './ModelPicker';
-import ScrewAIPanel from './ScrewAIPanel';
+import SampleBank, { type SampleEntry } from './SampleBank';
+
 import {
     DEFAULT_MODEL_BY_ENGINE,
     SeparationEngine,
     getModelById,
     getInstrumentStemLabels,
     supportsStems,
+    snapStemCountForModel,
+    STEM_COUNT_OPTIONS,
+    stemCountLabel,
 } from '@/lib/model-catalog';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { Points, PointMaterial } from '@react-three/drei';
 import * as THREE from 'three';
-// @ts-ignore
-import { Howl } from 'howler';
 
-// --- Sound System ---
+const FREE_YOUTUBE_MODE = 'audio_mp3_192';
 
-const sounds: Record<string, Howl> = {};
+const YOUTUBE_AUDIO_MODES: Array<{ id: string; label: string; proOnly?: boolean }> = [
+    { id: 'audio_mp3_192', label: 'MP3 192kbps' },
+    { id: 'audio_mp3_320', label: 'MP3 320kbps', proOnly: true },
+    { id: 'audio_mp3_128', label: 'MP3 128kbps', proOnly: true },
+    { id: 'audio_wav', label: 'WAV lossless', proOnly: true },
+    { id: 'audio_flac', label: 'FLAC lossless', proOnly: true },
+];
 
-const useSoundSystem = () => {
-    useEffect(() => {
-        const sfx = [
-            'hover_tick', 'hover_core', 'click_engage', 'process_start',
-            'success_chime', 'error_buzz', 'stem_active'
-        ];
-        sfx.forEach(s => {
-            if (!sounds[s]) {
-                sounds[s] = new Howl({ 
-                    src: [`/sounds/${s}.wav`], 
-                    volume: 0.6,
-                    loop: false,
-                    preload: true
-                });
-            }
-        });
-    }, []);
-
-    const play = useCallback((name: string) => {
-        if (sounds[name]) {
-            sounds[name].stop();
-            sounds[name].play();
-        }
-    }, []);
-    
-    const stop = useCallback((name: string) => {
-        if (sounds[name]) sounds[name].stop();
-    }, []);
-
-    return { play, stop };
-};
+const YOUTUBE_VIDEO_MODES: Array<{ id: string; label: string }> = [
+    { id: 'video_360p', label: '360p' },
+    { id: 'video_480p', label: '480p' },
+    { id: 'video_720p', label: '720p HD' },
+    { id: 'video_1080p', label: '1080p FHD' },
+    { id: 'video_1440p', label: '1440p 2K' },
+    { id: 'video_4k', label: '4K UHD' },
+];
 
 // --- WebGL Visualizer Details ---
 
@@ -703,8 +691,9 @@ const ReactorZone: React.FC = () => {
     const [showSettings, setShowSettings] = useState(false);
     const [showYouTubeModal, setShowYouTubeModal] = useState(false);
     const [showWhisperModal, setShowWhisperModal] = useState(false);
-    const [showScrewAIModal, setShowScrewAIModal] = useState(false);
-    const [splitEngine, setSplitEngine] = useState<SeparationEngine>('demucs');
+    const [showSampleBank, setShowSampleBank] = useState(false);
+
+    const [splitEngine, setSplitEngine] = useState<SeparationEngine>('spleeter');
     const [splitModelVariant, setSplitModelVariant] = useState(DEFAULT_MODEL_BY_ENGINE.demucs);
     const [splitStems, setSplitStems] = useState('4');
     const [splitPasses, setSplitPasses] = useState('1');
@@ -717,7 +706,7 @@ const ReactorZone: React.FC = () => {
     const [loadedFilePath, setLoadedFilePath] = useState<string | null>(null);
     const [sourceTitle, setSourceTitle] = useState<string | null>(null);
     const [youtubeUrl, setYouTubeUrl] = useState('');
-    const [youtubeMode, setYouTubeMode] = useState<string>('audio_mp3_320');
+    const [youtubeMode, setYouTubeMode] = useState<string>(FREE_YOUTUBE_MODE);
     const [youtubeProgress, setYouTubeProgress] = useState<{ message: string; percent: number } | null>(null);
     const [isDownloadingYouTube, setIsDownloadingYouTube] = useState(false);
     const [preSplitConvertWav, setPreSplitConvertWav] = useState(true);
@@ -739,10 +728,14 @@ const ReactorZone: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { status, progress: progressEvent, progressPercent, result, error, startSeparation, cancel } = useStemSplit();
     const [stemsLoaded, setStemsLoaded] = useState(false);
+    const [stemsRevision, setStemsRevision] = useState(0);
+    const [modelPickerCategory, setModelPickerCategory] = useState<string>('all');
     const stemsResultRef = useRef(result);
+    const resplitParentRef = useRef<string | null>(null);
+
     const { isPro } = useLicense();
     const isFreeMode = !isPro;
-    const { play, stop } = useSoundSystem();
+    const { play } = useSound();
     const prevStatus = useRef(status);
 
     const openLicenseModal = useCallback(() => {
@@ -760,6 +753,23 @@ const ReactorZone: React.FC = () => {
         if (splitPasses !== '1') setSplitPasses('1');
         if (splitEngine !== 'spleeter') setSplitEngine('spleeter');
     }, [isFreeMode, splitStems, splitPasses, splitEngine]);
+
+    useEffect(() => {
+        if (!isFreeMode) return;
+        if (youtubeMode !== FREE_YOUTUBE_MODE) {
+            setYouTubeMode(FREE_YOUTUBE_MODE);
+        }
+    }, [isFreeMode, youtubeMode]);
+
+    const availableYouTubeAudioModes = useMemo(
+        () => (isFreeMode ? YOUTUBE_AUDIO_MODES.filter((mode) => !mode.proOnly) : YOUTUBE_AUDIO_MODES),
+        [isFreeMode],
+    );
+    const availableYouTubeVideoModes = useMemo(
+        () => (isFreeMode ? [] : YOUTUBE_VIDEO_MODES),
+        [isFreeMode],
+    );
+    const isYouTubeVideoMode = youtubeMode.startsWith('video_');
 
     // Auto-detect GPU on mount
     useEffect(() => {
@@ -783,43 +793,55 @@ const ReactorZone: React.FC = () => {
     // Ping on app open (once)
     useEffect(() => { pingAppOpen(); }, []);
 
+    const requestedStemCount = parseInt(splitStems, 10);
+
     const splitOptions = useMemo(() => ({
         outputDir: customOutputDir || undefined,
         engine: splitEngine,
-        stems: isFreeMode ? 2 : parseInt(splitStems),
+        stems: isFreeMode ? 2 : requestedStemCount,
         passes: isFreeMode ? 1 : parseInt(splitPasses),
-        format: isFreeMode ? 'mp3' as const : undefined,
+        format: isFreeMode ? 'mp3' as const : 'wav' as const,
         applyEffects: !isFreeMode,
         modelVariant: splitModelVariant,
         referenceFile: splitModelVariant === 'postfx_matchering' ? (matcheringReference || undefined) : undefined,
         device: deviceMode === 'auto' ? undefined : deviceMode,
-    }), [customOutputDir, isFreeMode, splitEngine, splitStems, splitPasses, splitModelVariant, matcheringReference, deviceMode]);
+    }), [customOutputDir, isFreeMode, splitEngine, requestedStemCount, splitPasses, splitModelVariant, matcheringReference, deviceMode]);
 
+    const selectedModel = useMemo(() => getModelById(splitModelVariant), [splitModelVariant]);
+
+    // Keep stem count aligned with what the selected model can actually output.
     useEffect(() => {
-        const model = getModelById(splitModelVariant);
-        if (!model) return;
-        const stemCount = parseInt(splitStems);
-        if (!supportsStems(model, stemCount)) {
-            const fallback = model.stems[model.stems.length - 1];
-            setSplitStems(String(fallback));
-        }
-    }, [splitModelVariant, splitStems]);
+        if (!selectedModel || !Number.isFinite(requestedStemCount)) return;
+        if (supportsStems(selectedModel, requestedStemCount)) return;
+        setSplitStems(String(snapStemCountForModel(selectedModel, requestedStemCount)));
+    }, [selectedModel, requestedStemCount]);
+
+    const stemCountMismatch = useMemo(() => {
+        if (!selectedModel || !Number.isFinite(requestedStemCount)) return false;
+        return !supportsStems(selectedModel, requestedStemCount);
+    }, [selectedModel, requestedStemCount]);
+
+    const isStemOptionDisabled = useCallback((count: number) => {
+        if (isFreeMode && count !== 2) return true;
+        if (splitEngine === 'karaoke' && count !== 3) return true;
+        if (!selectedModel) return true;
+        return !supportsStems(selectedModel, count);
+    }, [isFreeMode, splitEngine, selectedModel]);
 
     // Track finished stems individually for UI glow
     const [finishedStems, setFinishedStems] = useState<Set<string>>(new Set());
 
     useEffect(() => {
-        if (progressEvent?.message?.startsWith('Saved ')) {
-             // Message format: "Saved vocals: ..."
-             const parts = progressEvent.message.split(' ');
-             if (parts.length >= 2) {
-                 const stemName = parts[1].replace(':', '').trim(); 
-                 setFinishedStems(prev => new Set(prev).add(stemName));
-                 play('stem_active'); 
-             }
+        const msg = progressEvent?.message;
+        if (!msg || status !== StemSplitStatus.PROCESSING) return;
+        const savedMatch = msg.match(/^Saved\s+([a-zA-Z0-9_-]+)/);
+        if (savedMatch) {
+            const stemName = savedMatch[1].replace(':', '').trim();
+            setFinishedStems((prev) => new Set(prev).add(stemName));
+            play('stem_active');
         }
-    }, [progressEvent, play]);
-    
+    }, [progressEvent, play, status]);
+
     useEffect(() => {
         if (status === StemSplitStatus.PROCESSING) {
             setFinishedStems(new Set());
@@ -843,15 +865,36 @@ const ReactorZone: React.FC = () => {
     }, [splitEngine, splitStems, splitModelVariant]);
 
     useEffect(() => {
-        if (result) stemsResultRef.current = result;
+        if (result) {
+            if (resplitParentRef.current && result.stems && stemsResultRef.current?.stems) {
+                const parentStem = resplitParentRef.current;
+                const mergedStems = expandResplitIntoStems(
+                    stemsResultRef.current.stems,
+                    parentStem,
+                    result.stems,
+                );
+                stemsResultRef.current = {
+                    ...stemsResultRef.current,
+                    stems: mergedStems,
+                };
+                resplitParentRef.current = null;
+                setStemsRevision((r) => r + 1);
+                setStemsLoaded(true);
+            } else if (!resplitParentRef.current) {
+                stemsResultRef.current = result;
+                if (result.stems) {
+                    setStemsRevision((r) => r + 1);
+                    setStemsLoaded(true);
+                }
+            }
+        }
         if (prevStatus.current !== status) {
-            if (status === StemSplitStatus.PROCESSING) play('process_start');
             if (status === StemSplitStatus.COMPLETED) {
-                play('success_chime');
-                stop('process_loop');
                 pingSplitComplete();
-                if (result?.stems) setStemsLoaded(true);
-                if (result?.output_directory) {
+                if (result?.stems) {
+                    setStemsLoaded(true);
+                }
+                if (result?.output_directory && !resplitParentRef.current) {
                     // Open the folder in the default file manager once completion happens!
                     console.log('Attempting to open folder:', result.output_directory);
                     openResultsFolder(result.output_directory).catch(e => console.error('Folder open failed:', e));
@@ -859,14 +902,14 @@ const ReactorZone: React.FC = () => {
                     console.warn('Completion signaled but output_directory missing in result');
                 }
             }
-            if (status === StemSplitStatus.ERROR) {
-                play('error_buzz');
-                stop('process_loop');
+            if (status === StemSplitStatus.ERROR || status === StemSplitStatus.CANCELLED) {
+                if (status === StemSplitStatus.ERROR) play('error_buzz');
+                resplitParentRef.current = null;
             }
             prevStatus.current = status;
         }
         
-    }, [status, play, stop, result]);
+    }, [status, play, result]);
 
     const [pendingFiles, setPendingFiles] = useState<string[]>([]);
     const [queueIndex, setQueueIndex] = useState(0);
@@ -881,7 +924,7 @@ const ReactorZone: React.FC = () => {
                     setQueueIndex(prev => prev + 1);
                     const nextFile = pendingFiles[queueIndex + 1];
                     setLoadedFilePath(nextFile);
-                    play('process_loop');
+                    play('process_start');
                     startSeparation(nextFile, splitOptions);
                 }, 2000);
                 return () => clearTimeout(timeout);
@@ -975,12 +1018,27 @@ const ReactorZone: React.FC = () => {
         applySelectedPaths(paths);
     }, [applySelectedPaths]);
 
-    const handleResplitStem = useCallback((stemPath: string) => {
-        // Treat the stem as a new source file for further splitting
+    const handleResplitStem = useCallback((stemName: string, stemPath: string) => {
+        resplitParentRef.current = stemName;
         setPendingFiles([stemPath]);
         setPendingFilePath(stemPath);
-        // Update loadedFilePath so the "Original Player" plays this stem context
-        setLoadedFilePath(stemPath); 
+        setLoadedFilePath(stemPath);
+
+        const lower = stemName.toLowerCase();
+        if (lower === 'drums' || lower.includes('drum')) {
+            setSplitEngine('drumsep');
+            setSplitModelVariant('drumsep_mdx23c_6');
+            setSplitStems('6');
+            setModelPickerCategory('drums');
+        } else if (lower === 'vocals' || lower.includes('vocal') || lower === 'lead' || lower === 'back' || lower === 'backing') {
+            setSplitEngine('karaoke');
+            setSplitModelVariant('karaoke_mvsep_team');
+            setSplitStems('3');
+            setModelPickerCategory('karaoke');
+        } else {
+            setModelPickerCategory('all');
+        }
+
         setShowSettings(true);
         play('click_engage');
     }, [play]);
@@ -1042,15 +1100,24 @@ const ReactorZone: React.FC = () => {
                 setYouTubeProgress(progress);
             });
 
+            if (isYouTubeVideoMode) {
+                setYouTubeProgress({ message: `Video saved to ${result.output_directory}`, percent: 100 });
+                play('success_chime');
+                return;
+            }
+
             setPendingFiles([]);
             setPendingFilePath(result.file_path);
-            setLoadedFilePath(result.file_path);
             setSourceTitle(result.title);
             setShowYouTubeModal(false);
             setYouTubeUrl('');
             setYouTubeProgress(null);
             setShowSettings(true);
             play('success_chime');
+            // Defer bottom player so settings modal opens first (instant mount was crashing WebView).
+            window.setTimeout(() => {
+                setLoadedFilePath(result.file_path);
+            }, 1200);
         } catch (err) {
             const detail = err instanceof Error ? err.message : String(err);
             setUiError(detail);
@@ -1059,7 +1126,7 @@ const ReactorZone: React.FC = () => {
         } finally {
             setIsDownloadingYouTube(false);
         }
-    }, [play, youtubeUrl, youtubeMode]);
+    }, [play, youtubeUrl, youtubeMode, isYouTubeVideoMode]);
 
     const handleOpenWhisper = useCallback(() => {
         if (!loadedFilePath && !pendingFilePath) {
@@ -1174,10 +1241,17 @@ const ReactorZone: React.FC = () => {
     }, [status, progressEvent, play]);
 
     const executePendingSplit = useCallback(async () => {
+        if (stemCountMismatch) {
+            play('error_buzz');
+            setUiError(
+                `${selectedModel?.name ?? 'Selected model'} cannot produce ${requestedStemCount} stems. Pick a supported stem count or switch models.`,
+            );
+            return;
+        }
         if (pendingFilePath) {
             setShowSettings(false);
-            play('process_loop');
-            
+            play('process_start');
+
             // Check if multiple files pending
             if (pendingFiles.length > 1) {
                 // BULK MODE START
@@ -1189,7 +1263,16 @@ const ReactorZone: React.FC = () => {
                 await startSeparation(pendingFilePath, splitOptions);
             }
         }
-    }, [pendingFilePath, pendingFiles, startSeparation, play, splitOptions]);
+    }, [
+        pendingFilePath,
+        pendingFiles,
+        startSeparation,
+        play,
+        splitOptions,
+        stemCountMismatch,
+        requestedStemCount,
+        selectedModel,
+    ]);
 
     useEffect(() => {
         if (!isTauriRuntime()) return;
@@ -1601,7 +1684,7 @@ const ReactorZone: React.FC = () => {
                 <AnimatePresence>
                     {stemsLoaded && stemsResultRef.current?.stems && (
                         <motion.div
-                            key="stem-players"
+                            key={`stem-players-${stemsRevision}`}
                             initial={{ opacity: 0 }}
                             animate={{ opacity: 1 }}
                             exit={{ opacity: 0 }}
@@ -1622,18 +1705,23 @@ const ReactorZone: React.FC = () => {
                             </motion.div>
 
                             {/* Player cards */}
-                            {Object.entries(stemsResultRef.current.stems).map(([name, info], idx) => (
+                            {sortStemEntries(stemsResultRef.current.stems).map(([name, info], idx) => (
                                 <StemPlayer
                                     key={`${name}-${info.file_path}`}
                                     stemName={name}
                                     filePath={info.file_path}
+                                    peaksPath={info.peaks_path}
                                     duration={info.duration_seconds}
                                     purityScore={info.purity_score}
                                     index={idx}
-                                    deferLoadMs={idx * 250}
+                                    deferLoadMs={idx * 80}
                                     isFxOpen={activeFxStem === name}
                                     onToggleFX={() => setActiveFxStem(prev => prev === name ? null : name)}
-                                    onResplitStem={isFreeMode ? undefined : () => handleResplitStem(info.file_path)}
+                                    onResplitStem={
+                                        isFreeMode || isMicroStem(name)
+                                            ? undefined
+                                            : () => handleResplitStem(name, info.file_path)
+                                    }
                                     fxDisabled={isFreeMode}
                                     resplitDisabled={isFreeMode}
                                 />
@@ -1670,14 +1758,44 @@ const ReactorZone: React.FC = () => {
                     >
                         [ WHISPER TRANSCRIPT ]
                     </button>
-                    <button 
-                        onClick={() => setShowScrewAIModal(true)}
-                        className="px-4 py-2 border border-purple-500/30 text-purple-300 hover:bg-purple-900/40 hover:border-purple-400 rounded font-mono text-xs transition-colors"
+                    <button
+                        onClick={() => {
+                            play('click_engage');
+                            setShowSampleBank(true);
+                        }}
+                        className="px-4 py-2 border border-violet-500/30 text-violet-300 hover:bg-violet-900/40 hover:border-violet-400 rounded font-mono text-xs transition-colors shadow-[0_0_10px_rgba(139,92,246,0.12)]"
                     >
-                        [ SCREWAI ]
+                        [ SAMPLE BANK ]
                     </button>
                 </div>
             </div>
+
+            {/* Sample Bank drawer */}
+            <AnimatePresence>
+                {showSampleBank && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-[109] bg-black/50 backdrop-blur-[2px]"
+                        onClick={() => setShowSampleBank(false)}
+                    />
+                )}
+            </AnimatePresence>
+            <SampleBank
+                isOpen={showSampleBank}
+                onClose={() => setShowSampleBank(false)}
+                onSelectSample={async (sample: SampleEntry) => {
+                    const folder = sample.path.replace(/[\\/][^\\/]+$/, '');
+                    if (folder) {
+                        try {
+                            await openResultsFolder(folder);
+                        } catch {
+                            /* ignore */
+                        }
+                    }
+                }}
+            />
 
             {/* Config Modal */}
             <AnimatePresence>
@@ -1723,100 +1841,85 @@ const ReactorZone: React.FC = () => {
                                         )}
                                     </div>
                                 )}
-                                {/* Recommended Mode */}
-                                <div className="border border-cyan-900/40 rounded-xl p-2.5 bg-slate-950/70 mb-3 relative overflow-hidden">
-                                    <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 via-transparent to-purple-500/5 pointer-events-none" />
-                                    <div className="relative z-10">
-                                        <label className="block mb-1.5 flex items-center gap-2">
-                                            <span className="text-[10px] font-mono uppercase tracking-widest text-cyan-400/90">
-                                                What are you extracting?
-                                            </span>
-                                        </label>
-                                        <div className="grid grid-cols-3 gap-1.5">
-                                            {[
-                                                { label: 'Vocals', id: 'vocals', eng: 'roformer' as SeparationEngine, mod: 'roformer_bs_317', stems: '4' },
-                                                { label: 'Karaoke', id: 'karaoke', eng: 'mdx' as SeparationEngine, mod: 'mdx_kara', stems: '2' },
-                                                { label: 'Podcast', id: 'podcast', eng: 'vr' as SeparationEngine, mod: 'vr_denoise', stems: '2' },
-                                                { label: 'Guitar', id: 'guitar', eng: 'instrument' as SeparationEngine, mod: 'inst_guitar', stems: '2' },
-                                                { label: 'Piano', id: 'piano', eng: 'instrument' as SeparationEngine, mod: 'inst_piano', stems: '2' },
-                                                { label: 'Drums', id: 'drums', eng: 'drumsep' as SeparationEngine, mod: 'drumsep_49469', stems: '6' },
-                                            ].map((opt) => {
-                                                const isActive = splitEngine === opt.eng && splitModelVariant === opt.mod;
-                                                return (
-                                                    <button
-                                                        key={opt.id}
-                                                        type="button"
-                                                        onClick={() => {
-                                                            setSplitEngine(opt.eng);
-                                                            setSplitModelVariant(opt.mod);
-                                                            setSplitStems(opt.stems);
-                                                        }}
-                                                        className={`text-[10px] font-mono uppercase tracking-wider px-2 py-1.5 rounded border transition-all duration-150 ${
-                                                            isActive
-                                                                ? 'border-cyan-500/60 bg-cyan-500/10 text-cyan-300 shadow-[0_0_8px_rgba(34,211,238,0.15)]'
-                                                                : 'border-slate-700/50 bg-slate-900/50 text-slate-400 hover:border-slate-600 hover:text-slate-300'
-                                                        }`}
-                                                    >
-                                                        {opt.label}
-                                                    </button>
-                                                );
-                                            })}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                {/* Advanced: Neural Model Matrix */}
-                                <div className="border border-slate-800 rounded-xl p-2.5 bg-slate-950/60">
+                                {/* Neural Model Matrix */}
+                                <div className={`border rounded-xl p-2.5 ${isFreeMode ? 'border-slate-800/40 bg-slate-950/30 opacity-60' : 'border-slate-800 bg-slate-950/60'}`}>
                                     <label className="block mb-1.5 text-slate-400 text-[10px] font-mono uppercase tracking-widest">
-                                        Advanced Models
+                                        Separation Model
+                                        {isFreeMode && <span className="ml-2 text-[7px] text-purple-500">PRO</span>}
                                     </label>
                                     <ModelPicker
                                         engine={splitEngine}
                                         selectedModelId={splitModelVariant}
                                         stemCount={parseInt(splitStems)}
                                         disabled={isFreeMode}
+                                        greyIncompatibleModels
+                                        preferredCategory={modelPickerCategory}
                                         onEngineChange={(eng) => {
+                                            setModelPickerCategory('all');
                                             setSplitEngine(eng);
                                             setSplitModelVariant(DEFAULT_MODEL_BY_ENGINE[eng]);
                                             if (eng === 'drumsep') {
                                                 setSplitStems('6');
+                                            } else if (eng === 'karaoke') {
+                                                setSplitStems('3');
+                                            } else if (eng === 'spleeter') {
+                                                setSplitStems('2');
                                             }
-                                            if (eng === 'karaoke') setSplitStems('3');
-                                            if (eng === 'spleeter' && splitStems === '6') setSplitStems('4');
                                         }}
                                         onModelChange={(modelId) => {
-                                            setSplitModelVariant(modelId);
                                             const model = getModelById(modelId);
-                                            if (model && model.engine !== splitEngine) {
+                                            if (!model) return;
+                                            setSplitModelVariant(modelId);
+                                            if (model.engine !== splitEngine) {
                                                 setSplitEngine(model.engine);
+                                            }
+                                            const stemCount = parseInt(splitStems, 10);
+                                            if (!supportsStems(model, stemCount)) {
+                                                setSplitStems(String(snapStemCountForModel(model, stemCount)));
                                             }
                                             if (modelId.startsWith('drumsep_mdx23c_') || modelId === 'drumsep_49469') {
                                                 setSplitStems(modelId === 'drumsep_mdx23c_5' ? '5' : '6');
                                             }
                                         }}
-                                        onPlaySound={play}
+                                        onPlaySound={(name) => play(name as SoundEffect)}
                                     />
                                 </div>
                                 
                                 <div>
                                     <label className="block mb-1 text-slate-400">Number of Stems</label>
                                     <select 
-                                        value={splitStems} onChange={e => setSplitStems(e.target.value)}
+                                        value={splitStems}
+                                        onChange={(e) => setSplitStems(e.target.value)}
                                         className={`w-full bg-slate-950 border border-slate-700 rounded p-2 text-cyan-50 focus:border-cyan-500 outline-none ${isFreeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                        title="Select the number of stems to separate"
+                                        title={selectedModel
+                                            ? `Supported by ${selectedModel.name}: ${selectedModel.stems.join(', ')}-stem`
+                                            : 'Select the number of stems to separate'}
                                         disabled={isFreeMode}
                                     >
-                                        <option value="2" disabled={splitEngine === 'drumsep'}>2-Stem (Vocal / Instrumental)</option>
-                                        <option value="3" disabled={splitEngine !== 'karaoke'}>3-Stem (Lead / Backing / Instrumental)</option>
-                                        <option value="4">
-                                            {splitEngine === 'drumsep' ? '4-Stem (Kick, Snare, Toms, Cymbals)' : '4-Stem (Vocal, Drum, Bass, Other)'}
-                                        </option>
-                                        <option value="6" disabled={splitEngine === 'spleeter' || splitEngine === 'karaoke' || splitEngine === 'ensemble' || splitEngine === 'vr' || splitEngine === 'mdx'}>
-                                            {splitEngine === 'drumsep' ? '6-Stem (Kick, Snare, Toms, HH, Ride, Crash)' : '6-Stem (Guitar, Piano, etc.)'}
-                                        </option>
-                                        <option value="7" disabled={splitEngine !== 'drumsep'}>7-Stem (Kick, Snare, Toms, HH, Ride, Crash, Overheads)</option>
-                                        <option value="5" disabled={splitEngine === 'drumsep' || splitEngine === 'roformer' || splitEngine === 'vr' || splitEngine === 'mdx'}>5-Stem (Adds Piano/Keys)</option>
+                                        {STEM_COUNT_OPTIONS.map((count) => {
+                                            const unavailable = isStemOptionDisabled(count);
+                                            return (
+                                                <option
+                                                    key={count}
+                                                    value={String(count)}
+                                                    disabled={unavailable}
+                                                >
+                                                    {stemCountLabel(count, splitEngine)}
+                                                    {unavailable ? ' — not supported' : ''}
+                                                </option>
+                                            );
+                                        })}
                                     </select>
+                                    {selectedModel && (
+                                        <span className="text-[10px] text-slate-500 mt-1 block">
+                                            {selectedModel.name} supports {selectedModel.stems.join(', ')}-stem output only.
+                                        </span>
+                                    )}
+                                    {stemCountMismatch && (
+                                        <span className="text-[10px] text-amber-400 mt-1 block">
+                                            {selectedModel?.name ?? 'This model'} cannot produce {requestedStemCount} stems.
+                                        </span>
+                                    )}
                                     {splitEngine === 'drumsep' && <span className="text-[10px] text-orange-400 mt-1 block">MDX23C Drumsep splits into kick, snare, toms, hi-hat, ride, and crash. Use 6/7-stem mode.</span>}
                                     {splitEngine === 'karaoke' && <span className="text-[10px] text-pink-300 mt-1 block">Karaoke mode returns lead vocals, backing vocals, and instrumental.</span>}
                                     {splitEngine === 'instrument' && (
@@ -1847,26 +1950,28 @@ const ReactorZone: React.FC = () => {
                                             </div>
                                         </div>
                                     )}
-                                    {splitEngine === 'roformer' && <span className="text-[10px] text-cyan-400 mt-1 block">Roformer is optimized for 2-stem or 4-stem extraction.</span>}
+                                    {splitEngine === 'roformer' && <span className="text-[10px] text-cyan-400 mt-1 block">Stem options depend on the selected Roformer model — switch models to unlock 4- or 6-stem modes.</span>}
                                     {splitEngine === 'vr' && <span className="text-[10px] text-orange-300 mt-1 block">VR models excel at vocal isolation, karaoke, and restoration tasks.</span>}
-                                    {splitEngine === 'mdx' && <span className="text-[10px] text-purple-300 mt-1 block">MDX-Net models load from your local AudioSeperationModels + UVR libraries.</span>}
+                                    {isFreeMode && <span className="text-[10px] text-amber-300 mt-1 block">Output is locked to MP3 in free mode.</span>}
                                 </div>
-                                
+
+                                {splitEngine !== 'spleeter' && !isFreeMode && (
                                 <div>
                                     <label className="block mb-1 text-slate-400">Processing Passes</label>
                                     <select 
                                         value={splitPasses} onChange={e => setSplitPasses(e.target.value)}
-                                        className={`w-full bg-slate-950 border border-slate-700 rounded p-2 text-cyan-50 focus:border-cyan-500 outline-none ${isFreeMode ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                        className="w-full bg-slate-950 border border-slate-700 rounded p-2 text-cyan-50 focus:border-cyan-500 outline-none"
                                         title="Select the number of processing passes"
-                                        disabled={splitEngine === 'spleeter' || isFreeMode}
                                     >
                                         <option value="1">1 Pass (Faster)</option>
                                         <option value="2">2 Passes (Cleaner bleeding)</option>
                                         <option value="3">3 Passes (Maximum Quality)</option>
                                     </select>
-                                    {splitEngine === 'spleeter' && <span className="text-[10px] text-orange-400 mt-1 block">Passes not available for Spleeter</span>}
-                                    {isFreeMode && <span className="text-[10px] text-amber-300 mt-1 block">Output is locked to MP3 in free mode.</span>}
                                 </div>
+                                )}
+                                {splitEngine === 'spleeter' && !isFreeMode && (
+                                    <span className="text-[10px] text-orange-400 block">Passes not available for Spleeter</span>
+                                )}
 
                                 {/* Device selector */}
                                 <div>
@@ -2000,7 +2105,7 @@ const ReactorZone: React.FC = () => {
                                             setShowSettings(false);
                                         }
                                     }}
-                                    disabled={!pendingFilePath}
+                                    disabled={!pendingFilePath || stemCountMismatch}
                                     className={`px-6 py-2 bg-cyan-900 border border-cyan-500 rounded text-cyan-50 hover:bg-cyan-800 transition-colors font-bold shadow-lg shadow-cyan-900/50 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-cyan-900 ${
                                        pendingFiles.length > 1 ? "animate-pulse" : "" 
                                     }`}
@@ -2039,8 +2144,14 @@ const ReactorZone: React.FC = () => {
                         >
                             <div className="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
                                 <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-cyan-500">Source Ingest</p>
-                                <h2 className="mt-1 font-mono text-xl text-cyan-300">YouTube Audio Import</h2>
-                                <p className="mt-2 text-xs text-slate-400">Import a track, cache it locally, then drop directly into the existing split configuration pipeline.</p>
+                                <h2 className="mt-1 font-mono text-xl text-cyan-300">
+                                    {isFreeMode ? 'YouTube Audio Import' : 'YouTube Import'}
+                                </h2>
+                                <p className="mt-2 text-xs text-slate-400">
+                                    {isFreeMode
+                                        ? 'Free tier imports MP3 192kbps audio for splitting. Upgrade to Pro for higher-quality audio and video downloads.'
+                                        : 'Import audio for splitting or download video locally in your chosen format.'}
+                                </p>
                             </div>
 
                             <div className="space-y-4 px-6 py-5 font-mono text-sm text-slate-300">
@@ -2067,52 +2178,51 @@ const ReactorZone: React.FC = () => {
 
                                 <div className="rounded-xl border border-slate-700/50 bg-slate-900 p-4 shadow-[0_0_10px_rgba(34,211,238,0.08)]">
                                     <label className="mb-3 block text-[10px] uppercase tracking-[0.24em] text-slate-500">Download Format</label>
-                                    <div className="grid grid-cols-2 gap-2">
-                                        <div>
-                                            <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2">Audio Formats</p>
-                                            {['audio_mp3_320', 'audio_mp3_192', 'audio_mp3_128', 'audio_wav', 'audio_flac'].map((mode) => (
-                                                <label key={mode} className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-800 p-1.5 rounded">
-                                                    <input
-                                                        type="radio"
-                                                        name="youtube-mode"
-                                                        value={mode}
-                                                        checked={youtubeMode === mode}
-                                                        onChange={(e) => setYouTubeMode(e.target.value)}
-                                                        disabled={isDownloadingYouTube}
-                                                        className="w-3 h-3"
-                                                    />
-                                                    <span className="text-xs text-slate-300">
-                                                        {mode.includes('320') && 'MP3 320kbps'}
-                                                        {mode.includes('192') && 'MP3 192kbps'}
-                                                        {mode.includes('128') && 'MP3 128kbps'}
-                                                        {mode === 'audio_wav' && 'WAV'}
-                                                        {mode === 'audio_flac' && 'FLAC'}
-                                                    </span>
-                                                </label>
-                                            ))}
+                                    {isFreeMode ? (
+                                        <div className="rounded-lg border border-slate-700/60 bg-slate-950/70 px-3 py-2">
+                                            <p className="text-xs text-cyan-100">MP3 192kbps</p>
+                                            <p className="mt-1 text-[10px] text-slate-500">Included with the free tier for fast stem splitting.</p>
                                         </div>
-                                        <div>
-                                            <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2">Video Formats</p>
-                                            {['video_360p', 'video_480p', 'video_720p', 'video_1080p', 'video_1440p', 'video_4k'].map((mode) => (
-                                                <label key={mode} className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-800 p-1.5 rounded">
-                                                    <input
-                                                        type="radio"
-                                                        name="youtube-mode"
-                                                        value={mode}
-                                                        checked={youtubeMode === mode}
-                                                        onChange={(e) => setYouTubeMode(e.target.value)}
-                                                        disabled={isDownloadingYouTube}
-                                                        className="w-3 h-3"
-                                                    />
-                                                    <span className="text-xs text-slate-300">
-                                                        {mode === 'video_360p' && '360p'}
-                                                        {mode === 'video_720p' && '720p HD'}
-                                                        {mode === 'video_1080p' && '1080p FHD'}
-                                                    </span>
-                                                </label>
-                                            ))}
+                                    ) : (
+                                        <div className={`grid gap-2 ${availableYouTubeVideoModes.length > 0 ? 'grid-cols-2' : 'grid-cols-1'}`}>
+                                            <div>
+                                                <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2">Audio Formats</p>
+                                                {availableYouTubeAudioModes.map((mode) => (
+                                                    <label key={mode.id} className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-800 p-1.5 rounded">
+                                                        <input
+                                                            type="radio"
+                                                            name="youtube-mode"
+                                                            value={mode.id}
+                                                            checked={youtubeMode === mode.id}
+                                                            onChange={(e) => setYouTubeMode(e.target.value)}
+                                                            disabled={isDownloadingYouTube}
+                                                            className="w-3 h-3"
+                                                        />
+                                                        <span className="text-xs text-slate-300">{mode.label}</span>
+                                                    </label>
+                                                ))}
+                                            </div>
+                                            {availableYouTubeVideoModes.length > 0 && (
+                                                <div>
+                                                    <p className="text-[9px] uppercase tracking-[0.2em] text-slate-400 mb-2">Video Formats (Pro)</p>
+                                                    {availableYouTubeVideoModes.map((mode) => (
+                                                        <label key={mode.id} className="flex items-center gap-2 mb-2 cursor-pointer hover:bg-slate-800 p-1.5 rounded">
+                                                            <input
+                                                                type="radio"
+                                                                name="youtube-mode"
+                                                                value={mode.id}
+                                                                checked={youtubeMode === mode.id}
+                                                                onChange={(e) => setYouTubeMode(e.target.value)}
+                                                                disabled={isDownloadingYouTube}
+                                                                className="w-3 h-3"
+                                                            />
+                                                            <span className="text-xs text-slate-300">{mode.label}</span>
+                                                        </label>
+                                                    ))}
+                                                </div>
+                                            )}
                                         </div>
-                                    </div>
+                                    )}
                                 </div>
 
                                 <div className="rounded-xl border border-slate-700/50 bg-slate-950/90 p-4">
@@ -2159,7 +2269,9 @@ const ReactorZone: React.FC = () => {
                                     disabled={isDownloadingYouTube}
                                     className="px-6 py-2 bg-cyan-900 border border-cyan-500 rounded text-cyan-50 hover:bg-cyan-800 transition-colors font-bold shadow-lg shadow-cyan-900/50 disabled:opacity-60"
                                 >
-                                    {isDownloadingYouTube ? 'IMPORTING...' : 'IMPORT AUDIO'}
+                                    {isDownloadingYouTube
+                                        ? (isYouTubeVideoMode ? 'DOWNLOADING...' : 'IMPORTING...')
+                                        : (isYouTubeVideoMode ? 'DOWNLOAD VIDEO' : 'IMPORT AUDIO')}
                                 </button>
                             </div>
                         </motion.div>
@@ -2398,40 +2510,6 @@ const ReactorZone: React.FC = () => {
                 )}
             </AnimatePresence>
 
-            {/* ScrewAI Modal */}
-            <AnimatePresence>
-                {showScrewAIModal && (
-                    <motion.div
-                        initial={{ opacity: 0 }}
-                        animate={{ opacity: 1 }}
-                        exit={{ opacity: 0 }}
-                        className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4"
-                        onClick={() => setShowScrewAIModal(false)}
-                    >
-                        <motion.div
-                            initial={{ scale: 0.95, y: 20 }}
-                            animate={{ scale: 1, y: 0 }}
-                            exit={{ scale: 0.95, y: 20 }}
-                            className="w-full max-w-md rounded-2xl border border-purple-900/50 bg-slate-900/95 backdrop-blur-xl shadow-2xl shadow-purple-900/20 overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            <div className="border-b border-slate-800 bg-slate-900/80 px-6 py-4">
-                                <p className="text-[10px] font-mono uppercase tracking-[0.3em] text-purple-500">ScrewAI</p>
-                                <h2 className="mt-1 font-mono text-xl text-purple-300">Chop & Screw Engine</h2>
-                                <p className="mt-2 text-xs text-slate-400">Apply DJ Screw-style slowdowns with pitch shift, echo, and limiting.</p>
-                            </div>
-                            <div className="px-6 py-5">
-                                <ScrewAIPanel
-                                    audioPath={loadedFilePath || pendingFilePath}
-                                    audioTitle={sourceTitle || (loadedFilePath || pendingFilePath)?.split(/[\\/]/).pop()}
-                                    isPro={isPro}
-                                />
-                            </div>
-                        </motion.div>
-                    </motion.div>
-                )}
-            </AnimatePresence>
-
             {/* Analysis Result Modal */}
             <AnimatePresence>
                 {showAnalysisModal && analysisResult && (
@@ -2575,19 +2653,19 @@ const ReactorZone: React.FC = () => {
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
                 <span className="text-[9px] font-mono text-slate-500 tracking-[0.15em] uppercase select-none">LIMINAL&trade;</span>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64_en-US.msi"
-                   download="NoDAW.Liminal_0.4.9_x64_en-US.msi"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/Liminal-StemSplit-Setup-v0.5.0-Windows-x64.exe"
+                   download="Liminal-StemSplit-Setup-v0.5.0-Windows-x64.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
-                    ⬇ Windows MSI
+                    ⬇ Full Installer
                 </a>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64-setup.exe"
-                   download="NoDAW.Liminal_0.4.9_x64-setup.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online.exe"
+                   download="Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
-                    ⬇ NSIS Setup
+                    ⬇ Online Installer
                 </a>
-                <span className="text-[9px] text-slate-600 font-mono">v0.4.9</span>
+                <span className="text-[9px] text-slate-600 font-mono">v0.5.0</span>
             </footer>
         </div>
     );

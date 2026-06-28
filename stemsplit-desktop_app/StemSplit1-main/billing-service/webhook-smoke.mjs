@@ -1,3 +1,4 @@
+import './load-env.mjs';
 import { createHmac } from 'node:crypto';
 
 const baseUrl = process.env.BILLING_TEST_BASE_URL || 'http://127.0.0.1:8787';

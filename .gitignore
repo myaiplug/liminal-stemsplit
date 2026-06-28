@@ -3,6 +3,7 @@ node_modules/
 .env.local
 data/leads.json
 data/licenses.json
+data/activation-email-queue.json
 *.log
 .DS_Store
 Thumbs.db
