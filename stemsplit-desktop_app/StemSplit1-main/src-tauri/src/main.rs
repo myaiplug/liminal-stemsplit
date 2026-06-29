@@ -4757,6 +4757,8 @@ fn save_to_sample_bank(
     stem_type: String,
     bpm: f64,
     key: String,
+    category: Option<String>,
+    name: Option<String>,
 ) -> Result<SampleBankEntry, String> {
     let bank_dir = get_sample_bank_dir();
     let stamp = std::time::SystemTime::now()
@@ -4769,11 +4771,18 @@ fn save_to_sample_bank(
 
     let export = run_audio_editor_export(&source_path, start_sec, end_sec, &output_path)?;
 
+    let resolved_category = category
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| category_for_stem(&stem_type));
+    let resolved_name = name
+        .filter(|value| !value.trim().is_empty())
+        .unwrap_or_else(|| format!("{} clip", stem_type));
+
     let entry = SampleBankEntry {
         id: id.clone(),
-        name: format!("{} clip", stem_type),
+        name: resolved_name,
         path: export.output_path,
-        category: category_for_stem(&stem_type),
+        category: resolved_category,
         bpm,
         key,
         duration: export.duration_seconds,
