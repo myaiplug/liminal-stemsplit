@@ -19,3 +19,10 @@ Thumbs.db
 skills/
 mcps/
 terminals/
+
+# License manager (private admin tool - never commit)
+tools/license-manager/
+
+# Temp files
+tmp/
+*.tmp

@@ -580,30 +580,34 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
       <a id="windowsDownloadExe" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_x64-setup.exe" data-download="NoDAW.Liminal_0.5.0_x64-setup.exe" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center group">
         <div class="w-12 h-12 mb-3 mx-auto flex items-center justify-center">
-          <img src="assets/windows.png" alt="Windows" class="w-10 h-10 object-contain" loading="lazy" />
+          <img src="assets/windows.svg" alt="Windows" class="w-10 h-10 object-contain" loading="lazy" />
         </div>
         <div class="font-semibold text-sm mb-1">Windows</div>
         <div class="text-[10px] text-white/40 leading-relaxed">.exe • 74 MB</div>
         <div class="text-[10px] text-white/25 mt-1.5 leading-relaxed">Win 10+ • 8 GB RAM<br>NVIDIA GPU 4 GB VRAM</div>
       </a>
-      <a id="macDownload" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_aarch64.dmg" data-download="NoDAW.Liminal_0.5.0_aarch64.dmg" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center group">
-        <div class="w-12 h-12 mb-3 mx-auto flex items-center justify-center">
-          <img src="assets/mac.png" alt="macOS" class="w-10 h-10 object-contain" loading="lazy" />
+      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center relative">
+        <div class="w-12 h-12 mb-3 mx-auto flex items-center justify-center opacity-40">
+          <img src="assets/mac.svg" alt="macOS" class="w-10 h-10 object-contain" loading="lazy" />
         </div>
-        <div class="font-semibold text-sm mb-1">macOS</div>
-        <div class="text-[10px] text-white/40 leading-relaxed">.dmg • 5.6 MB</div>
-        <div class="text-[10px] text-white/25 mt-1.5 leading-relaxed">macOS 12+ (Apple Silicon)<br>8 GB RAM</div>
-      </a>
-      <a id="linuxDownload" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_amd64.AppImage" data-download="NoDAW.Liminal_0.5.0_amd64.AppImage" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center group">
-        <div class="w-12 h-12 mb-3 mx-auto flex items-center justify-center">
-          <img src="assets/linux.png" alt="Linux" class="w-10 h-10 object-contain" loading="lazy" />
+        <div class="font-semibold text-sm mb-1 text-white/40">macOS</div>
+        <div class="text-[10px] text-white/30 leading-relaxed">Coming Soon</div>
+        <div class="absolute inset-0 rounded-xl bg-white/[0.01] flex items-center justify-center">
+          <span class="text-[11px] font-mono uppercase tracking-widest text-white/25">Coming Soon</span>
         </div>
-        <div class="font-semibold text-sm mb-1">Linux</div>
-        <div class="text-[10px] text-white/40 leading-relaxed">AppImage • 87 MB</div>
-        <div class="text-[10px] text-white/25 mt-1.5 leading-relaxed">Ubuntu 20.04+ / Debian<br>8 GB RAM • .deb also available</div>
-      </a>
+      </div>
+      <div class="p-5 rounded-xl bg-white/[0.02] border border-white/[0.06] text-center relative">
+        <div class="w-12 h-12 mb-3 mx-auto flex items-center justify-center opacity-40">
+          <img src="assets/linux.svg" alt="Linux" class="w-10 h-10 object-contain" loading="lazy" />
+        </div>
+        <div class="font-semibold text-sm mb-1 text-white/40">Linux</div>
+        <div class="text-[10px] text-white/30 leading-relaxed">Coming Soon</div>
+        <div class="absolute inset-0 rounded-xl bg-white/[0.01] flex items-center justify-center">
+          <span class="text-[11px] font-mono uppercase tracking-widest text-white/25">Coming Soon</span>
+        </div>
+      </div>
     </div>
-    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Liminal processes all audio locally on your machine — no cloud uploads. Windows may show a SmartScreen notice for new independent software. Choose "More info" → "Run anyway". Verify the SHA-256 checksum from the <a href="https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.5.0" class="text-liminal-400 hover:text-liminal-300 underline" target="_blank" rel="noopener">GitHub release</a>. macOS users: allow in System Settings → Privacy & Security.</p>
+    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Liminal processes all audio locally on your machine — no cloud uploads. Windows may show a SmartScreen notice for new independent software. Choose "More info" → "Run anyway". Verify the SHA-256 checksum from the <a href="https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.5.0" class="text-liminal-400 hover:text-liminal-300 underline" target="_blank" rel="noopener">GitHub release</a>. macOS and Linux versions coming soon.</p>
   </div>
 </section>
 
@@ -643,7 +647,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <p class="text-white/40 text-sm mb-2">One-time — <span class="text-liminal-400">lifetime license</span></p>
       <p class="text-white/30 text-xs mb-6 line-through">Regular $49 — Launch promo</p>
       <ul class="space-y-3 mb-8">
-        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> <strong>Full desktop app</strong> (Windows + Mac)</li>
+        <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> <strong>Full desktop app</strong> (Windows — Mac/Linux coming soon)</li>
         <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> 5 AI engines: Demucs, MDX, Roformer, Spleeter, DrumSep</li>
         <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> Up to 6 stems per track</li>
         <li class="flex items-start gap-2 text-sm text-white/70"><span class="text-liminal-400 mt-0.5">✓</span> 18 FX modules per stem</li>
