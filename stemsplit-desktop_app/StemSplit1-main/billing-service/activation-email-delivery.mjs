@@ -4,10 +4,10 @@ import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { checkoutConfigStatus } from './stripe-checkout.mjs';
 import { sendProActivationEmail } from './send-email.mjs';
+import { isTursoConfigured, getDb, initDb } from './db-turso.mjs';
 
 const rootDir = dirname(fileURLToPath(import.meta.url));
 const queuePath = resolve(process.env.ACTIVATION_EMAIL_QUEUE_PATH || resolve(rootDir, 'data/activation-email-queue.json'));
-const dbPath = resolve(process.env.BILLING_DB_PATH || resolve(rootDir, 'data/licenses.json'));
 
 const MIN_WARMUP_MS = Number(process.env.ACTIVATION_EMAIL_MIN_WARMUP_MS || 3000);
 const WARMUP_TIMEOUT_MS = Number(process.env.ACTIVATION_EMAIL_WARMUP_TIMEOUT_MS || 120_000);
@@ -21,21 +21,6 @@ let workerTimer = null;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-function ensureDb() {
-  if (!existsSync(dirname(dbPath))) mkdirSync(dirname(dbPath), { recursive: true });
-  if (!existsSync(dbPath)) {
-    writeFileSync(dbPath, JSON.stringify({ licenses: [], webhookEvents: [] }, null, 2));
-  }
-}
-
-function loadDb() {
-  ensureDb();
-  const parsed = JSON.parse(readFileSync(dbPath, 'utf8'));
-  if (!Array.isArray(parsed.licenses)) parsed.licenses = [];
-  if (!Array.isArray(parsed.webhookEvents)) parsed.webhookEvents = [];
-  return parsed;
 }
 
 function ensureQueueFile() {
@@ -57,12 +42,18 @@ function saveQueue(queue) {
   writeFileSync(queuePath, JSON.stringify(queue, null, 2));
 }
 
-export function assessBillingReadiness() {
+export async function assessBillingReadiness() {
   let dbReady = false;
-  try {
-    loadDb();
-    dbReady = true;
-  } catch {
+  if (isTursoConfigured()) {
+    try {
+      await initDb();
+      const db = getDb();
+      await db.execute('SELECT 1');
+      dbReady = true;
+    } catch {
+      dbReady = false;
+    }
+  } else {
     dbReady = false;
   }
 
@@ -85,10 +76,10 @@ export async function waitForBillingReady(options = {}) {
   const timeoutMs = options.timeoutMs ?? WARMUP_TIMEOUT_MS;
   const pollMs = options.pollMs ?? WARMUP_POLL_MS;
   const deadline = Date.now() + timeoutMs;
-  let last = assessBillingReadiness();
+  let last = await assessBillingReadiness();
 
   while (Date.now() < deadline) {
-    last = assessBillingReadiness();
+    last = await assessBillingReadiness();
     if (last.ready) return last;
     await sleep(pollMs);
   }
@@ -109,10 +100,35 @@ function findLatestPendingJobForEmail(email) {
     .find((job) => job.email === normalized && job.status !== 'sent') || null;
 }
 
-export function enqueueActivationEmail({ email, credential, source = 'stripe', eventKey = null }) {
+/** Only paid storefronts may enqueue Pro license emails. Free download / free signup must never. */
+export const PAID_LICENSE_SOURCES = new Set([
+  'stripe',
+  'gumroad',
+  'shopify',
+  'admin',
+  'managed_pro',
+]);
+
+export function isPaidLicenseSource(source) {
+  return PAID_LICENSE_SOURCES.has(String(source || '').trim().toLowerCase());
+}
+
+export function enqueueActivationEmail({
+  email,
+  credential,
+  source = 'stripe',
+  eventKey = null,
+  emailOpts = null,
+}) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
+  const normalizedSource = String(source || '').trim().toLowerCase();
   if (!normalizedEmail || !credential) {
     throw new Error('Email and credential are required to queue activation email');
+  }
+  if (!isPaidLicenseSource(normalizedSource)) {
+    throw new Error(
+      `Refused to queue Pro license email for non-paid source "${source}". Free users never receive license keys.`,
+    );
   }
 
   const queue = loadQueue();
@@ -125,8 +141,9 @@ export function enqueueActivationEmail({ email, credential, source = 'stripe', e
     id: randomUUID(),
     email: normalizedEmail,
     credential,
-    source,
+    source: normalizedSource,
     eventKey,
+    emailOpts: emailOpts || { source: normalizedSource },
     status: 'pending',
     attempts: 0,
     lastError: null,
@@ -187,7 +204,9 @@ export async function processActivationEmailJob(jobId) {
   let lastResult = { sent: false, reason: 'Unknown send failure' };
   for (let attempt = 1; attempt <= SEND_MAX_ATTEMPTS; attempt += 1) {
     updateJob(jobId, { attempts: attempt, status: 'warming' });
-    lastResult = await sendProActivationEmail(job.email, job.credential);
+    lastResult = await sendProActivationEmail(job.email, job.credential, job.emailOpts || {
+      source: job.source,
+    });
     if (lastResult.sent) {
       updateJob(jobId, {
         status: 'sent',
@@ -212,8 +231,25 @@ export async function deliverActivationEmailAfterPurchase({
   source = 'stripe',
   eventKey = null,
   waitInWebhookMs = WEBHOOK_WAIT_MS,
+  emailOpts = null,
 }) {
-  const job = enqueueActivationEmail({ email, credential, source, eventKey });
+  // Hard gate: free download / free account / unknown sources never get a Pro key email.
+  if (!isPaidLicenseSource(source)) {
+    console.warn(
+      `[activation-email] Blocked Pro license email for non-paid source="${source}" email="${email}"`,
+    );
+    return {
+      sent: false,
+      queued: false,
+      blocked: true,
+      reason: 'Pro license emails are only sent after a paid purchase (Stripe/Gumroad/Shopify)',
+    };
+  }
+  if (!credential) {
+    return { sent: false, queued: false, reason: 'Missing paid credential' };
+  }
+
+  const job = enqueueActivationEmail({ email, credential, source, eventKey, emailOpts });
   const deliveryPromise = processActivationEmailJob(job.id);
 
   if (!waitInWebhookMs || waitInWebhookMs <= 0) {

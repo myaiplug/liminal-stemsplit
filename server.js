@@ -21,7 +21,9 @@ fs.mkdirSync(DATA_DIR, { recursive: true });
 if (!fs.existsSync(LEADS_FILE)) fs.writeFileSync(LEADS_FILE, '[]');
 
 app.use(cors());
+// Stripe + Shopify need raw body for signature / HMAC verification
 app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+app.use('/webhooks/shopify', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(billingRouter);
@@ -120,7 +122,9 @@ app.listen(PORT, '0.0.0.0', () => {
 ║       LIMINAL STEMSPLIT v2.0             ║
 ║                                           ║
 ║  Site:    ${SITE_URL}
-║  Billing: ${SITE_URL}/webhooks/stripe
+║  Billing Stripe:  ${SITE_URL}/webhooks/stripe
+║  Billing Gumroad: ${SITE_URL}/webhooks/gumroad
+║  Billing Shopify: ${SITE_URL}/webhooks/shopify
 ║  API:     ${SITE_URL}/api
 ║                                           ║
 ║  Demo song: bz_onit (4 stems)            ║

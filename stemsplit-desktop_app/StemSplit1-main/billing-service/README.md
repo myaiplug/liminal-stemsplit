@@ -1,6 +1,6 @@
 # StemSplit Billing Webhook Service
 
-This service bridges Stripe and Gumroad purchases into hosted access credentials that the desktop app can validate.
+This service bridges **Stripe, Gumroad, and Shopify** purchases into hosted access credentials and **emails the license automatically** (Resend).
 
 ## Endpoints
 
@@ -11,11 +11,17 @@ This service bridges Stripe and Gumroad purchases into hosted access credentials
 - POST /webhooks/stripe
   - Handles Stripe `checkout.session.completed`
   - Creates or updates a hosted Pro credential for the checkout email.
+  - **Emails** access password via Resend.
 
 - POST /webhooks/gumroad?secret=...
-  - Handles Gumroad webhook posts.
-  - Creates or updates a hosted Pro credential for the purchase email.
-  - Can also preserve Gumroad `license_key` for direct validation.
+  - Handles Gumroad sale pings.
+  - Stores Gumroad `license_key` + hosted credential.
+  - **Emails the Gumroad license key** (preferred for Activate Pro).
+
+- POST /webhooks/shopify
+  - Handles Shopify `orders/paid` (HMAC with SHOPIFY_WEBHOOK_SECRET).
+  - Issues hosted Pro password and **emails** it.
+  - Optional line-item filter: `SHOPIFY_PRODUCT_NEEDLE=stemsplit|liminal|pro`.
 
 - POST /api/licenses/issue
   - Manual issue/upsert endpoint for support workflows.

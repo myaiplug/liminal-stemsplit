@@ -1,7 +1,8 @@
 import './load-env.mjs';
 import { createHmac, randomBytes, timingSafeEqual } from 'node:crypto';
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+// timingSafeEqual used for Shopify HMAC
+import { dirname } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import http from 'node:http';
 import { URL } from 'node:url';
 import { checkoutConfigStatus, createCheckoutSession } from './stripe-checkout.mjs';
@@ -14,68 +15,62 @@ import {
   processPendingActivationEmails,
   startActivationEmailWorker,
 } from './activation-email-delivery.mjs';
+import {
+  initDb,
+  wasWebhookProcessed,
+  recordWebhookProcessed,
+  findLicenseByEmail,
+  upsertLicense,
+  listLicenses,
+  isTursoConfigured,
+} from './db-turso.mjs';
 
 const port = Number(process.env.PORT || 8787);
-const dbPath = resolve(process.env.BILLING_DB_PATH || './billing-service/data/licenses.json');
+const billingRootDir = dirname(fileURLToPath(import.meta.url));
 const stripeWebhookSecret = process.env.STRIPE_WEBHOOK_SECRET || '';
 const gumroadWebhookSecret = process.env.GUMROAD_WEBHOOK_SECRET || '';
+const shopifyWebhookSecret = process.env.SHOPIFY_WEBHOOK_SECRET || process.env.SHOPIFY_API_SECRET || '';
 const billingAdminToken = process.env.BILLING_ADMIN_TOKEN || '';
-const maxTrackedWebhookEvents = Number(process.env.MAX_TRACKED_WEBHOOK_EVENTS || 20000);
 const stripeSignatureToleranceSec = Number(process.env.STRIPE_SIGNATURE_TOLERANCE_SEC || 300);
 
-function ensureDb() {
-  if (!existsSync(dirname(dbPath))) mkdirSync(dirname(dbPath), { recursive: true });
-  if (!existsSync(dbPath)) {
-    writeFileSync(dbPath, JSON.stringify({ licenses: [], webhookEvents: [] }, null, 2));
+function credentialForEmail(saved, gumroadLicenseKey = null) {
+  if (gumroadLicenseKey) {
+    return {
+      primary: gumroadLicenseKey,
+      secondary: saved.credential && saved.credential !== gumroadLicenseKey ? saved.credential : null,
+      source: 'gumroad',
+    };
+  }
+  return { primary: saved.credential, secondary: null, source: saved.source || 'stripe' };
+}
+
+function verifyShopifyHmac(rawBody, hmacHeader) {
+  if (!shopifyWebhookSecret) {
+    return { ok: false, error: 'SHOPIFY_WEBHOOK_SECRET not configured' };
+  }
+  if (!hmacHeader) return { ok: false, error: 'Missing X-Shopify-Hmac-Sha256' };
+  const digest = createHmac('sha256', shopifyWebhookSecret).update(rawBody).digest('base64');
+  try {
+    const a = Buffer.from(digest, 'utf8');
+    const b = Buffer.from(String(hmacHeader), 'utf8');
+    if (a.length !== b.length || !timingSafeEqual(a, b)) {
+      return { ok: false, error: 'Shopify HMAC mismatch' };
+    }
+    return { ok: true, error: null };
+  } catch {
+    return { ok: false, error: 'Shopify HMAC check failed' };
   }
 }
 
-function loadDb() {
-  ensureDb();
-  const parsed = JSON.parse(readFileSync(dbPath, 'utf8'));
-  if (!Array.isArray(parsed.licenses)) parsed.licenses = [];
-  if (!Array.isArray(parsed.webhookEvents)) parsed.webhookEvents = [];
-  return parsed;
-}
-
-function saveDb(db) {
-  ensureDb();
-  if (!Array.isArray(db.licenses)) db.licenses = [];
-  if (!Array.isArray(db.webhookEvents)) db.webhookEvents = [];
-  writeFileSync(dbPath, JSON.stringify(db, null, 2));
-}
-
-function trimWebhookEvents(db) {
-  if (!Array.isArray(db.webhookEvents)) db.webhookEvents = [];
-  if (db.webhookEvents.length <= maxTrackedWebhookEvents) return;
-
-  db.webhookEvents.sort((a, b) => {
-    const at = Date.parse(a.processedAt || 0);
-    const bt = Date.parse(b.processedAt || 0);
-    return at - bt;
+function isStemSplitShopifyProduct(order) {
+  const items = order?.line_items || [];
+  if (!items.length) return true;
+  const needle = (process.env.SHOPIFY_PRODUCT_NEEDLE || 'stemsplit|liminal|pro').toLowerCase();
+  const patterns = needle.split('|').map((p) => p.trim()).filter(Boolean);
+  return items.some((item) => {
+    const hay = `${item.title || ''} ${item.name || ''} ${item.sku || ''}`.toLowerCase();
+    return patterns.some((p) => hay.includes(p));
   });
-  db.webhookEvents = db.webhookEvents.slice(db.webhookEvents.length - maxTrackedWebhookEvents);
-}
-
-function wasWebhookProcessed(eventKey) {
-  const db = loadDb();
-  return db.webhookEvents.some((entry) => entry?.key === eventKey);
-}
-
-function recordWebhookProcessed(eventKey, source, metadata = {}) {
-  const db = loadDb();
-  if (db.webhookEvents.some((entry) => entry?.key === eventKey)) {
-    return;
-  }
-
-  db.webhookEvents.push({
-    key: eventKey,
-    source,
-    processedAt: new Date().toISOString(),
-    metadata,
-  });
-  trimWebhookEvents(db);
-  saveDb(db);
 }
 
 function sendJson(res, status, payload) {
@@ -172,7 +167,7 @@ function mergeEntitlements(existing = [], product) {
   return existing.includes(entitlement) ? [...existing] : [...existing, entitlement];
 }
 
-function upsertLicense({
+async function upsertLicenseLocal({
   email,
   source,
   plan = 'pro',
@@ -182,66 +177,28 @@ function upsertLicense({
   metadata = {},
   product = metadata?.product || 'stemsplit_pro',
 }) {
-  const db = loadDb();
-  const normalizedEmail = String(email || '').trim().toLowerCase();
-  if (!normalizedEmail) throw new Error('Email is required');
-
-  const now = new Date().toISOString();
-  const existingIndex = db.licenses.findIndex((entry) => entry.email === normalizedEmail);
-  const existing = existingIndex >= 0 ? db.licenses[existingIndex] : null;
-  let credentialValue = credential || null;
-  let credentialHash = existing?.credentialHash;
-  if (credentialValue) {
-    credentialHash = sha256(`${normalizedEmail}::${credentialValue}`);
-  } else if (!credentialHash) {
-    credentialValue = generateAccessPassword();
-    credentialHash = sha256(`${normalizedEmail}::${credentialValue}`);
-  }
-
-  const resolvedPlan = product === 'stemsplit_pro' || plan === 'pro'
-    ? 'pro'
-    : existing?.plan === 'pro'
-      ? 'pro'
-      : plan || existing?.plan || 'free';
-  const entitlements = mergeEntitlements(existing?.entitlements || [], product);
-
-  const record = {
-    email: normalizedEmail,
+  return upsertLicense({
+    email,
     source,
-    plan: resolvedPlan,
-    entitlements,
-    credentialHash,
-    purchaseDate: purchaseDate || existing?.purchaseDate || now,
-    createdAt: existing?.createdAt || now,
-    updatedAt: now,
-    gumroadLicenseKey: gumroadLicenseKey || existing?.gumroadLicenseKey || null,
-    metadata: { ...(existing?.metadata || {}), ...metadata, product },
-  };
-
-  if (existingIndex >= 0) {
-    db.licenses[existingIndex] = record;
-  } else {
-    db.licenses.push(record);
-  }
-  saveDb(db);
-
-  return {
-    email: normalizedEmail,
-    plan: resolvedPlan,
-    credential: credentialValue,
-    source,
-    entitlements,
-  };
+    plan,
+    credential,
+    purchaseDate,
+    gumroadLicenseKey,
+    metadata,
+    product,
+    sha256,
+    generateAccessPassword,
+    mergeEntitlements,
+  });
 }
 
-function lookupEntitlements(email) {
-  const db = loadDb();
+async function lookupEntitlements(email) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
   if (!normalizedEmail) {
     return { ok: false, error: 'Email is required', email: null, pro: false, entitlements: [] };
   }
 
-  const record = db.licenses.find((entry) => entry.email === normalizedEmail);
+  const record = await findLicenseByEmail(normalizedEmail);
   if (!record) {
     return { ok: true, email: normalizedEmail, pro: false, entitlements: [] };
   }
@@ -251,10 +208,9 @@ function lookupEntitlements(email) {
   return { ok: true, email: normalizedEmail, pro, entitlements };
 }
 
-function validateCredential(email, licenseKey) {
-  const db = loadDb();
+async function validateCredential(email, licenseKey) {
   const normalizedEmail = String(email || '').trim().toLowerCase();
-  const record = db.licenses.find((entry) => entry.email === normalizedEmail);
+  const record = await findLicenseByEmail(normalizedEmail);
   if (!record) {
     return { recognized: false, valid: false, error: 'No hosted license found for this email' };
   }
@@ -282,17 +238,8 @@ function validateCredential(email, licenseKey) {
   };
 }
 
-function listLicensesSafe() {
-  const db = loadDb();
-  return db.licenses.map((entry) => ({
-    email: entry.email,
-    source: entry.source,
-    plan: entry.plan,
-    purchaseDate: entry.purchaseDate,
-    createdAt: entry.createdAt,
-    updatedAt: entry.updatedAt,
-    hasGumroadLicenseKey: !!entry.gumroadLicenseKey,
-  }));
+async function listLicensesSafe() {
+  return listLicenses();
 }
 
 const server = http.createServer(async (req, res) => {
@@ -303,7 +250,7 @@ const server = http.createServer(async (req, res) => {
   }
 
   if (req.method === 'GET' && url.pathname === '/health') {
-    const readiness = assessBillingReadiness();
+    const readiness = await assessBillingReadiness();
     const queue = getActivationEmailQueueSummary();
     return sendJson(res, 200, {
       ok: readiness.ready,
@@ -343,14 +290,14 @@ const server = http.createServer(async (req, res) => {
   if (req.method === 'POST' && url.pathname === '/api/entitlements/lookup') {
     const rawBody = await readBody(req);
     const body = tryParseJson(rawBody) || {};
-    return sendJson(res, 200, lookupEntitlements(body.email));
+    return sendJson(res, 200, await lookupEntitlements(body.email));
   }
 
   if (req.method === 'POST' && url.pathname === '/api/licenses/validate') {
     const rawBody = await readBody(req);
     const body = tryParseJson(rawBody);
     if (!body) return sendJson(res, 400, { recognized: false, valid: false, error: 'Invalid JSON payload' });
-    return sendJson(res, 200, validateCredential(body.email, body.licenseKey));
+    return sendJson(res, 200, await validateCredential(body.email, body.licenseKey));
   }
 
   if (req.method === 'POST' && url.pathname === '/webhooks/stripe') {
@@ -369,7 +316,7 @@ const server = http.createServer(async (req, res) => {
     const stripeEventKey = event.id
       ? `stripe:${event.id}`
       : `stripe:raw:${sha256(rawBody.toString('utf8'))}`;
-    if (wasWebhookProcessed(stripeEventKey)) {
+    if (await wasWebhookProcessed(stripeEventKey)) {
       return sendJson(res, 200, { ok: true, duplicate: true });
     }
 
@@ -379,7 +326,7 @@ const server = http.createServer(async (req, res) => {
     const plan = session.metadata?.plan || (product === 'stemsplit_pro' ? 'pro' : 'vst');
     const credential = session.metadata?.access_password || '';
     try {
-      const saved = upsertLicense({
+      const saved = await upsertLicenseLocal({
         email,
         source: 'stripe',
         plan,
@@ -389,7 +336,7 @@ const server = http.createServer(async (req, res) => {
         metadata: { sessionId: session.id || null, product },
       });
 
-      recordWebhookProcessed(stripeEventKey, 'stripe', {
+      await recordWebhookProcessed(stripeEventKey, 'stripe', {
         eventId: event.id || null,
         sessionId: session.id || null,
         email: email || null,
@@ -432,43 +379,145 @@ const server = http.createServer(async (req, res) => {
       : Object.fromEntries(new URLSearchParams(rawBody.toString('utf8')));
     if (!body) return sendJson(res, 400, { ok: false, error: 'Invalid JSON payload' });
 
+    const refunded = body.refunded === 'true' || body.refunded === true || body.chargebacked === 'true';
+    if (refunded) {
+      return sendJson(res, 200, { ok: true, ignored: true, reason: 'refund_or_chargeback' });
+    }
+
     const email = body.email || body.purchase_email || body['purchase[email]'];
     const gumroadLicenseKey = body.license_key || body['purchase[license_key]'] || null;
-    const credential = body.access_password || '';
+    const credential = body.access_password || gumroadLicenseKey || null;
     const gumroadSaleId = body.sale_id || body['sale[id]'] || body.order_id || null;
     const gumroadEventKey = gumroadSaleId
       ? `gumroad:sale:${gumroadSaleId}`
       : `gumroad:raw:${sha256(rawBody.toString('utf8'))}`;
-    if (wasWebhookProcessed(gumroadEventKey)) {
+    if (await wasWebhookProcessed(gumroadEventKey)) {
       return sendJson(res, 200, { ok: true, duplicate: true });
     }
 
     try {
-      const saved = upsertLicense({
+      const saved = await upsertLicenseLocal({
         email,
         source: 'gumroad',
         plan: body.plan || 'pro',
+        product: 'stemsplit_pro',
         credential,
         purchaseDate: body.sale_timestamp || new Date().toISOString(),
         gumroadLicenseKey,
-        metadata: { saleId: body.sale_id || null },
+        metadata: {
+          saleId: gumroadSaleId,
+          productName: body.product_name || body['product[name]'] || null,
+        },
       });
 
-      recordWebhookProcessed(gumroadEventKey, 'gumroad', {
+      await recordWebhookProcessed(gumroadEventKey, 'gumroad', {
         saleId: gumroadSaleId,
         email: email || null,
       });
 
+      const keys = credentialForEmail(saved, gumroadLicenseKey);
+      if (!keys.primary) {
+        throw new Error('No activatable credential for Gumroad sale');
+      }
+
       const emailResult = await deliverActivationEmailAfterPurchase({
         email: saved.email,
-        credential: saved.credential,
+        credential: keys.primary,
         source: 'gumroad',
         eventKey: gumroadEventKey,
+        emailOpts: { source: 'gumroad', secondaryKey: keys.secondary, storeLabel: 'Gumroad' },
       });
 
       return sendJson(res, 200, {
         ok: true,
-        saved,
+        saved: { email: saved.email, plan: saved.plan, source: saved.source },
+        emailSent: emailResult.sent,
+        emailQueued: !!emailResult.queued,
+        emailError: emailResult.sent ? null : emailResult.reason,
+        emailedKeyType: gumroadLicenseKey ? 'gumroad_license_key' : 'hosted_password',
+      });
+    } catch (error) {
+      return sendJson(res, 400, { ok: false, error: String(error) });
+    }
+  }
+
+  if (req.method === 'POST' && url.pathname === '/webhooks/shopify') {
+    const rawBody = await readBody(req);
+    if (shopifyWebhookSecret) {
+      const check = verifyShopifyHmac(rawBody, req.headers['x-shopify-hmac-sha256']);
+      if (!check.ok) return sendJson(res, 401, { ok: false, error: check.error });
+    }
+
+    const order = tryParseJson(rawBody);
+    if (!order) return sendJson(res, 400, { ok: false, error: 'Invalid JSON payload' });
+
+    const topic = String(req.headers['x-shopify-topic'] || '');
+    const financial = String(order.financial_status || '').toLowerCase();
+    const paid =
+      topic.includes('paid') ||
+      financial === 'paid' ||
+      financial === 'partially_paid' ||
+      !!order.closed_at;
+    if (!paid && topic && !topic.includes('paid')) {
+      return sendJson(res, 200, {
+        ok: true,
+        ignored: true,
+        reason: `topic_or_status_not_paid:${topic || financial}`,
+      });
+    }
+    if (!isStemSplitShopifyProduct(order)) {
+      return sendJson(res, 200, { ok: true, ignored: true, reason: 'no_matching_line_item' });
+    }
+
+    const email =
+      order.email ||
+      order.contact_email ||
+      order.customer?.email ||
+      order.billing_address?.email ||
+      null;
+    const orderId = order.id || order.order_number || order.name || null;
+    const shopifyEventKey = orderId
+      ? `shopify:order:${orderId}`
+      : `shopify:raw:${sha256(rawBody.toString('utf8'))}`;
+    if (await wasWebhookProcessed(shopifyEventKey)) {
+      return sendJson(res, 200, { ok: true, duplicate: true });
+    }
+
+    try {
+      const saved = await upsertLicenseLocal({
+        email,
+        source: 'shopify',
+        plan: 'pro',
+        product: 'stemsplit_pro',
+        credential: null,
+        purchaseDate: order.processed_at || order.created_at || new Date().toISOString(),
+        metadata: {
+          orderId,
+          orderName: order.name || null,
+          shopDomain: req.headers['x-shopify-shop-domain'] || null,
+        },
+      });
+
+      await recordWebhookProcessed(shopifyEventKey, 'shopify', {
+        orderId,
+        email: email || null,
+      });
+
+      if (!saved.credential) {
+        throw new Error('Shopify order saved but no credential generated');
+      }
+
+      const emailResult = await deliverActivationEmailAfterPurchase({
+        email: saved.email,
+        credential: saved.credential,
+        source: 'shopify',
+        eventKey: shopifyEventKey,
+        emailOpts: { source: 'shopify', storeLabel: 'Shopify' },
+      });
+
+      return sendJson(res, 200, {
+        ok: true,
+        saved: { email: saved.email, plan: saved.plan, source: saved.source },
         emailSent: emailResult.sent,
         emailQueued: !!emailResult.queued,
         emailError: emailResult.sent ? null : emailResult.reason,
@@ -507,8 +556,36 @@ const server = http.createServer(async (req, res) => {
     const body = tryParseJson(rawBody);
     if (!body) return sendJson(res, 400, { ok: false, error: 'Invalid JSON payload' });
     try {
-      const saved = upsertLicense(body);
-      return sendJson(res, 200, { ok: true, saved });
+      // Admin may only issue paid Pro credentials — never free-tier "licenses"
+      const rawSource = String(body.source || 'admin').toLowerCase();
+      const source =
+        rawSource === 'free' || rawSource === 'download' || rawSource === 'signup'
+          ? 'admin'
+          : rawSource || 'admin';
+      const saved = await upsertLicenseLocal({
+        ...body,
+        source,
+        plan: 'pro',
+        product: body.product || 'stemsplit_pro',
+      });
+      const sendEmail = body.sendEmail !== false;
+      let emailResult = { sent: false, queued: false, reason: 'not_requested' };
+      if (sendEmail && saved.credential) {
+        emailResult = await deliverActivationEmailAfterPurchase({
+          email: saved.email,
+          credential: saved.credential,
+          source: 'admin',
+          eventKey: `admin:issue:${saved.email}:${Date.now()}`,
+          emailOpts: { source: 'admin', storeLabel: 'Support' },
+        });
+      }
+      return sendJson(res, 200, {
+        ok: true,
+        saved: { email: saved.email, plan: saved.plan, source: saved.source },
+        emailSent: !!emailResult.sent,
+        emailQueued: !!emailResult.queued,
+        emailError: emailResult.sent ? null : emailResult.reason || null,
+      });
     } catch (error) {
       return sendJson(res, 400, { ok: false, error: String(error) });
     }
@@ -518,18 +595,26 @@ const server = http.createServer(async (req, res) => {
     if (!isAdminAuthorized(req)) {
       return sendJson(res, 401, { ok: false, error: 'Unauthorized' });
     }
-    return sendJson(res, 200, { ok: true, licenses: listLicensesSafe() });
+    return sendJson(res, 200, { ok: true, licenses: await listLicensesSafe() });
   }
 
   return sendJson(res, 404, { ok: false, error: 'Not found' });
 });
 
-server.listen(port, () => {
-  ensureDb();
+server.listen(port, async () => {
+  if (isTursoConfigured()) {
+    try {
+      await initDb();
+    } catch (err) {
+      console.error(`WARNING: Turso DB init failed: ${err.message}`);
+    }
+  } else {
+    console.warn('WARNING: TURSO_DATABASE_URL not set. DB operations will fail until configured.');
+  }
   startActivationEmailWorker();
   const checkout = checkoutConfigStatus();
   console.log(`StemSplit billing service listening on http://localhost:${port}`);
-  console.log(`DB: ${dbPath}`);
+  console.log(`DB: ${isTursoConfigured() ? 'Turso (persistent cloud)' : 'NOT CONFIGURED — set TURSO_DATABASE_URL'}`);
   console.log(
     `Checkout: ${
       checkout.ready
