@@ -108,7 +108,7 @@ const PAID_LICENSE_SOURCES = new Set([
 
 export async function sendProActivationEmail(email, accessPassword, opts = {}) {
   const gmailPass = process.env.GMAIL_APP_PASSWORD || process.env.GMAIL_APP_PASS || process.env.GMAIL_PASSWORD;
-  const gmailUser = process.env.GMAIL_USER || process.env.GMAIL_EMAIL || 'myaiplug.com@gmail.com';
+  const gmailUser = process.env.GMAIL_USER || process.env.GMAIL_EMAIL || 'nodawlabs@gmail.com';
   const apiKey = process.env.RESEND_API_KEY;
 
   if (!gmailPass && !apiKey) {
