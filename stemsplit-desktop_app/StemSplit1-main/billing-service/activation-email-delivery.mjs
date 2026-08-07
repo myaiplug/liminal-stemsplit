@@ -176,19 +176,38 @@ function scrubCredentialFromJob(jobId) {
   saveQueue(queue);
 }
 
+function maskEmail(email) {
+  const value = String(email || '');
+  const at = value.indexOf('@');
+  if (at <= 1) return '***';
+  return `${value[0]}***${value.slice(at)}`;
+}
+
 export function getActivationEmailQueueSummary() {
   const queue = loadQueue();
-  const pending = queue.jobs.filter((job) => job.status === 'pending' || job.status === 'warming' || job.status === 'failed').length;
+  const open = queue.jobs.filter((job) => job.status === 'pending' || job.status === 'warming' || job.status === 'failed');
   const sent = queue.jobs.filter((job) => job.status === 'sent').length;
-  return { pending, sent, total: queue.jobs.length };
+  const recentOpen = open.slice(-5).map((job) => ({
+    email: maskEmail(job.email),
+    status: job.status,
+    source: job.source || null,
+    attempts: job.attempts || 0,
+    lastError: job.lastError || null,
+    updatedAt: job.updatedAt || null,
+  }));
+  return { pending: open.length, sent, total: queue.jobs.length, recentOpen };
 }
 
 export async function processActivationEmailJob(jobId) {
   const job = findJobById(jobId);
   if (!job) return { sent: false, reason: 'Activation email job not found' };
   if (job.status === 'sent') return { sent: true, id: job.resendId || null, duplicate: true };
+  if (!job.credential) {
+    updateJob(jobId, { status: 'failed', lastError: 'Missing credential on job — cannot send license email' });
+    return { sent: false, reason: 'Missing credential on job' };
+  }
 
-  updateJob(jobId, { status: 'warming', lastError: null });
+  updateJob(jobId, { status: 'warming' });
 
   const readiness = await waitForBillingReady();
   if (!readiness.ready) {
@@ -201,12 +220,15 @@ export async function processActivationEmailJob(jobId) {
     return { sent: false, reason, queued: true, readiness };
   }
 
+  const emailOpts = {
+    ...(job.emailOpts || {}),
+    source: job.source || job.emailOpts?.source || 'unknown',
+  };
+
   let lastResult = { sent: false, reason: 'Unknown send failure' };
   for (let attempt = 1; attempt <= SEND_MAX_ATTEMPTS; attempt += 1) {
     updateJob(jobId, { attempts: attempt, status: 'warming' });
-    lastResult = await sendProActivationEmail(job.email, job.credential, job.emailOpts || {
-      source: job.source,
-    });
+    lastResult = await sendProActivationEmail(job.email, job.credential, emailOpts);
     if (lastResult.sent) {
       updateJob(jobId, {
         status: 'sent',
@@ -281,7 +303,17 @@ export async function dispatchActivationEmailForEmail(email) {
 
 export async function processPendingActivationEmails(limit = 10) {
   const queue = loadQueue();
-  const pending = queue.jobs.filter((job) => job.status === 'pending' || job.status === 'failed').slice(0, limit);
+  const now = Date.now();
+  const pending = queue.jobs
+    .filter((job) => {
+      if (job.status === 'pending' || job.status === 'failed') return true;
+      if (job.status === 'warming') {
+        const age = now - Date.parse(job.updatedAt || job.createdAt || 0);
+        return !Number.isFinite(age) || age > 120_000;
+      }
+      return false;
+    })
+    .slice(0, limit);
   const results = [];
   for (const job of pending) {
     results.push({ jobId: job.id, email: job.email, result: await processActivationEmailJob(job.id) });
