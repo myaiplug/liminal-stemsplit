@@ -62,15 +62,39 @@ function verifyShopifyHmac(rawBody, hmacHeader) {
   }
 }
 
-function isStemSplitShopifyProduct(order) {
+function detectShopifyProduct(order) {
   const items = order?.line_items || [];
-  if (!items.length) return true;
-  const needle = (process.env.SHOPIFY_PRODUCT_NEEDLE || 'stemsplit|liminal|pro').toLowerCase();
+  if (!items.length) return { isMatch: true, product: 'stemsplit_pro', productName: 'Creator Pro' };
+
+  for (const item of items) {
+    const hay = `${item.title || ''} ${item.name || ''} ${item.sku || ''}`.toLowerCase();
+    if (hay.includes('coproducer')) {
+      return { isMatch: true, product: 'coproducer_pro', productName: item.title || 'CoProducer PRO' };
+    }
+    if (hay.includes('degloss') || hay.includes('reverb')) {
+      return { isMatch: true, product: 'vst_reverb_degloss', productName: item.title || 'ReVerb-DeGloss' };
+    }
+    if (hay.includes('stemsplit') || hay.includes('liminal') || hay.includes('pro') || hay.includes('stem')) {
+      return { isMatch: true, product: 'stemsplit_pro', productName: item.title || 'Liminal StemSplit Pro' };
+    }
+  }
+
+  const needle = (process.env.SHOPIFY_PRODUCT_NEEDLE || 'stemsplit|liminal|pro|coproducer|degloss').toLowerCase();
   const patterns = needle.split('|').map((p) => p.trim()).filter(Boolean);
-  return items.some((item) => {
+  const matchAny = items.some((item) => {
     const hay = `${item.title || ''} ${item.name || ''} ${item.sku || ''}`.toLowerCase();
     return patterns.some((p) => hay.includes(p));
   });
+
+  if (matchAny) {
+    return { isMatch: true, product: 'stemsplit_pro', productName: items[0]?.title || 'Creator Pro' };
+  }
+
+  return { isMatch: false, product: null, productName: null };
+}
+
+function isStemSplitShopifyProduct(order) {
+  return detectShopifyProduct(order).isMatch;
 }
 
 function sendJson(res, status, payload) {
@@ -465,7 +489,8 @@ const server = http.createServer(async (req, res) => {
         reason: `topic_or_status_not_paid:${topic || financial}`,
       });
     }
-    if (!isStemSplitShopifyProduct(order)) {
+    const detected = detectShopifyProduct(order);
+    if (!detected.isMatch) {
       return sendJson(res, 200, { ok: true, ignored: true, reason: 'no_matching_line_item' });
     }
 
@@ -488,19 +513,21 @@ const server = http.createServer(async (req, res) => {
         email,
         source: 'shopify',
         plan: 'pro',
-        product: 'stemsplit_pro',
+        product: detected.product,
         credential: null,
         purchaseDate: order.processed_at || order.created_at || new Date().toISOString(),
         metadata: {
           orderId,
           orderName: order.name || null,
           shopDomain: req.headers['x-shopify-shop-domain'] || null,
+          productName: detected.productName,
         },
       });
 
       await recordWebhookProcessed(shopifyEventKey, 'shopify', {
         orderId,
         email: email || null,
+        product: detected.product,
       });
 
       if (!saved.credential) {
@@ -512,12 +539,17 @@ const server = http.createServer(async (req, res) => {
         credential: saved.credential,
         source: 'shopify',
         eventKey: shopifyEventKey,
-        emailOpts: { source: 'shopify', storeLabel: 'Shopify' },
+        emailOpts: {
+          source: 'shopify',
+          storeLabel: 'Shopify',
+          product: detected.product,
+          productName: detected.productName,
+        },
       });
 
       return sendJson(res, 200, {
         ok: true,
-        saved: { email: saved.email, plan: saved.plan, source: saved.source },
+        saved: { email: saved.email, plan: saved.plan, source: saved.source, product: detected.product },
         emailSent: emailResult.sent,
         emailQueued: !!emailResult.queued,
         emailError: emailResult.sent ? null : emailResult.reason,

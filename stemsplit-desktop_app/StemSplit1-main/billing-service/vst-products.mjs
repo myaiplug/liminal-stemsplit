@@ -1,11 +1,9 @@
-export const ALL_VST_ENTITLEMENTS = ['screwai', 'fantune', 'timestretchx', 'repairit'];
+export const ALL_VST_ENTITLEMENTS = ['reverb_degloss', 'coproducer_pro'];
 
 export const VST_PRODUCT_CATALOG = {
-  vst_screwai: { id: 'screwai', name: 'ScrewAI', priceEnv: 'STRIPE_PRICE_VST_SCREWAI' },
-  vst_fantune: { id: 'fantune', name: 'FanTune', priceEnv: 'STRIPE_PRICE_VST_FANTUNE' },
-  vst_timestretchx: { id: 'timestretchx', name: 'Time Stretch X', priceEnv: 'STRIPE_PRICE_VST_TIMESTRETCHX' },
-  vst_repairit: { id: 'repairit', name: 'Repair-IT', priceEnv: 'STRIPE_PRICE_VST_REPAIRIT' },
+  vst_reverb_degloss: { id: 'reverb_degloss', name: 'ReVerb-DeGloss', priceEnv: 'STRIPE_PRICE_VST_REVERB_DEGLOSS' },
   stemsplit_pro: { id: 'pro', name: 'Creator Pro', priceEnv: 'STRIPE_PRICE_ID' },
+  coproducer_pro: { id: 'coproducer_pro', name: 'CoProducer PRO', priceEnv: 'STRIPE_PRICE_COPRODUCER_PRO' },
 };
 
 export function productToEntitlement(product) {
