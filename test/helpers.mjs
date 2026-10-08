@@ -15,6 +15,8 @@ process.env.ACTIVATION_EMAIL_MIN_WARMUP_MS = '0';
 process.env.ACTIVATION_EMAIL_SEND_ATTEMPTS = '1';
 if (!process.env.KEEP_GUMROAD_SECRET) delete process.env.GUMROAD_WEBHOOK_SECRET;
 
+export const DB_PATH = process.env.BILLING_DB_PATH;
+
 export const PRO_ID = 'Ojszufj7YAruxdm7ZnwJzQ==';
 export const DEMO_ID = 'rQTVqaHxdUm5urq5oJKQhw==';
 export const PRO_KEY = 'AAAA1111-BBBB2222-CCCC3333-DDDD4444';
@@ -48,6 +50,9 @@ export async function startApp(routerOptions) {
   const express = (await import('express')).default;
   const { createBillingRouter } = await import('../lib/billing-routes.js');
   const app = express();
+  // Mirror server.js: Stripe + Shopify need the raw body for signature checks.
+  app.use('/webhooks/stripe', express.raw({ type: 'application/json' }));
+  app.use('/webhooks/shopify', express.raw({ type: 'application/json' }));
   app.use(express.json());
   app.use(express.urlencoded({ extended: true }));
   app.use(createBillingRouter({ startWorker: false, ...routerOptions }));
@@ -58,11 +63,11 @@ export async function startApp(routerOptions) {
   return {
     base,
     close: () => new Promise((resolve) => server.close(resolve)),
-    post: async (path, body, { form = false } = {}) => {
+    post: async (path, body, { form = false, headers = {}, raw = null } = {}) => {
       const res = await fetch(base + path, {
         method: 'POST',
-        headers: { 'content-type': form ? 'application/x-www-form-urlencoded' : 'application/json' },
-        body: form ? new URLSearchParams(body).toString() : JSON.stringify(body),
+        headers: { 'content-type': form ? 'application/x-www-form-urlencoded' : 'application/json', ...headers },
+        body: raw ?? (form ? new URLSearchParams(body).toString() : JSON.stringify(body)),
       });
       return { status: res.status, body: await res.json() };
     },
