@@ -7,6 +7,13 @@ const dir = mkdtempSync(join(tmpdir(), 'liminal-billing-test-'));
 process.env.BILLING_DB_PATH = join(dir, 'licenses.json');
 process.env.ACTIVATION_EMAIL_QUEUE_PATH = join(dir, 'activation-email-queue.json');
 delete process.env.RESEND_API_KEY;
+delete process.env.GMAIL_APP_PASSWORD;
+// Email is unconfigured in tests; make the activation-email path give up fast.
+process.env.ACTIVATION_EMAIL_WEBHOOK_WAIT_MS = '1';
+process.env.ACTIVATION_EMAIL_WARMUP_TIMEOUT_MS = '1';
+process.env.ACTIVATION_EMAIL_MIN_WARMUP_MS = '0';
+process.env.ACTIVATION_EMAIL_SEND_ATTEMPTS = '1';
+if (!process.env.KEEP_GUMROAD_SECRET) delete process.env.GUMROAD_WEBHOOK_SECRET;
 
 export const PRO_ID = 'Ojszufj7YAruxdm7ZnwJzQ==';
 export const DEMO_ID = 'rQTVqaHxdUm5urq5oJKQhw==';
