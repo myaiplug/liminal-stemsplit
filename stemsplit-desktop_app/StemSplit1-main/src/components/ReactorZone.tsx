@@ -1460,7 +1460,7 @@ const ReactorZone: React.FC = () => {
                                 onClick={() => window.dispatchEvent(new CustomEvent('open-sales-modal'))}
                                 className="text-[9px] font-mono text-cyan-400/60 hover:text-cyan-300 border border-cyan-500/20 hover:border-cyan-500/40 px-2 py-0.5 rounded transition-all"
                             >
-                                Upgrade $49
+                                Upgrade $29
                             </button>
                         </motion.div>
                     )}

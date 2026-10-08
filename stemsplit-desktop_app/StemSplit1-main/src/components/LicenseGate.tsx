@@ -235,7 +235,7 @@ export default function LicenseGate({ children }: { children: React.ReactNode })
               Log In
             </button>
             <p className="text-center text-[9px] text-slate-600 mt-4">
-              Free = unlimited 2-stem Spleeter splits. Pro ($19.99 once) unlocks all engines, stems, and FX.
+              Free = unlimited 2-stem Spleeter splits. Pro ($29 once) unlocks all engines, stems, and FX.
             </p>
           </div>
         )}
