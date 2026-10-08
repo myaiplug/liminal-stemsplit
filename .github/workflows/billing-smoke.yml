@@ -70,6 +70,9 @@ jobs:
       run:
         working-directory: stemsplit-desktop_app/StemSplit1-main
     env:
+      # Legacy billing-service needs libsql; use a throwaway local file DB in CI
+      # (it crashed on the first webhook without TURSO_DATABASE_URL since Aug 2026).
+      TURSO_DATABASE_URL: file:/tmp/desktop-billing-ci.db
       STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET || 'whsec_ci_smoke' }}
       GUMROAD_WEBHOOK_SECRET: ${{ secrets.GUMROAD_WEBHOOK_SECRET || 'gumroad_ci_smoke' }}
       RESEND_API_KEY: ${{ secrets.RESEND_API_KEY || '' }}
