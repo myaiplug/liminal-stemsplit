@@ -1,12 +1,13 @@
 {
   "name": "liminal-stemsplit",
   "version": "2.0.0",
-  "description": "Liminal StemSplit — AI-powered stem separation. Local-first. One-time purchase $49.",
+  "description": "Liminal StemSplit \u2014 AI-powered stem separation. Local-first. One-time purchase $49.",
   "type": "module",
   "scripts": {
     "start": "node server.js",
     "dev": "node --watch server.js",
-    "test:billing": "node scripts/production-billing-smoke.mjs"
+    "test:billing": "node scripts/production-billing-smoke.mjs",
+    "test": "node --test test/"
   },
   "dependencies": {
     "cors": "^2.8.5",
