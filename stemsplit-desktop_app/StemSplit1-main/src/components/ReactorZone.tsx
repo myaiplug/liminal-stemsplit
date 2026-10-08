@@ -2653,19 +2653,19 @@ const ReactorZone: React.FC = () => {
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
                 <span className="text-[9px] font-mono text-slate-500 tracking-[0.15em] uppercase select-none">LIMINAL&trade;</span>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/Liminal-StemSplit-Setup-v0.5.0-Windows-x64.exe"
-                   download="Liminal-StemSplit-Setup-v0.5.0-Windows-x64.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/NoDAW.Liminal_0.5.1_x64-setup.exe"
+                   download="NoDAW.Liminal_0.5.1_x64-setup.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Full Installer
                 </a>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online.exe"
-                   download="Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online.exe"
+                   download="Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Online Installer
                 </a>
-                <span className="text-[9px] text-slate-600 font-mono">v0.5.0</span>
+                <span className="text-[9px] text-slate-600 font-mono">v0.5.1</span>
             </footer>
         </div>
     );

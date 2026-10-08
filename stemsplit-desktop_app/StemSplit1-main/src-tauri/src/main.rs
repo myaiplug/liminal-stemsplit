@@ -34,8 +34,11 @@ const SECURITY_WEBHOOK_RETRY_DELAY_MS: u64 = 900;
 // Gumroad License System
 // ============================================================================
 
-// Your Gumroad product permalink/ID
-const GUMROAD_PRODUCT_ID: &str = "rQTVqaHxdUm5urq5oJKQhw==";
+// Gumroad product IDs whose license keys unlock Pro.
+// "Ojszufj7YAruxdm7ZnwJzQ==" = nodaw.gumroad.com/l/LiminalPro ($29).
+// NEVER add the free demo (rQTVqaHxdUm5urq5oJKQhw==, nodaw.gumroad.com/l/Liminal):
+// demo keys must not grant Pro.
+const GUMROAD_PRO_PRODUCT_IDS: &[&str] = &["Ojszufj7YAruxdm7ZnwJzQ=="];
 const LICENSE_SOURCE_GUMROAD: &str = "gumroad";
 const LICENSE_SOURCE_MANAGED_PRO: &str = "managed_pro";
 const LICENSE_SOURCE_DEV_BYPASS: &str = "dev_bypass";
@@ -594,6 +597,12 @@ struct GumroadPurchase {
     created_at: Option<String>,
     refunded: Option<bool>,
     chargebacked: Option<bool>,
+    #[serde(default)]
+    disputed: Option<bool>,
+    #[serde(default)]
+    dispute_won: Option<bool>,
+    #[serde(default)]
+    product_id: Option<String>,
 }
 
 /// Get the license file path in app data directory
@@ -1223,37 +1232,59 @@ fn get_no_limitations() -> TrialLimitations {
     }
 }
 
-/// Verify license with Gumroad API
+/// Verify license with Gumroad API against the Liminal Pro product(s) only.
 fn verify_with_gumroad(license_key: &str) -> Result<(bool, Option<String>, Option<String>), String> {
+    let mut last_err: String = "Invalid license key".into();
+    for product_id in GUMROAD_PRO_PRODUCT_IDS {
+        match verify_with_gumroad_product(product_id, license_key) {
+            Ok(result) => return Ok(result),
+            Err(e) => last_err = e,
+        }
+    }
+    Err(last_err)
+}
+
+fn verify_with_gumroad_product(
+    product_id: &str,
+    license_key: &str,
+) -> Result<(bool, Option<String>, Option<String>), String> {
     let client = reqwest::blocking::Client::new();
-    
+
     let response = client
         .post("https://api.gumroad.com/v2/licenses/verify")
         .form(&[
-            ("product_id", GUMROAD_PRODUCT_ID),
-            ("license_key", license_key),
+            ("product_id", product_id),
+            ("license_key", license_key.trim()),
             ("increment_uses_count", "false"),  // Don't increment on every check
         ])
         .send()
         .map_err(|e| format!("Network error: {}", e))?;
-    
+
     let gumroad_response: GumroadVerifyResponse = response
         .json()
         .map_err(|e| format!("Invalid response: {}", e))?;
-    
+
     if !gumroad_response.success {
         return Err(gumroad_response.message.unwrap_or("License verification failed".into()));
     }
-    
+
     if let Some(purchase) = gumroad_response.purchase {
-        // Check if refunded or chargebacked
+        // Defence in depth: the key must belong to a Pro product.
+        if let Some(pid) = purchase.product_id.as_deref() {
+            if !GUMROAD_PRO_PRODUCT_IDS.contains(&pid) {
+                return Err("This license is not for Liminal Pro".into());
+            }
+        }
         if purchase.refunded.unwrap_or(false) {
             return Err("This license has been refunded".into());
         }
         if purchase.chargebacked.unwrap_or(false) {
             return Err("This license has been chargebacked".into());
         }
-        
+        if purchase.disputed.unwrap_or(false) && !purchase.dispute_won.unwrap_or(false) {
+            return Err("This purchase is disputed".into());
+        }
+
         Ok((true, purchase.email, purchase.created_at))
     } else {
         Err("Invalid license key".into())

@@ -1,6 +1,6 @@
 {
   "productName": "NoDAW Liminal",
-  "version": "0.5.0",
+  "version": "0.5.1",
   "identifier": "com.stemsplit.app",
   "build": {
     "beforeDevCommand": "npm run dev",
@@ -17,7 +17,7 @@
         "resizable": true,
         "decorations": false,
         "transparent": true,
-        "title": "NoDAW™ Liminal™ StemSplit v0.5.0",
+        "title": "NoDAW™ Liminal™ StemSplit v0.5.1",
         "width": 1280,
         "minHeight": 640,
         "minWidth": 840,

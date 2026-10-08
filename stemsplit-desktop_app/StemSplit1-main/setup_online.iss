@@ -3,7 +3,7 @@
 ; This creates a SMALL installer (~100MB) that downloads Python packages during install
 
 #define MyAppName "NoDAW Liminal"
-#define MyAppVersion "0.5.0"
+#define MyAppVersion "0.5.1"
 #define MyAppPublisher "NoDAW"
 #define MyAppBuildExeName "stem-split.exe"
 #define MyAppExeName "Liminal™.exe"
@@ -23,7 +23,7 @@ SetupIconFile=ss2.ico
 Compression=lzma2/ultra64
 SolidCompression=yes
 OutputDir=installers
-OutputBaseFilename=Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online
+OutputBaseFilename=Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online
 ArchitecturesAllowed=x64
 ArchitecturesInstallIn64BitMode=x64
 UninstallDisplayIcon={app}\ss2.ico
