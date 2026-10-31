@@ -237,7 +237,15 @@ export function analyzeStem(stem, sr, others = [], { onProgress } = {}) {
   const fd = frameDb(L, R); const p10 = pct(fd, 0.1), p95 = pct(fd, 0.95), p50 = pct(fd, 0.5);
   metrics.floorDb = p10; metrics.loudDb = p95; metrics.dynamicDb = p95 - p10;
   const bedFrac = fd.filter((v) => v < p95 - 25 && v > -80).length / fd.length; metrics.noiseBedFrac = bedFrac;
+  let flat = 0;
   if (p95 - p10 > 22 && p10 > -62 && p10 < p95 - 22 && bedFrac > 0.03) {
+    // a noise bed is broadband and stationary; the quiet bars of a bass line or pad are tonal (flatness ~0.0002 on a real Mini bass stem)
+    const pr = noiseProfile(L, R, sr), a = hzBin(100, sr), b = hzBin(14000, sr); let lg = 0, sm = 0;
+    for (let k = a; k < b; k++) { const v = pr.power[k] + 1e-20; lg += Math.log(v); sm += v; }
+    flat = Math.exp(lg / (b - a)) / (sm / (b - a));
+  }
+  metrics.noiseFlatness = flat;
+  if (flat > 0.02) {
     issues.push({ id: 'noise', type: 'noise', severity: SEVERITY[sev(p10, [-62, -52, -42])] === 'ok' ? 'minor' : SEVERITY[sev(p10, [-62, -52, -42])], value: p10,
       title: `Noise bed at ${p10.toFixed(0)} dBFS`,
       plain: `The quietest passages sit at about ${p10.toFixed(0)} dBFS instead of silence (${(bedFrac * 100).toFixed(0)}% of the track is more than 25 dB below the loud parts). That's separation residue or hiss you can hear between phrases and hits.`,
@@ -269,16 +277,16 @@ export function analyzeStem(stem, sr, others = [], { onProgress } = {}) {
   }
   void hv;
   const holeFrac = H.cand ? H.holes / H.cand : 0; metrics.holeFrac = holeFrac;
-  if (H.cand > 2000 && holeFrac > 0.012) {
-    issues.push({ id: 'holes', type: 'holes', severity: SEVERITY[sev(holeFrac, [0.012, 0.03, 0.07])], value: holeFrac,
+  if (H.cand > 800 && holeFrac > 0.022) {
+    issues.push({ id: 'holes', type: 'holes', severity: SEVERITY[sev(holeFrac, [0.022, 0.04, 0.08])], value: holeFrac,
       title: `Spectral holes (${(holeFrac * 100).toFixed(1)}%)`,
       plain: `${(holeFrac * 100).toFixed(1)}% of the mid-range spectrum has sudden dropouts inside otherwise loud passages. They make the stem sound thin, "swiss cheese" or gappy.`,
       where: holeTimes.slice(0, 50).map((t) => ({ start: t - 0.05, end: t + 0.05 })),
       fix: { type: 'fillholes', label: 'Fill & smooth holes', params: { strength: 0.8 } } });
   }
   const blipDensity = W.cand ? W.blips / W.cand : 0; metrics.blipDensity = blipDensity;
-  if (W.cand > 2000 && blipDensity > 0.012) {
-    issues.push({ id: 'watery', type: 'watery', severity: SEVERITY[sev(blipDensity, [0.012, 0.025, 0.05])], value: blipDensity,
+  if (W.cand > 800 && blipDensity > 0.006) {
+    issues.push({ id: 'watery', type: 'watery', severity: SEVERITY[sev(blipDensity, [0.006, 0.012, 0.025])], value: blipDensity,
       title: 'Watery / bubbly high end',
       plain: `The upper mids and highs are full of tiny isolated blips (${(blipDensity * 100).toFixed(1)}% of bins). That's the "underwater" or bubbling sound common in separations.`,
       where: [],
@@ -287,8 +295,8 @@ export function analyzeStem(stem, sr, others = [], { onProgress } = {}) {
   const side = P.eMid > 0 ? P.eSide / (P.eMid + P.eSide) : 0, anti = P.eTot ? P.eAnti / P.eTot : 0;
   const monoLoss = P.eTot > 0 ? 10 * Math.log10(((P.eMid / (P.eMid + P.eSide)) + 1e-9) / 0.5) : 0; // 0 dB when mid=side energy, i.e. uncorrelated
   metrics.antiphaseFrac = anti; metrics.sideFrac = side; metrics.monoLossDb = monoLoss;
-  if (P.eTot > 0 && anti > 0.06) {
-    issues.push({ id: 'phasey', type: 'phasey', severity: SEVERITY[sev(anti, [0.06, 0.15, 0.3])], value: anti,
+  if (P.eTot > 0 && anti > 0.10) {
+    issues.push({ id: 'phasey', type: 'phasey', severity: SEVERITY[sev(anti, [0.10, 0.2, 0.35])], value: anti,
       title: 'Phasey stereo',
       plain: `${(anti * 100).toFixed(0)}% of the stereo energy is out of phase between left and right. It sounds hollow, and parts disappear when the mix is played in mono (phones, club systems).`,
       where: [], fix: { type: 'phase', label: 'Align phase', params: { strength: 0.8 } } });
