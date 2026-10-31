@@ -90,3 +90,10 @@ export function mapTime(t, sr, frames, edits) {
   for (const s of segs) { if (f >= s.from && f < s.to) return (o + (f - s.from)) / sr; o += s.to - s.from; }
   return null;
 }
+
+/** inverse of mapTime: a time on the edited timeline -> time on the original timeline */
+export function unmapTime(tEdited, sr, frames, edits) {
+  const { segs } = applyPlan(frames, sr, edits); let f = tEdited * sr;
+  for (const s of segs) { const len = s.to - s.from; if (f < len) return (s.from + f) / sr; f -= len; }
+  return segs.length ? segs[segs.length - 1].to / sr : 0;
+}
