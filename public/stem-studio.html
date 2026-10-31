@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Stem Studio — split, clean &amp; mix stems in your browser | Liminal</title>
+<meta name="description" content="Split a song into stems, then give every stem its own effects, loudness metering, artifact clean-up and a deeper drum split. All in your browser — your audio never leaves your device.">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/roformer-web/rf.css">
+<link rel="stylesheet" href="/stem-studio/studio.css">
+</head>
+<body>
+<div class="wrap">
+  <nav class="top" aria-label="Site"><a href="/">Liminal</a><span class="sep">/</span><a href="/browser-split.html">Browser splitter</a><span class="sep">/</span><span aria-current="page">Stem Studio</span></nav>
+  <span class="tag">Beta · runs on your device</span>
+  <h1>Stem <span>Studio</span></h1>
+  <p class="sub">Split a track, then shape every stem on its own: effect chains with the Liminal desktop presets, LUFS and true-peak metering, artifact detection and repair, and a deeper drum split. Nothing is uploaded. Best on desktop Chrome or Edge.</p>
+  <main id="studio-root"><noscript>Stem Studio needs JavaScript.</noscript></main>
+  <footer>Liminal Stem Studio · audio stays on your device · <a href="/browser-split.html">Just need stems? Use the splitter</a></footer>
+</div>
+<script type="module">
+  import { mountStudio } from '/stem-studio/ui.js';
+  if ('serviceWorker' in navigator && !self.crossOriginIsolated) { /* COOP/COEP is set by the server; threaded wasm is optional */ }
+  mountStudio(document.getElementById('studio-root'));
+</script>
+</body>
+</html>
