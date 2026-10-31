@@ -347,7 +347,7 @@ export function applyFix(fix, stem, sr, others = [], { onProgress } = {}) {
     case 'phase': {
       const s = p.strength ?? 0.8;
       const [yl, yr] = processInSegments(L, R, sr, (S) => alignPhase(S, s), { onProgress });
-      return { L: yl, R: yr, summary: 'Flipped anti-phase bins so left and right sum cleanly.' };
+      return { L: yl, R: yr, summary: 'Rotated anti-phase bins so left and right sum cleanly.' };
     }
     case 'bleed': {
       const o = others.find((x) => x.name === p.against); if (!o) return { L, R, summary: 'Reference stem not found.' };
