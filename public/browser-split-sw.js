@@ -23,11 +23,11 @@
  * Edit CONFIG per site. Bump VERSION when the precache list changes.
  */
 const CONFIG = {
-  VERSION: 'c32df3b249',
+  VERSION: 'preview-20s-1',
   COI: false,
-  PAGES: ['browser-split.html'],
+  PAGES: ['browser-split.html', 'preview.html'],
   MODULE_DIR: 'roformer-web/',
-  SHELL: ['roformer-web/adapters.js','roformer-web/client.js','roformer-web/dsp.js','roformer-web/engine.js','roformer-web/model-store.js','roformer-web/models.js','roformer-web/progress.js','roformer-web/register-sw.js','roformer-web/rf.css','roformer-web/separator.js','roformer-web/sinks.js','roformer-web/tips.js','roformer-web/ui.js','roformer-web/wav.js','roformer-web/worker.js'],
+  SHELL: ['roformer-web/adapters.js','roformer-web/client.js','roformer-web/derive.js','roformer-web/dsp.js','roformer-web/engine.js','roformer-web/model-store.js','roformer-web/models.js','roformer-web/progress.js','roformer-web/register-sw.js','roformer-web/rf.css','roformer-web/separator.js','roformer-web/sinks.js','roformer-web/tips.js','roformer-web/ui.js','roformer-web/wav.js','roformer-web/window.js','roformer-web/worker.js'],
   ROOT_FALLBACK: false,
 };
 

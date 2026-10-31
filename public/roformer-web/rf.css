@@ -107,6 +107,12 @@
 .rf-check{display:inline-flex;gap:.45rem;align-items:center;cursor:pointer}
 .rf-check input{accent-color:var(--rf-accent)}
 .rf-opts__note{color:var(--rf-warn)}
+.rf-window{margin-top:.85rem;padding:.85rem 1rem;border:1px solid color-mix(in srgb,var(--rf-accent) 35%,transparent);border-radius:var(--rf-radius);background:color-mix(in srgb,var(--rf-accent) 6%,transparent);display:flex;flex-wrap:wrap;gap:.75rem;align-items:center;justify-content:space-between}
+.rf-window[hidden]{display:none}
+.rf-window__text{margin:0;font-size:.85rem;color:var(--rf-text);flex:1 1 16rem}
+.rf-desk{margin-top:1.5rem;padding-top:1rem;border-top:1px solid var(--rf-border)}
+.rf-desk__group{margin:1rem 0 .4rem;font:.72rem var(--rf-mono);letter-spacing:.06em;text-transform:uppercase;color:var(--rf-accent)}
+.rf-stem audio{width:min(100%, 280px);height:32px}
 @media(max-width:640px){.rf-live{padding:.75rem}.rf-orig__hint{flex-basis:100%}.rf-light__state{display:none}.rf-light[data-lit=true] .rf-light__state{display:inline}}
 @media (prefers-reduced-motion:reduce){
   .rf-step[data-state=active]::before,.rf-live[data-state=busy] .rf-bigbar__fill::after,.rf-light--pulse,.rf-tip--in .rf-tip__text,.rf-bar__fill--indet{animation:none!important}

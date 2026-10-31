@@ -331,6 +331,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
     </div>
     <div class="hidden md:flex items-center gap-8">
       <a href="/funnel/" class="text-sm text-white/50 hover:text-white transition-colors">Free Demo</a>
+      <a href="#split" class="text-sm text-white/50 hover:text-white transition-colors">20s Preview</a>
       <a href="/browser-split.html" class="text-sm text-white/50 hover:text-white transition-colors">Browser Split</a>
       <a href="#app-showcase" class="text-sm text-white/50 hover:text-white transition-colors">See App</a>
       <a href="#features" class="text-sm text-white/50 hover:text-white transition-colors">Features</a>
@@ -340,7 +341,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
     </div>
     <div class="flex items-center gap-2 sm:gap-3">
       <a href="#download" class="nav-cta-secondary hidden sm:inline-flex btn-secondary text-sm !py-2 !px-4">Download</a>
-      <a href="#demo" class="btn-primary text-sm !py-2 !px-4 sm:!px-5 whitespace-nowrap">Try Demo →</a>
+      <a href="#split" class="btn-primary text-sm !py-2 !px-4 sm:!px-5 whitespace-nowrap">Split 20s</a>
       <button type="button" class="nav-mobile-toggle md:hidden" id="navMobileToggle" aria-label="Open menu" aria-expanded="false" aria-controls="navMobileMenu">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
       </button>
@@ -355,6 +356,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
   <a href="#features" data-nav-close>Features</a>
   <a href="#faq" data-nav-close>FAQ</a>
   <a href="/funnel/" data-nav-close>Free Funnel Demo</a>
+  <a href="#split" data-nav-close>Split 20 seconds</a>
   <a href="/browser-split.html" data-nav-close>Browser Split (WebGPU)</a>
 </div>
 
@@ -397,6 +399,9 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <a href="#app-showcase" class="btn-primary text-base" onclick="trackClick('hero_showcase')">
         <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
         See Real App Screenshots
+      </a>
+      <a href="#split" class="btn-secondary text-base" onclick="trackClick('hero_split')">
+        Split 20 seconds
       </a>
       <a href="#demo" class="btn-secondary text-base" onclick="trackClick('hero_demo')">
         Hear the Demo ↓
@@ -503,6 +508,20 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
     </div>
     <p id="appShowcaseCaption" class="text-center text-sm text-white/45 max-w-2xl mx-auto mt-4">Drop any WAV, MP3, or FLAC. Pick your engine and stem count before you split.</p>
   </div>
+</section>
+
+
+<!-- 20 SECOND BROWSER PREVIEW -->
+<section class="stem-player" id="split">
+  <div class="max-w-4xl mx-auto text-center mb-8 reveal">
+    <span class="inline-block px-3 py-1 rounded-full bg-liminal-500/10 border border-liminal-500/20 text-liminal-400 text-xs font-mono mb-4">IN THIS BROWSER</span>
+    <h2 class="text-3xl sm:text-4xl font-bold tracking-tight mb-3">Split <span class="gradient-text">20 seconds</span> of your song</h2>
+    <p class="text-white/50 max-w-2xl mx-auto">Drop a file. A random 20 second stretch is chosen where sub, drums, and vocal-range energy sit together, then the same RoFormer as Browser Split runs on that stretch only. Nothing is uploaded. After the model finishes, cut a lead vocal, backup or adlibs, an 808, and a deeper drum kit: kick, snare/clap, hi-hats, crash, perk.</p>
+  </div>
+  <div class="max-w-4xl mx-auto" style="border:1px solid rgba(255,255,255,.08);border-radius:16px;overflow:hidden;background:#020617;">
+    <iframe title="20 second browser stem preview" src="/preview.html" style="width:100%;height:980px;border:0;background:#020617;display:block"></iframe>
+  </div>
+  <p class="text-center text-sm text-white/40 mt-4"><a href="/preview.html" class="text-liminal-400">Open the preview full size</a> · <a href="/browser-split.html" class="text-liminal-400">Split a full song</a></p>
 </section>
 
 <!-- INTERACTIVE STEM DEMO -->
@@ -630,7 +649,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <div class="text-3xl font-bold mb-1">$0</div>
       <p class="text-white/40 text-sm mb-6">Try in your browser</p>
       <ul class="space-y-3 mb-8">
-        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Interactive browser demo (bz_onit)</li>
+        <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> 20 second in-browser split, plus the bz_onit demo</li>
         <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Free desktop demo: 1 Spleeter 2-stem split</li>
         <li class="flex items-start gap-2 text-sm text-white/60"><span class="text-liminal-400 mt-0.5">✓</span> Solo, mute, and compare 4 stems</li>
         <li class="flex items-start gap-2 text-sm text-white/40"><span class="text-white/20 mt-0.5">✗</span> Full 4-6 stem export</li>
@@ -678,7 +697,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
   </div>
   <div class="reveal">
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">How does stem separation work? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Liminal uses state-of-the-art AI models (Demucs, MDX, Roformer) trained on millions of songs. Each model analyzes the frequency and time patterns to isolate individual instruments. The desktop app runs these models locally on your own GPU/CPU.</div></div>
-    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is my audio sent to the cloud? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">No. The desktop app processes everything on your computer. Your audio never touches the internet for separation. The website demo only streams pre-separated preview audio in your browser — it does not upload your files.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is my audio sent to the cloud? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">No. The desktop app processes everything on your computer. Your audio never touches the internet for separation. The finished demo on this page only plays pre-separated audio. The 20 second preview and Browser Split run the model in your browser. Your file is not uploaded.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What's the quality compared to lalal.ai / Splitter.ai? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Independent benchmarks show Liminal matches or exceeds cloud services on most tracks. With Demucs + MDX ensemble mode, you get studio-grade separation. And since it's local, there's no file size limit, no upload queue, and no monthly cap.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What are the system requirements? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Windows 10+ or macOS 12+. 8GB RAM recommended (16GB for large batches). NVIDIA GPU with 4GB+ VRAM for fastest processing. CPU-only mode works but is slower. The app auto-detects your hardware and chooses the best settings.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is it really one-time payment? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Yes. $29 one-time and you own Liminal Pro forever. All updates included. No subscriptions, no "Pro+" tiers, no recurring fees. We believe in building tools producers actually want to own.</div></div>

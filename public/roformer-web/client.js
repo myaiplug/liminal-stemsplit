@@ -102,7 +102,7 @@ export class StemSeparator {
       if (m.type === 'exported' || m.type === 'export-error') {
         const r = this.exportReq.get(m.reqId);
         this.exportReq.delete(m.reqId);
-        if (m.type === 'exported') r?.resolve(m.blob); else r?.reject(new Error(m.message));
+        if (m.type === 'exported') r?.resolve(m); else r?.reject(new Error(m.message));
         return;
       }
       this.listener?.(m);
@@ -144,10 +144,13 @@ export class StemSeparator {
   }
 
   /** @returns {Promise<Blob>} WAV of one stem ('pcm16' | 'pcm24' | 'float32'), encoded on demand from the worker's stem store. */
-  exportStem(stem, format) { return this.#request({ type: 'export', stem, format }); }
+  exportStem(stem, format) { return this.#request({ type: 'export', stem, format }).then((m) => m.blob); }
 
   /** @returns {Promise<Blob>} a .zip with every stem as WAV. */
-  exportZip(format, base) { return this.#request({ type: 'zip', format, base }); }
+  exportZip(format, base) { return this.#request({ type: 'zip', format, base }).then((m) => m.blob); }
+
+  /** Float32 planes of one finished stem, copied out of the worker store. */
+  readStem(stem) { return this.#request({ type: 'planes', stem }).then((m) => m.planes); }
 
   cancel() { this.worker?.postMessage({ type: 'cancel' }); }
 
