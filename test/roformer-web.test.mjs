@@ -4,7 +4,9 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { stftFrames, istftFrames, numFrames } from '../public/roformer-web/dsp.js';
 import { planChunks, separateTrack } from '../public/roformer-web/separator.js';
-import { encodeWav } from '../public/roformer-web/wav.js';
+import { encodeWav, wavHeader, wavPieces, wavBlob, zipBlob, parseWav } from '../public/roformer-web/wav.js';
+import { MemorySink } from '../public/roformer-web/sinks.js';
+import * as fflate from '../public/roformer-web/vendor/fflate/fflate.mjs';
 import { MODELS, MODEL_ORDER } from '../public/roformer-web/models.js';
 
 function noise(n, seed = 1) {
@@ -76,4 +78,44 @@ test('model config is complete and pinned', () => {
       assert.match(f.sha256, /^[0-9a-f]{64}$/);
     }
   }
+});
+
+function fakeSink(N) { const m = new MemorySink(N); return m; }
+
+test('streaming separation is identical for different sinks and chunk plans (stem = input)', async () => {
+  const N = 7777, C = 1500;
+  const l = noise(N, 5), r = noise(N, 6);
+  const adapter = { chunkSamples: C, prepare: (a, b) => ({ feeds: {}, ctx: { a, b } }), finish: (_o, ctx) => ({ a: [ctx.a, ctx.b], b: [ctx.a.map((x) => -x), ctx.b.map((x) => -x)] }) };
+  const sink = fakeSink(N);
+  const res = await separateTrack({ adapter, run: async () => ({}), left: l, right: r, overlap: 0.5, sink });
+  assert.equal(res.sink, sink);
+  assert.deepEqual(sink.names().sort(), ['a', 'b']);
+  for (let i = 0; i < N; i++) {
+    assert.ok(Math.abs(sink.data.a[0][i] - l[i]) < 1e-5 && Math.abs(sink.data.b[1][i] + r[i]) < 1e-5, `sample ${i}`);
+  }
+});
+
+test('wavPieces/wavBlob stream a valid WAV that parseWav reads back', async () => {
+  const N = 3000, l = noise(N, 7), r = noise(N, 8);
+  const sink = new MemorySink(N); sink.write('x', 0, 0, l); sink.write('x', 1, 0, r);
+  for (const [fmt, tol] of [['pcm16', 1e-3], ['pcm24', 1e-5], ['float32', 0]]) {
+    const blob = wavBlob(sink, 'x', N, 48000, fmt);
+    const buf = await blob.arrayBuffer();
+    assert.equal(buf.byteLength, 44 + N * 2 * { pcm16: 2, pcm24: 3, float32: 4 }[fmt]);
+    const w = parseWav(buf);
+    assert.equal(w.sampleRate, 48000); assert.equal(w.channels.length, 2); assert.equal(w.channels[0].length, N);
+    let e = 0; for (let i = 0; i < N; i++) e = Math.max(e, Math.abs(w.channels[0][i] - l[i]), Math.abs(w.channels[1][i] - r[i]));
+    assert.ok(e <= tol + 1e-9, `${fmt} err ${e}`);
+  }
+  assert.equal(wavHeader(10, 2, 44100, 'pcm16').length, 44);
+  assert.ok([...wavPieces(sink, 'x', N, 44100, 'pcm16')].length >= 2);
+});
+
+test('zipBlob produces a readable archive with one WAV per stem', async () => {
+  const N = 2000, sink = new MemorySink(N);
+  for (const n of ['vocals', 'drums']) { sink.write(n, 0, 0, noise(N, 9)); sink.write(n, 1, 0, noise(N, 10)); }
+  const blob = zipBlob(fflate, sink, ['vocals', 'drums'], N, 44100, 'pcm16', 'My: Song?');
+  const files = fflate.unzipSync(new Uint8Array(await blob.arrayBuffer()));
+  assert.deepEqual(Object.keys(files).sort(), ['My_ Song_ - drums.wav', 'My_ Song_ - vocals.wav']);
+  for (const f of Object.values(files)) assert.equal(f.length, 44 + N * 4);
 });

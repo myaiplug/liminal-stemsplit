@@ -105,9 +105,11 @@ export class RoformerEngine {
   /**
    * @param {Float32Array} left  44.1 kHz samples
    * @param {Float32Array} right
-   * @returns {Promise<{stems: Record<string,[Float32Array,Float32Array]>, backend: string, ms: number}>}
+   * @param {{ createSink?: (N:number)=>Promise<object>|object }} [opts] where finished stems are written
+   *        (default: in memory). A fresh sink is requested for every attempt (e.g. after a WebGPU->WASM restart).
+   * @returns {Promise<{sink: object, stems: Record<string,[Float32Array,Float32Array]>|null, backend: string, ms: number}>}
    */
-  async separate(left, right, { onProgress } = {}) {
+  async separate(left, right, { onProgress, createSink } = {}) {
     if (!this.session) throw new Error('No model loaded');
     this.cancelled = false;
     const model = this.model;
@@ -138,11 +140,14 @@ export class RoformerEngine {
           throw new BadGpuOutputError(`WebGPU produced silent/invalid output (max |x| = ${m})`);
         }
       };
-      return separateTrack({
-        adapter, run, left, right, overlap: model.overlap, sanityCheck,
+      const sink = createSink ? await createSink(left.length) : undefined;
+      try {
+        return await separateTrack({
+        adapter, run, left, right, sink, overlap: model.overlap, sanityCheck,
         isCancelled: () => this.cancelled,
         onChunk: (p) => onProgress?.({ phase: 'separate', backend: this.backend, ...p }),
-      });
+        });
+      } catch (e) { await sink?.dispose(); throw e; }
     };
 
     let result;
@@ -153,7 +158,7 @@ export class RoformerEngine {
       await this.#switchToWasm(e.message || e, onProgress);
       result = await attempt();
     }
-    return { stems: result.stems, backend: this.backend, ms: Date.now() - t0, chunks: result.chunks };
+    return { sink: result.sink, stems: result.stems, backend: this.backend, ms: Date.now() - t0, chunks: result.chunks };
   }
 }
 

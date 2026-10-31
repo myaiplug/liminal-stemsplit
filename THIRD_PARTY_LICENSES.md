@@ -4,13 +4,23 @@ In-browser (no server) stem separation with RoFormer-family ONNX models.
 The code in this directory is original glue; the following upstream works are
 used or were consulted. Model weights are **not** stored in this repository:
 they are downloaded at runtime from Hugging Face (see `models.js`, which pins
-exact commit revisions and SHA-256 hashes) and cached in the user's browser.
+exact commit revisions and SHA-256 hashes), verified, and stored in the user's browser (OPFS; Cache API fallback).
 
-## Runtime dependency
+## Vendored runtime / libraries (in `vendor/`, redistributed under their licenses)
 
-| Component | License | Notes |
-| --- | --- | --- |
-| onnxruntime-web 1.30.0 (Microsoft) | MIT | Loaded from the jsDelivr CDN at runtime (WebGPU + WASM execution providers). https://github.com/microsoft/onnxruntime |
+| Component | License | Files | Notes |
+| --- | --- | --- | --- |
+| onnxruntime-web 1.30.0 (Microsoft) | MIT | `vendor/ort/` (`ort.webgpu.min.mjs`, `ort-wasm-simd-threaded.asyncify.{mjs,wasm}`, `LICENSE`) | Unmodified npm build (WebGPU + WASM execution providers). Served from this origin so the tool needs no CDN; jsDelivr is used only as a fallback if the local files cannot be loaded. https://github.com/microsoft/onnxruntime |
+| fflate 0.8.x (Arjun Barrett) | MIT | `vendor/fflate/` | Used only to build the "Download all (ZIP)" archive (store-only). https://github.com/101arrowz/fflate |
+| coi-serviceworker v0.1.7 (Guido Zuidhof) | MIT | `vendor/coi-serviceworker/LICENSE` | The site's stem-splitter service worker (`*-sw.js`) adapts its header-injection / install / claim approach (it is a restricted rewrite: it only touches this tool's own files). Copyright (c) 2021 Guido Zuidhof. https://github.com/gzuidhof/coi-serviceworker |
+
+SHA-256 of the vendored ORT files (npm `onnxruntime-web@1.30.0`, unmodified):
+
+```
+3dffff71811bc13a3a3d9591c57ca5ee5735b8f5f3eaf789510b02bb040ae3a0  ort.webgpu.min.mjs
+3d1c85995364bb643302fc6fd877a0c3ba5ae72401815e0f24828a53d9191e28  ort-wasm-simd-threaded.asyncify.mjs
+39f9f0894d478800487ed9f7dbe92618498db320cf55c8e3d89adff8dce658da  ort-wasm-simd-threaded.asyncify.wasm   (26.78 MB)
+```
 
 ## Model weights (downloaded at runtime, not redistributed here)
 

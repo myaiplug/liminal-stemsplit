@@ -7,19 +7,27 @@
  *  - URLs are pinned to an exact Hugging Face commit so a re-upload upstream
  *    can't silently change what runs on the site. To follow `main` instead,
  *    change `revision` to 'main' and set `sha256` to null.
- *  - onnxruntime-web (MIT) is loaded from the jsDelivr CDN, pinned. To
- *    self-host, copy dist/ort.webgpu.min.mjs + the ort-wasm-simd-threaded.*
- *    files somewhere and change ORT_MODULE_URL / ORT_WASM_BASE.
+ *  - onnxruntime-web 1.30.0 (MIT) is VENDORED in ./vendor/ort (ort.webgpu.min.mjs
+ *    + the asyncify wasm runtime it loads) so the page needs no CDN. jsDelivr
+ *    (pinned) is only a fallback if the local files can't be loaded.
+ *  - Model files are stored in the browser's Origin Private File System (OPFS),
+ *    downloaded in resumable Range chunks. See model-store.js.
  *
  * Licenses are recorded in NOTICE.md (and THIRD_PARTY_* at the repo root).
  */
 
 export const ORT_VERSION = '1.30.0';
-export const ORT_MODULE_URL = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/ort.webgpu.min.mjs`;
-export const ORT_WASM_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
+export const ORT_LOCAL_BASE = new URL('./vendor/ort/', import.meta.url).href;
+export const ORT_MODULE_URL = `${ORT_LOCAL_BASE}ort.webgpu.min.mjs`;
+export const ORT_WASM_BASE = ORT_LOCAL_BASE;
+export const ORT_CDN_BASE = `https://cdn.jsdelivr.net/npm/onnxruntime-web@${ORT_VERSION}/dist/`;
+export const ORT_CDN_MODULE_URL = `${ORT_CDN_BASE}ort.webgpu.min.mjs`;
+/** Files the offline service worker should keep for the runtime. */
+export const ORT_RUNTIME_FILES = ['ort.webgpu.min.mjs', 'ort-wasm-simd-threaded.asyncify.mjs', 'ort-wasm-simd-threaded.asyncify.wasm'];
 
-/** Name of the Cache Storage bucket the model files live in. */
+/** Cache Storage bucket (fallback store when OPFS is unavailable) and OPFS directory name. */
 export const MODEL_CACHE_NAME = 'roformer-web-models-v1';
+export const MODEL_OPFS_DIR = 'roformer-web-models-v1';
 
 const hf = (repo, revision, path) => `https://huggingface.co/${repo}/resolve/${revision}/${path}`;
 

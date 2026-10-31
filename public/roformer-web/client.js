@@ -3,6 +3,7 @@
  * wrapper around the separation worker.
  */
 import { MODELS } from './models.js';
+import { parseWav } from './wav.js';
 
 export async function detectCapabilities() {
   const caps = {
@@ -35,28 +36,52 @@ export async function detectCapabilities() {
   return caps;
 }
 
-/** Decode any browser-supported audio file to 44.1 kHz stereo Float32 planes. */
+const TARGET_SR = 44100;
+
+async function resampleBuffer(audio, sr) {
+  const Off = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const off = new Off(Math.min(2, audio.numberOfChannels), Math.max(1, Math.ceil(audio.duration * sr)), sr);
+  const src = off.createBufferSource();
+  src.buffer = audio; src.connect(off.destination); src.start();
+  return off.startRendering();
+}
+
+/**
+ * Decode an audio file to 44.1 kHz stereo Float32 planes, entirely in the browser.
+ * WebAudio handles MP3/FLAC/OGG/M4A/WAV; if it refuses a WAV (odd bit depth, RF64, ...)
+ * a built-in parser takes over. Anything not 44.1 kHz is resampled; mono is duplicated,
+ * surround keeps front L/R.
+ */
 export async function decodeToStereo44k(file) {
   const bytes = await file.arrayBuffer();
   const Ctx = window.AudioContext || window.webkitAudioContext;
-  let audio;
-  try {
-    // Chrome/Firefox resample to the context rate while decoding.
-    const ctx = new Ctx({ sampleRate: 44100 });
-    audio = await ctx.decodeAudioData(bytes.slice(0));
-    ctx.close?.();
-  } catch (e) {
-    throw new Error(`Could not decode "${file.name}". Try a WAV, MP3, FLAC, M4A or OGG file. (${e?.message || e})`);
+  let audio = null;
+  let firstErr = null;
+  for (const opts of [{ sampleRate: TARGET_SR }, undefined]) {
+    try {
+      const ctx = opts ? new Ctx(opts) : new Ctx();
+      try { audio = await ctx.decodeAudioData(bytes.slice(0)); } finally { ctx.close?.(); }
+      break;
+    } catch (e) { firstErr = firstErr || e; }
   }
-  if (audio.sampleRate !== 44100) {
-    const off = new OfflineAudioContext(audio.numberOfChannels, Math.ceil(audio.duration * 44100), 44100);
-    const src = off.createBufferSource();
-    src.buffer = audio; src.connect(off.destination); src.start();
-    audio = await off.startRendering();
+  if (!audio) {
+    try {
+      const w = parseWav(bytes);
+      const buf = new AudioBuffer({ length: w.frames, numberOfChannels: Math.min(2, w.channels.length), sampleRate: w.sampleRate });
+      for (let c = 0; c < buf.numberOfChannels; c++) buf.copyToChannel(w.channels[c], c);
+      audio = buf;
+    } catch {
+      throw new Error(`Could not decode "${file.name}". Try a WAV, MP3, FLAC, M4A or OGG file. (${firstErr?.message || firstErr || 'unsupported format'})`);
+    }
   }
-  const left = audio.getChannelData(0).slice();
-  const right = (audio.numberOfChannels > 1 ? audio.getChannelData(1) : audio.getChannelData(0)).slice();
-  return { left, right, duration: audio.duration };
+  const sourceRate = audio.sampleRate;
+  if (sourceRate !== TARGET_SR) audio = await resampleBuffer(audio, TARGET_SR);
+  const l0 = audio.getChannelData(0);
+  const left = l0.slice();
+  const right = (audio.numberOfChannels > 1 ? audio.getChannelData(1) : l0).slice();
+  for (const ch of [left, right]) for (let i = 0; i < ch.length; i++) if (!(ch[i] === ch[i])) ch[i] = 0; // NaN guard
+  if (left.length < 2048) throw new Error('This audio is too short to separate.');
+  return { left, right, duration: left.length / TARGET_SR, sourceRate };
 }
 
 export class StemSeparator {
@@ -74,9 +99,10 @@ export class StemSeparator {
     this.worker = new Worker(this.workerUrl, { type: 'module' });
     this.worker.onmessage = (ev) => {
       const m = ev.data;
-      if (m.type === 'exported') {
-        this.exportReq.get(m.reqId)?.resolve(m.buffer);
+      if (m.type === 'exported' || m.type === 'export-error') {
+        const r = this.exportReq.get(m.reqId);
         this.exportReq.delete(m.reqId);
+        if (m.type === 'exported') r?.resolve(m.blob); else r?.reject(new Error(m.message));
         return;
       }
       this.listener?.(m);
@@ -108,14 +134,20 @@ export class StemSeparator {
     return this.#call({ type: 'separate', left, right }, 'done', onProgress, [left.buffer, right.buffer]);
   }
 
-  exportStem(stem, format) {
+  #request(msg) {
     this.#ensure();
     const reqId = this.nextReq++;
-    return new Promise((resolve) => {
-      this.exportReq.set(reqId, { resolve });
-      this.worker.postMessage({ type: 'export', stem, format, reqId });
+    return new Promise((resolve, reject) => {
+      this.exportReq.set(reqId, { resolve, reject });
+      this.worker.postMessage({ ...msg, reqId });
     });
   }
+
+  /** @returns {Promise<Blob>} WAV of one stem ('pcm16' | 'pcm24' | 'float32'), encoded on demand from the worker's stem store. */
+  exportStem(stem, format) { return this.#request({ type: 'export', stem, format }); }
+
+  /** @returns {Promise<Blob>} a .zip with every stem as WAV. */
+  exportZip(format, base) { return this.#request({ type: 'zip', format, base }); }
 
   cancel() { this.worker?.postMessage({ type: 'cancel' }); }
 

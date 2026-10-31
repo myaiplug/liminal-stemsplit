@@ -51,5 +51,9 @@
 .rf-stem{display:grid;grid-template-columns:7rem 1fr auto;gap:.75rem;align-items:center;border:1px solid var(--rf-border);background:var(--rf-panel);border-radius:10px;padding:.6rem .85rem}
 .rf-stem__name{font:700 .8rem var(--rf-mono);text-transform:uppercase;letter-spacing:.06em;color:var(--rf-accent)}
 .rf-stem__audio{width:100%;height:36px}
+.rf-root [hidden]{display:none!important}
+.rf-stem__play{min-width:0}
+.rf-storage{display:flex;flex-wrap:wrap;gap:.25rem .5rem;align-items:center;margin-top:.9rem;font:.72rem var(--rf-mono);color:var(--rf-muted)}
+.rf-storage .rf-btn--link{padding:.2rem .25rem;font-size:.72rem}
 .rf-note{color:var(--rf-muted);font-size:.78rem;margin-top:.75rem}
 @media(max-width:640px){.rf-stem{grid-template-columns:1fr}.rf-stem__audio{grid-column:auto}}

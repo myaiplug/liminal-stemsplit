@@ -9,6 +9,8 @@
  * with onnxruntime and shipped unchanged in a Web Worker.
  */
 
+import { MemorySink } from './sinks.js';
+
 export class CancelledError extends Error {
   constructor() { super('Separation cancelled'); this.name = 'CancelledError'; }
 }
@@ -31,17 +33,26 @@ function rms(a, n) {
   return Math.sqrt(e / Math.max(1, n));
 }
 
+/**
+ * Streaming overlap-add. Only a two-chunk window of accumulators lives in RAM:
+ * once chunk i is done, everything before chunk i+1's start can no longer
+ * change, so it is normalised and flushed to `sink` and the window slides.
+ * (Memory is O(chunk), not O(track x stems).)
+ *
+ * @param {{write: Function}} [sink] defaults to an in-memory sink
+ */
 export async function separateTrack({
-  adapter, run, left, right, overlap = 0.25, onChunk, isCancelled, sanityCheck,
+  adapter, run, left, right, overlap = 0.25, onChunk, isCancelled, sanityCheck, sink,
 }) {
   const N = left.length;
   const C = adapter.chunkSamples;
   const ov = Math.min(Math.floor(C * overlap), C - 1);
   const starts = planChunks(N, C, ov);
   const total = starts.length;
+  sink = sink || new MemorySink(N);
 
-  const acc = {}; // name -> [Float32Array, Float32Array]
-  const wsum = new Float32Array(N);
+  const win = {}; // name -> [Float32Array(C), Float32Array(C)]  (window origin = start of current chunk)
+  const wwin = new Float32Array(C);
   const bufL = new Float32Array(C);
   const bufR = new Float32Array(C);
   let sanityDone = false;
@@ -75,15 +86,32 @@ export async function separateTrack({
       return v;
     };
     for (const [name, [sl, sr]] of Object.entries(stems)) {
-      if (!acc[name]) acc[name] = [new Float32Array(N), new Float32Array(N)];
-      const [al, ar] = acc[name];
+      if (!win[name]) win[name] = [new Float32Array(C), new Float32Array(C)];
+      const [al, ar] = win[name];
       for (let j = 0; j < len; j++) {
         const wj = w(j);
-        al[start + j] += sl[j] * wj;
-        ar[start + j] += sr[j] * wj;
+        al[j] += sl[j] * wj;
+        ar[j] += sr[j] * wj;
       }
     }
-    for (let j = 0; j < len; j++) wsum[start + j] += w(j);
+    for (let j = 0; j < len; j++) wwin[j] += w(j);
+
+    // Flush the finished region [start, nextStart) and slide the window.
+    const nextStart = i < total - 1 ? starts[i + 1] : N;
+    const fin = Math.min(nextStart - start, len);
+    for (const [name, [al, ar]] of Object.entries(win)) {
+      const outL = new Float32Array(fin);
+      const outR = new Float32Array(fin);
+      for (let j = 0; j < fin; j++) {
+        const inv = wwin[j] > 0 ? 1 / wwin[j] : 0;
+        outL[j] = al[j] * inv; outR[j] = ar[j] * inv;
+      }
+      await sink.write(name, 0, start, outL);
+      await sink.write(name, 1, start, outR);
+      al.copyWithin(0, fin); ar.copyWithin(0, fin);
+      al.fill(0, C - fin); ar.fill(0, C - fin);
+    }
+    wwin.copyWithin(0, fin); wwin.fill(0, C - fin);
 
     const done = i + 1;
     const elapsed = Date.now() - t0;
@@ -92,11 +120,5 @@ export async function separateTrack({
     await new Promise((r) => setTimeout(r, 0));
   }
 
-  for (const [al, ar] of Object.values(acc)) {
-    for (let j = 0; j < N; j++) {
-      const inv = wsum[j] > 0 ? 1 / wsum[j] : 0;
-      al[j] *= inv; ar[j] *= inv;
-    }
-  }
-  return { stems: acc, chunks: total };
+  return { sink, stems: sink.data || null, chunks: total };
 }
