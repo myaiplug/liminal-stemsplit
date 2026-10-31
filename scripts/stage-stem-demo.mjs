@@ -17,6 +17,11 @@ for (const rel of FILES) {
   fs.mkdirSync(path.dirname(dst), { recursive: true });
   fs.cpSync(src, dst, { recursive: true });
 }
+// On this preview host '/' shows the stem page: let the offline cache answer '/' too.
+const swPath = path.join(out, 'browser-split-sw.js');
+const swSrc = fs.readFileSync(swPath, 'utf8');
+if (!swSrc.includes('ROOT_FALLBACK: false')) { console.error('service worker has no ROOT_FALLBACK flag - run the module sync'); process.exit(1); }
+fs.writeFileSync(swPath, swSrc.replace('ROOT_FALLBACK: false', 'ROOT_FALLBACK: true'));
 fs.copyFileSync(path.join(root, 'vercel-stem-demo', 'vercel.json'), path.join(out, 'vercel.json'));
 let bytes = 0, n = 0;
 (function walk(d) { for (const e of fs.readdirSync(d, { withFileTypes: true })) { const p = path.join(d, e.name); if (e.isDirectory()) walk(p); else { bytes += fs.statSync(p).size; n++; } } })(out);

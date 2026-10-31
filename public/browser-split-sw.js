@@ -28,6 +28,7 @@ const CONFIG = {
   PAGES: ['browser-split.html'],
   MODULE_DIR: 'roformer-web/',
   SHELL: ['roformer-web/adapters.js','roformer-web/client.js','roformer-web/dsp.js','roformer-web/engine.js','roformer-web/model-store.js','roformer-web/models.js','roformer-web/progress.js','roformer-web/register-sw.js','roformer-web/rf.css','roformer-web/separator.js','roformer-web/sinks.js','roformer-web/tips.js','roformer-web/ui.js','roformer-web/wav.js','roformer-web/worker.js'],
+  ROOT_FALLBACK: false,
 };
 
 const CACHE = `rf-app-${CONFIG.VERSION}`;
@@ -117,6 +118,16 @@ self.addEventListener('fetch', (event) => {
   const r = event.request;
   if (r.cache === 'only-if-cached' && r.mode !== 'same-origin') return;
   if (r.method !== 'GET' && r.method !== 'HEAD') return;
+  if (CONFIG.ROOT_FALLBACK && r.mode === 'navigate' && new URL(r.url).origin === self.location.origin && new URL(r.url).pathname === BASE.pathname) {
+    // Online: the network answers untouched. Offline: fall back to the cached stem page.
+    event.respondWith(fetch(r).catch(async () => {
+      const cache = await caches.open(CACHE);
+      const hit = await cache.match(new Request(new URL(CONFIG.PAGES[0], BASE).href));
+      if (hit) return withIsolation(hit);
+      throw new Error('offline');
+    }));
+    return;
+  }
   if (!isOurs(new URL(r.url))) return; // not ours: do not intercept
   event.respondWith(handle(event));
 });
