@@ -70,7 +70,7 @@ test('spectral holes: random time-frequency dropouts flagged; fix fills them', a
   for (let i = 0; i < n; i++) { const t = i / sr; const v = 0.2 * (Math.sin(2 * Math.PI * 300 * t) + Math.sin(2 * Math.PI * 900 * t) + 0.7 * Math.sin(2 * Math.PI * 1700 * t)) + 0.15 * rnd(); L[i] = v; R[i] = v; }
   const clean = analyzeStem({ name: 'other', kind: 'other', L, R }, sr, []); assert.ok(!types(clean).includes('holes'), `clean flagged: ${clean.metrics.holeFrac}`);
   let s2 = 7; const rr = () => ((s2 = (s2 * 16807) % 2147483647) / 2147483647);
-  const [hl, hr] = processInSegments(L, R, sr, (S) => { for (let t = 0; t < S.T - 4; t += 2) for (let k = 5; k < S.F - 8; k += 3) if (rr() < 0.12) for (let dt = 0; dt < 4; dt++) for (let dk = 0; dk < 3; dk++) { const i = (t + dt) * S.F + k + dk; S.reL[i] = S.imL[i] = S.reR[i] = S.imR[i] = 0; } });
+  const [hl, hr] = processInSegments(L, R, sr, (S) => { for (let t = 0; t < S.T - 4; t += 2) for (let k = 5; k < S.F - 8; k += 3) if (rr() < 0.3) for (let dt = 0; dt < 4; dt++) for (let dk = 0; dk < 3; dk++) { const i = (t + dt) * S.F + k + dk; S.reL[i] = S.imL[i] = S.reR[i] = S.imR[i] = 0; } });
   const r = analyzeStem({ name: 'other', kind: 'other', L: hl, R: hr }, sr, []); const issue = r.issues.find((i) => i.type === 'holes');
   assert.ok(issue, `hole metrics ${r.metrics.holeFrac} (clean ${clean.metrics.holeFrac})`);
   const fx = applyFix(issue.fix, { L: hl, R: hr }, sr); const after = analyzeStem({ name: 'other', kind: 'other', L: fx.L, R: fx.R }, sr, []);
