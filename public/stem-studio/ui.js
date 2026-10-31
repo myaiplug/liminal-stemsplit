@@ -344,7 +344,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
       exResult.textContent = ''; ui.urls?.forEach(URL.revokeObjectURL); ui.urls = [];
       const links = r.files.map((f) => { const u = URL.createObjectURL(new Blob([f.data], { type: f.mime })); ui.urls.push(u); return el('a', { class: 'btn pri', href: u, download: f.name, text: `Download ${f.name} (${(f.data.byteLength / 1048576).toFixed(1)} MB)` }); });
       const rows = r.report.map((x) => el('tr', null, el('td', { text: x.file }), el('td', { text: `${(x.frames / x.sampleRate).toFixed(2)} s` }), el('td', { text: x.lufs == null ? '—' : `${fmtDb(x.lufs)} LUFS` }), el('td', { text: x.tp == null ? '—' : `${fmtDb(x.tp)} dBTP` }), el('td', { text: x.note || '' })));
-      exResult.append(el('div', { class: 'bar', style: 'margin-top:1rem' }, ...links), el('table', { class: 'rep' }, el('thead', null, el('tr', null, ...['File', 'Length', 'Loudness', 'True peak', 'Note'].map((h) => el('th', { text: h })))), el('tbody', null, ...rows)), upsellCopy());
+      upsell.hidden = true; exResult.append(el('div', { class: 'bar', style: 'margin-top:1rem' }, ...links), el('table', { class: 'rep' }, el('thead', null, el('tr', null, ...['File', 'Length', 'Loudness', 'True peak', 'Note'].map((h) => el('th', { text: h })))), el('tbody', null, ...rows)), upsellCopy());
       links[0].focus(); announce(`Export ready: ${r.files.length} file${r.files.length > 1 ? 's' : ''}.`);
       if (r.files.length === 1) links[0].click();
     });
@@ -378,7 +378,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
 
   const studio = el('section', { class: 'card', hidden: true, 'aria-labelledby': 'h-st' }, el('h2', { id: 'h-st' }, el('span', { class: 'n', text: '2' }), 'Edit, clean & mix'), sessionBar, transport, editBar,
     el('div', { class: 'studio', style: 'margin-top:.9rem' }, lanesEl, insp));
-  root.append(live, sources, studio, exportCard, upsellCopy());
+  root.append(live, sources, studio, exportCard, upsell);
 
   const api = { engine: eng, addStems, ui, el, withBusy, renderInspector, KIND_COLOR, announce, importFiles };
   try { await mountSplitSource(splitHost, addStems, { appTitle: appName }); }
