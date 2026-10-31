@@ -8,14 +8,19 @@
  * No audio resampling happens here: the caller passes planar Float32 channels at the sample rate to write.
  */
 
+/** Paid products offered in the gentle upsell (same two on both sites). No prices unless a product page states one. */
+export const OFFERS = [
+  { id: 'liminal', name: 'NoDAW Liminal', tag: 'Windows desktop', blurb: 'Per-stem presets, full-length models on your GPU, batch folders, export straight to your DAW.', cta: 'Get NoDAW Liminal', url: 'https://nodaw.gumroad.com/l/LiminalPro' },
+  { id: 'coproducer', name: 'NoDAW CoProducer Pro', tag: 'Desktop, $49 one-time', blurb: 'Local LUFS, true-peak, clip and phase analysis with conservative repair that writes a file. No subscription.', cta: 'Get CoProducer Pro', url: 'https://nodawlabs.com/products/nodaw-coproducer-audio-quality-analyzer-repair-tool?utm_source=stem-studio&utm_medium=referral&utm_campaign=upsell' },
+];
 export const BRAND_LIMINAL = {
   name: 'NoDAW Liminal', credit: 'Made with NoDAW Liminal', url: 'https://liminal-stemsplit.onrender.com/',
-  upgradeUrl: 'https://nodaw.gumroad.com/l/LiminalPro',
+  upgradeUrl: OFFERS[0].url, offers: OFFERS,
 };
-/** Same studio on the CoProducer site: credit says CoProducer; the upsell still points at the paid Liminal desktop app (the stem product). */
+/** Same studio on the CoProducer site: the credit says CoProducer; the upsell offers both products. */
 export const BRAND_COPRODUCER = {
   name: 'NoDAW CoProducer', credit: 'Made with NoDAW CoProducer', url: 'https://myaiplug.github.io/coproducer-web/',
-  upgradeUrl: 'https://nodaw.gumroad.com/l/LiminalPro',
+  upgradeUrl: OFFERS[0].url, offers: OFFERS,
 };
 
 const enc = new TextEncoder();

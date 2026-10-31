@@ -344,7 +344,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
       exResult.textContent = ''; ui.urls?.forEach(URL.revokeObjectURL); ui.urls = [];
       const links = r.files.map((f) => { const u = URL.createObjectURL(new Blob([f.data], { type: f.mime })); ui.urls.push(u); return el('a', { class: 'btn pri', href: u, download: f.name, text: `Download ${f.name} (${(f.data.byteLength / 1048576).toFixed(1)} MB)` }); });
       const rows = r.report.map((x) => el('tr', null, el('td', { text: x.file }), el('td', { text: `${(x.frames / x.sampleRate).toFixed(2)} s` }), el('td', { text: x.lufs == null ? '—' : `${fmtDb(x.lufs)} LUFS` }), el('td', { text: x.tp == null ? '—' : `${fmtDb(x.tp)} dBTP` }), el('td', { text: x.note || '' })));
-      exResult.append(el('div', { class: 'bar', style: 'margin-top:1rem' }, ...links), el('table', { class: 'rep' }, el('thead', null, el('tr', null, ...['File', 'Length', 'Loudness', 'True peak', 'Note'].map((h) => el('th', { text: h })))), el('tbody', null, ...rows)), upsell.cloneNode(true));
+      exResult.append(el('div', { class: 'bar', style: 'margin-top:1rem' }, ...links), el('table', { class: 'rep' }, el('thead', null, el('tr', null, ...['File', 'Length', 'Loudness', 'True peak', 'Note'].map((h) => el('th', { text: h })))), el('tbody', null, ...rows)), upsellCopy());
       links[0].focus(); announce(`Export ready: ${r.files.length} file${r.files.length > 1 ? 's' : ''}.`);
       if (r.files.length === 1) links[0].click();
     });
@@ -358,7 +358,9 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
     try { const s = await eng.saveSession(nameIn.value || undefined); saveStatus.textContent = `Saved in this browser at ${new Date(s.savedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`; refreshSessions(); if (manual) announce('Session saved in this browser.'); }
     catch (e) { saveStatus.textContent = `Could not save: ${e.message || e}`; } finally { ui.saving = false; }
   }
-  const upsell = el('aside', { class: 'upsell', 'aria-label': `${desktopName}` }, el('div', null, el('b', { text: `Want this offline, with unlimited length and your whole library?` }), el('span', { class: 'muted', text: `The ${desktopName} runs the full models on your GPU, batch-processes folders and exports straight into your DAW.` })), el('a', { class: 'btn pri', href: brand.upgradeUrl, target: '_blank', rel: 'noopener', text: `Get ${desktopName}` }));
+  const upsellCopy = () => { const c = el('div', { class: 'upsell', role: 'group', 'aria-label': 'More from NoDAW' }, ...[...upsell.children].map((k) => k.cloneNode(true))); c.querySelector('h2').removeAttribute('id'); return c; };
+  const offers = brand.offers || [{ id: 'one', name: desktopName, tag: '', blurb: `The ${desktopName} runs the full models on your GPU and exports straight into your DAW.`, cta: `Get ${desktopName}`, url: brand.upgradeUrl }];
+  const upsell = el('aside', { class: 'upsell', 'aria-labelledby': 'upsell-h' }, el('h2', { id: 'upsell-h', text: 'Want more than a browser tab can do?' }), el('div', { class: 'offers' }, ...offers.map((o) => el('div', { class: 'offer' }, el('b', { text: o.name }), o.tag ? el('span', { class: 'ot', text: o.tag }) : null, el('p', { class: 'muted', text: o.blurb }), el('a', { class: 'btn', href: o.url, target: '_blank', rel: 'noopener', 'aria-label': `${o.cta} (opens in a new tab)`, text: `${o.cta} ↗` })))));
   eng.addEventListener('change', (ev) => {
     const w = ev.detail.what;
     if (w === 'tracks') { buildLanes(); syncExportUi(); timeOut.textContent = `${fmtT(eng.position())} / ${fmtT(eng.duration)}`; mixLufs.textContent = 'Mix: not measured'; scheduleSave(); }
@@ -376,7 +378,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
 
   const studio = el('section', { class: 'card', hidden: true, 'aria-labelledby': 'h-st' }, el('h2', { id: 'h-st' }, el('span', { class: 'n', text: '2' }), 'Edit, clean & mix'), sessionBar, transport, editBar,
     el('div', { class: 'studio', style: 'margin-top:.9rem' }, lanesEl, insp));
-  root.append(live, sources, studio, exportCard, upsell.cloneNode(true));
+  root.append(live, sources, studio, exportCard, upsellCopy());
 
   const api = { engine: eng, addStems, ui, el, withBusy, renderInspector, KIND_COLOR, announce, importFiles };
   try { await mountSplitSource(splitHost, addStems, { appTitle: appName }); }

@@ -109,7 +109,15 @@ label.row{display:flex;gap:.5rem;align-items:center;font-size:.82rem;color:var(-
 table.rep{width:100%;border-collapse:collapse;font:.72rem var(--mono)}
 table.rep th,table.rep td{padding:.3rem .5rem;border-bottom:1px solid var(--border);text-align:left}
 .upsell{display:flex;flex-wrap:wrap;gap:.75rem 1.25rem;align-items:center;justify-content:space-between;border:1px solid rgba(168,85,247,.4);background:linear-gradient(135deg,rgba(34,211,238,.07),rgba(168,85,247,.10));border-radius:var(--rad);padding:1rem 1.2rem;margin:1.25rem 0}
-.upsell b{display:block;margin-bottom:.15rem}
+.upsell{display:block}
+.upsell h2{font-size:1rem;font-weight:700;margin-bottom:.7rem}
+.upsell .offers{display:grid;grid-template-columns:repeat(auto-fit,minmax(15rem,1fr));gap:.75rem}
+.upsell .offer{border:1px solid var(--border);background:rgba(255,255,255,.03);border-radius:calc(var(--rad) - 2px);padding:.85rem 1rem;display:flex;flex-direction:column;align-items:flex-start;gap:.25rem}
+.upsell .offer b{display:inline}
+.upsell .offer .ot{font:500 .68rem var(--mono);color:var(--muted);text-transform:uppercase;letter-spacing:.04em}
+.upsell .offer p{font-size:.85rem;margin:.2rem 0 .5rem}
+.upsell .offer .btn{margin-top:auto}
+.foot-more{margin-top:.5rem}
 footer{border-top:1px solid var(--border);padding:1.5rem 0;margin-top:2rem;text-align:center;font-size:.75rem;color:var(--faint)}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
 [hidden]{display:none!important}
@@ -135,3 +143,4 @@ ul.plain .dot{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;ve
 select{max-width:100%;min-width:0}
 .fxhead{flex-wrap:wrap}.fxhead select{flex:1 1 10rem}
 @media (max-width:640px){.lane .lc{min-width:0}.lane .lc select{width:100%}.lane{grid-template-columns:minmax(0,1fr)}.ruler{grid-template-columns:minmax(0,1fr)}.ruler .rl{display:none}}
+.upsell .btn{text-decoration:none}

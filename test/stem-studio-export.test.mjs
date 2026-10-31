@@ -63,3 +63,12 @@ test('MP3 export: lamejs output carries ID3 credit and decodes at the right rate
   assert.match(j.format.tags.comment || j.format.tags.COMM || '', /Made with NoDAW Liminal/); assert.equal(j.format.tags.title, 'MP3 T');
   assert.ok(Math.abs(parseFloat(j.format.duration) - n / 44100) < 0.06);
 });
+
+test('upsell offers both products with real https links (no invented prices on Liminal)', async () => {
+  const { OFFERS, BRAND_LIMINAL, BRAND_COPRODUCER } = await import('../public/stem-studio/export.js');
+  assert.deepEqual(OFFERS.map((o) => o.id), ['liminal', 'coproducer']);
+  for (const o of OFFERS) assert.match(o.url, /^https:\/\//);
+  assert.equal(BRAND_LIMINAL.offers, OFFERS); assert.equal(BRAND_COPRODUCER.offers, OFFERS);
+  assert.equal(OFFERS[0].url, 'https://nodaw.gumroad.com/l/LiminalPro');
+  assert.doesNotMatch(OFFERS[0].tag + OFFERS[0].blurb, /\$/);
+});
