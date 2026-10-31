@@ -239,6 +239,10 @@ export class StudioEngine extends EventTarget {
     const files = [], report = []; const rendered = new Map();
     const steps = tracks.length + (o.mix ? 1 : 0); let done = 0; const tick = (label) => onProgress(++done / (steps * 2), label);
     for (const t of tracks) { rendered.set(t.id, await this.renderTrack(t, { tail: o.tail })); tick(`Rendered ${t.name}`); }
+    if (o.tail && rendered.size > 1) { // with effect tails, give every stem the same length so they line up when dropped in a DAW
+      const n = Math.max(...[...rendered.values()].map((r) => r.L.length)); const pad = (a) => { if (a.length === n) return a; const b = new Float32Array(n); b.set(a); return b; };
+      for (const [k, r] of rendered) rendered.set(k, { ...r, L: pad(r.L), R: pad(r.R) });
+    }
     let mixGainDb = 0, mixRes = null;
     const mixSources = this.tracks.filter((t) => this._audible(t));
     if (o.mix || o.normalize === 'mix') {

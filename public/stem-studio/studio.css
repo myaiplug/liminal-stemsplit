@@ -1,5 +1,5 @@
 /* Stem Studio — matches the Liminal StemSplit site (navy, cyan→purple accents). */
-:root{--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--orange:#f97316;--pink:#ec4899;--yellow:#facc15;--navy:#0a0f1d;--panel:rgba(255,255,255,.035);--border:rgba(255,255,255,.09);--text:#f3f4f6;--muted:#9ca3af;--faint:#6b7280;--rad:14px;--mono:'JetBrains Mono',ui-monospace,monospace}
+:root{--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--orange:#f97316;--pink:#ec4899;--yellow:#facc15;--navy:#0a0f1d;--panel:rgba(255,255,255,.035);--border:rgba(255,255,255,.09);--text:#f3f4f6;--muted:#9ca3af;--faint:#8b93a3;--rad:14px;--mono:'JetBrains Mono',ui-monospace,monospace}
 *{box-sizing:border-box;margin:0;padding:0}
 html{scroll-behavior:smooth}
 body{font-family:'Inter',system-ui,sans-serif;background:#020617;color:var(--text);line-height:1.5;overflow-x:hidden}
@@ -80,11 +80,12 @@ label.row{display:flex;gap:.5rem;align-items:center;font-size:.82rem;color:var(-
 .fxhead{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
 .fxhead select{flex:1;min-width:12rem}
 .mod{border:1px solid var(--border);border-radius:10px;background:rgba(255,255,255,.02)}
-.mod>summary{display:flex;gap:.5rem;align-items:center;padding:.45rem .65rem;cursor:pointer;font-size:.82rem;font-weight:600;list-style:none}
-.mod>summary::-webkit-details-marker{display:none}
-.mod>summary::before{content:'▸';color:var(--faint);font-size:.7rem}
-.mod[open]>summary::before{content:'▾'}
-.mod.off>summary{color:var(--faint)}
+.mod>.mh{display:flex;gap:.5rem;align-items:center;padding:.3rem .65rem;font-size:.82rem;font-weight:600}
+.mod .tg{all:unset;box-sizing:border-box;cursor:pointer;display:inline-flex;gap:.4rem;align-items:center;padding:.2rem .1rem;border-radius:6px;font:inherit;color:inherit}
+.mod .tg:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.mod .tg::before{content:'▸';color:var(--muted);font-size:.7rem}
+.mod.open .tg::before{content:'▾'}
+.mod.off .tg{color:var(--muted)}
 .mod .mb{padding:.2rem .7rem .7rem;display:grid;gap:.35rem}
 .mod .pr{display:grid;grid-template-columns:6.2rem minmax(0,1fr) 4.4rem;gap:.5rem;align-items:center;font-size:.75rem;color:var(--muted)}
 .mod .pr output{font:.7rem var(--mono);text-align:right;color:var(--text)}
@@ -128,3 +129,9 @@ footer{border-top:1px solid var(--border);padding:1.5rem 0;margin-top:2rem;text-
 .badge{font-size:.62rem;letter-spacing:.06em;text-transform:uppercase;border:1px solid rgba(34,211,238,.5);color:#67e8f9;border-radius:999px;padding:.05rem .45rem;margin-left:.3rem}
 ul.plain{list-style:none;padding:0;margin:.3rem 0 .6rem;display:grid;grid-template-columns:repeat(auto-fill,minmax(9rem,1fr));gap:.25rem .6rem;font-size:.82rem}
 ul.plain .dot{display:inline-block;width:.6rem;height:.6rem;border-radius:50%;vertical-align:baseline}
+.mod .mb[hidden],[hidden]{display:none!important}
+.mod{min-width:0}.mod>.mh{flex-wrap:wrap}.insp,.pane{min-width:0}
+@media (max-width:640px){.mod .tg{flex:1 1 6rem}.mod .chip{order:5}.mod .ctl{order:4}}
+select{max-width:100%;min-width:0}
+.fxhead{flex-wrap:wrap}.fxhead select{flex:1 1 10rem}
+@media (max-width:640px){.lane .lc{min-width:0}.lane .lc select{width:100%}.lane{grid-template-columns:minmax(0,1fr)}.ruler{grid-template-columns:minmax(0,1fr)}.ruler .rl{display:none}}

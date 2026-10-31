@@ -82,7 +82,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
   const transport = el('div', { class: 'bar' }, playBtn, stopBtn, timeOut, el('label', { class: 'row' }, 'Zoom', zoomIn), abBtn, el('span', { class: 'grow' }), mixLufs, mixBtn);
   const sessionBar = el('div', { class: 'bar' }, el('label', { class: 'row' }, 'Session', nameIn), saveBtn, saveStatus);
 
-  const rulerIn = el('div', { class: 'rinner' }); const rscroll = el('div', { class: 'rscroll' }, rulerIn);
+  const rulerIn = el('div', { class: 'rinner' }); const rscroll = el('div', { class: 'rscroll', tabindex: 0, role: 'region', 'aria-label': 'Timeline scroll' }, rulerIn);
   const ruler = el('div', { class: 'ruler' }, el('div', { class: 'rl', text: 'Timeline (cuts struck through)' }), rscroll);
   const lanesEl = el('div', { class: 'lanes' }, ruler);
   const playhead = el('div', { class: 'ph', hidden: true });
@@ -248,10 +248,12 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
     const key = `${t.id}:${m.type}`;
     const chk = el('input', { type: 'checkbox', checked: m.enabled, 'aria-label': `Enable ${spec.name}`, onclick: (e) => e.stopPropagation(), onchange: () => { eng.setEnabled(t, idx, chk.checked); card.classList.toggle('off', !chk.checked); } });
     const move = (d) => (e) => { e.preventDefault(); e.stopPropagation(); const c = [...t.chain], j = idx + d; if (j < 0 || j >= c.length) return; [c[idx], c[j]] = [c[j], c[idx]]; eng.setFx(t, c, t.presetId ? `${t.presetId.replace('*', '')}*` : null); };
-    const head = el('summary', null, chk, el('span', { text: spec.name }), el('span', { class: `chip ${spec.fidelity}`, title: spec.fidelityNote || '', text: FID_TXT[spec.fidelity] || spec.fidelity }),
+    const bodyId = `mb-${key.replace(/\W/g, '')}`;
+    const tg = el('button', { type: 'button', class: 'tg', 'aria-expanded': String(openMods.has(key)), 'aria-controls': bodyId, text: spec.name, onclick: () => { const o = card.classList.toggle('open'); body.hidden = !o; tg.setAttribute('aria-expanded', String(o)); o ? openMods.add(key) : openMods.delete(key); } });
+    const head = el('div', { class: 'mh' }, chk, tg, el('span', { class: `chip ${spec.fidelity}`, title: spec.fidelityNote || '', text: FID_TXT[spec.fidelity] || spec.fidelity }),
       el('span', { class: 'ctl' }, el('button', { class: 'btn sm', type: 'button', text: '↑', 'aria-label': `Move ${spec.name} up`, onclick: move(-1) }), el('button', { class: 'btn sm', type: 'button', text: '↓', 'aria-label': `Move ${spec.name} down`, onclick: move(1) }),
         el('button', { class: 'btn sm', type: 'button', text: '✕', 'aria-label': `Remove ${spec.name}`, onclick: (e) => { e.preventDefault(); e.stopPropagation(); eng.setFx(t, t.chain.filter((_, i) => i !== idx), t.presetId); } })));
-    const body = el('div', { class: 'mb' }, el('p', { class: 'muted', text: spec.description || '' }), spec.fidelityNote ? el('p', { class: 'muted', text: `Fidelity: ${spec.fidelityNote}` }) : null);
+    const body = el('div', { class: 'mb', id: bodyId, hidden: !openMods.has(key) }, el('p', { class: 'muted', text: spec.description || '' }), spec.fidelityNote ? el('p', { class: 'muted', text: `Fidelity: ${spec.fidelityNote}` }) : null);
     for (const p of spec.params) {
       const v = m.params[p.id] ?? p.value;
       if (p.kind === 'select') { body.append(el('label', { class: 'pr' }, p.label, el('select', { 'aria-label': `${spec.name} ${p.label}`, onchange: (e) => eng.setParam(t, idx, p.id, e.target.value) }, p.options.map((o) => el('option', { value: o.value ?? o, text: o.label ?? o, selected: String(o.value ?? o) === String(v) }))), el('span'))); continue; }
@@ -263,7 +265,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
         ondblclick: () => { r.value = toS(p.value); r.dispatchEvent(new Event('input')); } });
       body.append(el('label', { class: 'pr' }, p.label, r, out));
     }
-    const card = el('details', { class: `mod${m.enabled ? '' : ' off'}`, open: openMods.has(key) || undefined, ontoggle: () => { card.open ? openMods.add(key) : openMods.delete(key); } }, head, body);
+    const card = el('div', { class: `mod${m.enabled ? '' : ' off'}${openMods.has(key) ? ' open' : ''}` }, head, body);
     return card;
   }
 

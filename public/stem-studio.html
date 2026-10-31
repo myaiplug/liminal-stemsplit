@@ -12,12 +12,14 @@
 </head>
 <body>
 <div class="wrap">
+  <header>
   <nav class="top" aria-label="Site"><a href="/">Liminal</a><span class="sep">/</span><a href="/browser-split.html">Browser splitter</a><span class="sep">/</span><span aria-current="page">Stem Studio</span></nav>
   <span class="tag">Beta · runs on your device</span>
   <h1>Stem <span>Studio</span></h1>
   <p class="sub">Split a track, then shape every stem on its own: effect chains with the Liminal desktop presets, LUFS and true-peak metering, artifact detection and repair, and a deeper drum split. Nothing is uploaded. Best on desktop Chrome or Edge.</p>
+  </header>
   <main id="studio-root"><noscript>Stem Studio needs JavaScript.</noscript></main>
-  <footer>Liminal Stem Studio · audio stays on your device · <a href="/browser-split.html">Just need stems? Use the splitter</a></footer>
+  <footer role="contentinfo">Liminal Stem Studio · audio stays on your device · <a href="/browser-split.html">Just need stems? Use the splitter</a></footer>
 </div>
 <script type="module">
   import { mountStudio } from '/stem-studio/ui.js';

@@ -47,7 +47,7 @@ test('ID3v2.3 header + frames; buildTags brands with another site', () => {
 test('ZIP round-trips stored entries; safeName strips path chars', () => {
   const z = zipFiles(fflate, [{ name: 'a/b.wav', data: Uint8Array.of(1, 2, 3) }, { name: 'c.txt', data: Uint8Array.of(9) }]);
   const u = fflate.unzipSync(z); assert.deepEqual([...u['a/b.wav']], [1, 2, 3]); assert.deepEqual([...u['c.txt']], [9]);
-  assert.equal(safeName('../../etc/pass:wd'), '.._.._etc_pass_wd'); assert.equal(safeName(''), 'stem');
+  assert.equal(safeName('../../etc/pass:wd'), 'etc-pass-wd'); assert.equal(safeName('Snare / clap'), 'Snare-clap'); assert.equal(safeName(''), 'stem');
 });
 
 test('MP3 export: lamejs output carries ID3 credit and decodes at the right rate/duration', async () => {

@@ -120,4 +120,4 @@ export function zipFiles(fflate, files) {
   const o = {}; for (const f of files) o[f.name] = [f.data, { level: 0 }];
   return fflate.zipSync(o, { level: 0 });
 }
-export const safeName = (s) => String(s).replace(/[^\w.\- ]+/g, '_').replace(/\s+/g, ' ').trim().slice(0, 80) || 'stem';
+export const safeName = (s) => String(s).replace(/[^\w.\- ]+/g, ' ').replace(/\s+/g, '-').replace(/^[-.]+|-+$/g, '').slice(0, 80) || 'stem';
