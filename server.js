@@ -27,6 +27,18 @@ app.use('/webhooks/shopify', express.raw({ type: 'application/json' }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(billingRouter);
+// In-browser RoFormer separation: cross-origin isolation (SharedArrayBuffer ->
+// multi-threaded WASM fallback). Scoped to this page + its module/worker files
+// only so the rest of the site (Tailwind CDN, embeds, Stripe) is unaffected.
+// `credentialless` keeps cross-origin CDN assets (Google Fonts, jsDelivr,
+// Hugging Face model files) loadable without CORP headers.
+app.use((req, res, next) => {
+  if (req.path === '/browser-split.html' || req.path.startsWith('/roformer-web/')) {
+    res.set('Cross-Origin-Opener-Policy', 'same-origin');
+    res.set('Cross-Origin-Embedder-Policy', 'credentialless');
+  }
+  next();
+});
 app.use(express.static(path.join(__dirname, 'public')));
 app.use('/funnel', express.static(path.join(__dirname, 'funnel')));
 app.get('/funnel', (req, res) => res.sendFile(path.join(__dirname, 'funnel', 'index.html')));

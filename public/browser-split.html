@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020617">
+<title>Split Stems in Your Browser — No Upload, No Server | Liminal StemSplit</title>
+<meta name="description" content="High-quality RoFormer stem separation that runs entirely in your browser on WebGPU. Pick a model, drop a track, download the stems. Nothing is uploaded.">
+<link rel="icon" href="/assets/liminal.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/roformer-web/rf.css">
+<style>
+:root{--cyan:#22d3ee;--purple:#a855f7;--green:#22c55e;--orange:#f97316;--pink:#ec4899;--navy:#0a0f1d;--border:rgba(255,255,255,0.06);--text:#f3f4f6;--muted:#6b7280}
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;background:#020617;color:var(--text);overflow-x:hidden;line-height:1.6}
+.wrap{max-width:920px;margin:0 auto;padding:2rem 1.5rem 4rem;position:relative;z-index:1}
+nav{display:flex;align-items:center;gap:1rem;margin-bottom:3rem;font-size:0.875rem}
+nav a{color:var(--muted);text-decoration:none;transition:color 0.2s}
+nav a:hover{color:var(--cyan)}
+nav .sep{color:rgba(255,255,255,0.15)}
+h1{font-size:clamp(2rem,5vw,3rem);font-weight:800;letter-spacing:-0.03em;line-height:1.1;margin-bottom:0.75rem}
+h1 span{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{color:var(--muted);font-size:1.05rem;margin-bottom:2rem;max-width:640px}
+.tag{display:inline-flex;align-items:center;gap:.35rem;padding:.15rem .5rem;border-radius:999px;font-size:.6rem;font-family:'JetBrains Mono',monospace;letter-spacing:.04em;text-transform:uppercase;background:rgba(34,211,238,.1);border:1px solid rgba(34,211,238,.2);color:var(--cyan);margin-bottom:1rem}
+h2{font-size:1.2rem;font-weight:700;margin-top:3rem;margin-bottom:.75rem;color:#fff}
+p{color:rgba(255,255,255,0.65);margin-bottom:1rem;font-size:.9375rem}
+ul.facts{list-style:none;display:grid;gap:.5rem;margin-bottom:1rem}
+ul.facts li{color:rgba(255,255,255,0.65);font-size:.875rem;padding-left:1.25rem;position:relative}
+ul.facts li::before{content:'→';position:absolute;left:0;color:var(--cyan)}
+code{background:rgba(255,255,255,0.06);padding:.1rem .35rem;border-radius:4px;font-size:.8em;font-family:'JetBrains Mono',monospace;color:var(--cyan)}
+footer{border-top:1px solid var(--border);padding:2rem 0;margin-top:3rem;text-align:center;font-size:.75rem;color:var(--muted)}
+footer a{color:var(--cyan);text-decoration:none}
+noscript p{color:var(--orange)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="/">← Liminal StemSplit</a><span class="sep">/</span>
+    <a href="/workshop.html">Workshop</a><span class="sep">/</span>
+    <a href="/funnel/">Free Demo</a>
+  </nav>
+
+  <div class="tag">Runs in your browser · WebGPU</div>
+  <h1>Split stems <span>right here.</span></h1>
+  <p class="subtitle">State-of-the-art RoFormer models running on your own GPU, inside this tab. No upload, no server, no account. The model downloads once and stays in your browser.</p>
+
+  <div id="app"><noscript><p>This tool needs JavaScript.</p></noscript></div>
+
+  <h2>How it works</h2>
+  <ul class="facts">
+    <li>Your audio is decoded and separated locally with <code>onnxruntime-web</code> in a background Web Worker. It never leaves your device.</li>
+    <li>Models are fetched directly from Hugging Face the first time you use them (integrity-checked) and cached by your browser — delete them any time with “Clear downloaded models”.</li>
+    <li>Best on desktop Chrome or Edge with a dedicated GPU. Without WebGPU it falls back to the CPU, which works but is much slower — use the Fast preview model there.</li>
+  </ul>
+  <p>Model licenses: Mini-BS-RoFormer (MIT), Mel-Band RoFormer Duality (Apache-2.0), BS-RoFormer-SW (MIT — upstream weight provenance unstated). Details in <a href="/roformer-web/NOTICE.md" style="color:var(--cyan)">NOTICE</a>.</p>
+
+  <footer>© 2026 Liminal by <a href="https://myaiplug.com">MyAiPlug</a> · <a href="/privacy.html">Privacy</a> · <a href="/terms.html">Terms</a></footer>
+</div>
+<script type="module">
+  import { mountStemSplit } from '/roformer-web/ui.js';
+  mountStemSplit(document.getElementById('app'));
+</script>
+</body>
+</html>
