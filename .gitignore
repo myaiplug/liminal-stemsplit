@@ -26,3 +26,5 @@ tools/license-manager/
 # Temp files
 tmp/
 *.tmp
+.vercel
+dist-stem-demo/
