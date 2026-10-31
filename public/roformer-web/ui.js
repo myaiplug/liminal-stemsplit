@@ -268,6 +268,7 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
       });
       await refreshCache();
       state.loadedModel = model.id;
+      window.__rfLast = { model: model.id, load: loadInfo }; // read by the automated browser tests
       if (loadInfo.gpuError) showMsg(`WebGPU couldn't start (${loadInfo.gpuError}). Using the slower CPU path instead.`, 'warn');
       if (loadInfo.backend === 'wasm' && loadInfo.threads === 'single' && !loadInfo.gpuError && device !== 'wasm') showMsg('Running on CPU (single thread). This will be slow.', 'warn');
 
@@ -286,6 +287,7 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
           }
         },
       });
+      window.__rfLast.sep = info;
       panel.finish({ message: `Done — ${info.stems.length} stems ready.` });
       renderStems(info);
     } catch (e) {
