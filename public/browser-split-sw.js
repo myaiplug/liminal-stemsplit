@@ -23,11 +23,11 @@
  * Edit CONFIG per site. Bump VERSION when the precache list changes.
  */
 const CONFIG = {
-  VERSION: '8f8937d786',
+  VERSION: 'a5e5f3a82b',
   COI: false,
   PAGES: ['browser-split.html'],
   MODULE_DIR: 'roformer-web/',
-  SHELL: ['roformer-web/adapters.js','roformer-web/client.js','roformer-web/dsp.js','roformer-web/engine.js','roformer-web/model-store.js','roformer-web/models.js','roformer-web/register-sw.js','roformer-web/rf.css','roformer-web/separator.js','roformer-web/sinks.js','roformer-web/ui.js','roformer-web/wav.js','roformer-web/worker.js'],
+  SHELL: ['roformer-web/adapters.js','roformer-web/client.js','roformer-web/dsp.js','roformer-web/engine.js','roformer-web/model-store.js','roformer-web/models.js','roformer-web/progress.js','roformer-web/register-sw.js','roformer-web/rf.css','roformer-web/separator.js','roformer-web/sinks.js','roformer-web/tips.js','roformer-web/ui.js','roformer-web/wav.js','roformer-web/worker.js'],
 };
 
 const CACHE = `rf-app-${CONFIG.VERSION}`;

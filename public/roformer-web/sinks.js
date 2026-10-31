@@ -87,3 +87,55 @@ export class OpfsSink {
     this.files.clear();
   }
 }
+
+/**
+ * Transparent wrapper that lets the UI watch separation as it happens, without
+ * keeping the full result in RAM. Every flushed region is reported through
+ * `emit` as:
+ *   { stem, peaks: Float32Array, peakStart }                 // loudness per 0.1 s block (whole track)
+ *   { stem, preview: Float32Array, previewStart, previewRate } // mono half-rate audio, first `previewSeconds` only
+ * Both are small (a few KB per chunk / a few MB in total) and are sent for the
+ * first stem channel pair only once both channels of a region have been written.
+ */
+export const PEAK_BLOCK = 4410; // 0.1 s at 44.1 kHz
+export class TapSink {
+  constructor(inner, emit, { sampleRate = 44100, previewSeconds = 45 } = {}) {
+    this.inner = inner; this.emit = emit; this.sr = sampleRate;
+    this.blocks = Math.ceil(inner.N / PEAK_BLOCK);
+    this.maxPrev = Math.min(Math.ceil(inner.N / 2), Math.floor((sampleRate / 2) * previewSeconds));
+    this.state = new Map(); // stem -> { peaks, prev, lastCh0: [start,len] }
+  }
+  get kind() { return this.inner.kind; }
+  get N() { return this.inner.N; }
+  get data() { return this.inner.data; }
+  names() { return this.inner.names(); }
+  read(...a) { return this.inner.read(...a); }
+  dispose() { return this.inner.dispose(); }
+
+  async write(name, ch, offset, f32) {
+    await this.inner.write(name, ch, offset, f32);
+    let st = this.state.get(name);
+    if (!st) { st = { peaks: new Float32Array(this.blocks), prev: new Float32Array(this.maxPrev) }; this.state.set(name, st); }
+    // peaks (max over both channels)
+    for (let i = 0; i < f32.length; i++) {
+      const b = ((offset + i) / PEAK_BLOCK) | 0;
+      const v = f32[i] < 0 ? -f32[i] : f32[i];
+      if (v > st.peaks[b]) st.peaks[b] = v;
+    }
+    // half-rate mono preview, accumulated as 0.25*x per frame -> avg of L,R and of two neighbours
+    for (let i = 0; i < f32.length; i++) {
+      const p = (offset + i) >> 1;
+      if (p >= this.maxPrev) break;
+      if (ch === 0 && ((offset + i) & 1) === 0) st.prev[p] = 0; // fresh pair
+      st.prev[p] += 0.25 * f32[i];
+    }
+    if (ch === 1) {
+      const b0 = (offset / PEAK_BLOCK) | 0, b1 = (((offset + f32.length - 1) / PEAK_BLOCK) | 0) + 1;
+      const msg = { stem: name, peakStart: b0, peaks: st.peaks.slice(b0, b1) };
+      const p0 = offset >> 1;
+      const p1 = Math.min(this.maxPrev, ((offset + f32.length - 1) >> 1) + 1);
+      if (p0 < this.maxPrev) { msg.preview = st.prev.slice(p0, p1); msg.previewStart = p0; msg.previewRate = this.sr / 2; }
+      this.emit(msg);
+    }
+  }
+}

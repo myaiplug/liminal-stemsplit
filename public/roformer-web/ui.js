@@ -9,6 +9,7 @@
  */
 import { MODELS, MODEL_ORDER, formatBytes } from './models.js';
 import { StemSeparator, detectCapabilities, decodeToStereo44k } from './client.js';
+import { createProgressPanel, computePeaks, fmtEta } from './progress.js';
 import { cachedModelIds, clearModelCache, partialModelBytes, storageInfo, requestPersistence } from './model-store.js';
 
 const el = (tag, cls, text) => {
@@ -29,7 +30,7 @@ const MODEL_BLURB = {
   bs6: 'Full 6-stem (BS-Roformer-SW)',
 };
 
-export function mountStemSplit(root, { workerUrl } = {}) {
+export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {}) {
   root.classList.add('rf-root');
   root.textContent = '';
 
@@ -105,12 +106,8 @@ export function mountStemSplit(root, { workerUrl } = {}) {
   const offlineNote = el('span', 'rf-storage__text rf-storage__offline');
   storageRow.append(storageText, persistBtn, offlineNote);
 
-  const prog = el('div', 'rf-progress'); prog.hidden = true;
-  const progLabel = el('div', 'rf-progress__label');
-  const progBar = el('div', 'rf-bar'); const progFill = el('div', 'rf-bar__fill'); progBar.append(progFill);
-  progBar.setAttribute('role', 'progressbar');
-  const progSub = el('div', 'rf-progress__sub');
-  prog.append(progLabel, progBar, progSub);
+  const panel = createProgressPanel({ tips, tipLinks, appTitle });
+  const prog = panel.el;
   const msg = el('div', 'rf-msg'); msg.hidden = true;
 
   // ---- results
@@ -133,14 +130,6 @@ export function mountStemSplit(root, { workerUrl } = {}) {
 
   // ---- helpers
   function showMsg(text, kind = 'info') { msg.hidden = !text; msg.textContent = text || ''; msg.className = `rf-msg rf-msg--${kind}`; }
-  function setProgress(label, frac, sub) {
-    prog.hidden = false;
-    progLabel.textContent = label;
-    progFill.style.width = frac == null ? '100%' : `${Math.round(Math.max(0, Math.min(1, frac)) * 100)}%`;
-    progFill.classList.toggle('rf-bar__fill--indet', frac == null);
-    progBar.setAttribute('aria-valuenow', frac == null ? '' : String(Math.round(frac * 100)));
-    progSub.textContent = sub || '';
-  }
   function refresh() {
     for (const id of MODEL_ORDER) {
       modelCards[id].label.classList.toggle('rf-model--on', id === state.modelId);
@@ -247,9 +236,12 @@ export function mountStemSplit(root, { workerUrl } = {}) {
     }
     state.busy = true; results.hidden = true; showMsg('');
     refresh();
+    const needsDownload = !state.cached.has(model.id);
+    panel.begin({ stems: model.stems, needsDownload, file: state.file });
     try {
-      setProgress('Reading audio…', null);
+      panel.stage('decode', { frac: null, label: 'Reading your audio…', detail: 'Decoding and resampling on this device.' });
       const audio = await decodeToStereo44k(state.file);
+      panel.setTrack(computePeaks(audio.left, audio.right, 480), audio.duration); // before the buffers are handed to the worker
       if (audio.duration > 1200) showMsg(`This track is ${fmtTime(audio.duration * 1000)} long. Separation is streamed to keep memory low, but it will take a while and the decoded audio alone needs about ${Math.round(audio.duration * 44100 * 8 / 1e6)} MB of RAM.`, 'warn');
       else if (audio.sourceRate && audio.sourceRate !== 44100) showMsg(`Resampled from ${audio.sourceRate} Hz to 44100 Hz in your browser.`, 'info');
 
@@ -260,18 +252,18 @@ export function mountStemSplit(root, { workerUrl } = {}) {
           if (p.notice) showMsg(p.notice, 'warn');
           if (p.phase === 'download') {
             const frac = p.total ? p.loaded / p.total : null;
-            if (p.resumedFrom) setProgress(`Resuming ${model.label} download…`, frac, `Continuing from ${formatBytes(p.resumedFrom)}`);
-            else if (p.verifying) setProgress('Verifying download (SHA-256)…', null);
-            else if (p.fromCache) setProgress('Loading model from browser storage…', frac);
+            if (p.resumedFrom) panel.stage('download', { frac, label: `Resuming ${model.label} download…`, detail: `Continuing from ${formatBytes(p.resumedFrom)}` });
+            else if (p.verifying) panel.stage('download', { frac: 1, label: 'Verifying download (SHA-256)…', detail: 'Making sure the file is intact.' });
+            else if (p.fromCache) panel.stage('load', { frac, label: 'Loading model from browser storage…', detail: p.total ? `${formatBytes(p.loaded)} / ${formatBytes(p.total)}` : '' });
             else if (p.file) {
               if (!dl.t0) { dl.t0 = performance.now(); dl.b0 = p.loaded; }
               const secs = (performance.now() - dl.t0) / 1000;
               const rate = secs > 1 ? (p.loaded - dl.b0) / secs : 0;
               const eta = rate > 0 ? (p.total - p.loaded) / rate * 1000 : null;
-              setProgress(`Downloading ${model.label} model…`, frac,
-                `${formatBytes(p.loaded)} / ${formatBytes(p.total)}${rate ? ` · ${(rate / 1e6).toFixed(1)} MB/s` : ''}${eta != null ? ` · about ${fmtTime(eta)} left` : ''} · saved in your browser for next time`);
+              panel.stage('download', { frac, label: `Downloading ${model.label}…`,
+                detail: `${formatBytes(p.loaded)} / ${formatBytes(p.total)} · ${Math.round((frac || 0) * 100)}%${rate ? ` · ${(rate / 1e6).toFixed(1)} MB/s` : ' · measuring speed…'}${eta != null ? ` · about ${fmtEta(eta)} left` : ''} · saved in your browser for next time` });
             }
-          } else if (p.phase === 'init') setProgress('Starting inference engine…', null, 'Compiling the model — first run on a big model can take a minute.');
+          } else if (p.phase === 'init') panel.stage('load', { frac: null, label: 'Starting inference engine…', detail: 'Compiling the model. The first run of a big model can take a minute.' });
         },
       });
       await refreshCache();
@@ -279,21 +271,27 @@ export function mountStemSplit(root, { workerUrl } = {}) {
       if (loadInfo.gpuError) showMsg(`WebGPU couldn't start (${loadInfo.gpuError}). Using the slower CPU path instead.`, 'warn');
       if (loadInfo.backend === 'wasm' && loadInfo.threads === 'single' && !loadInfo.gpuError && device !== 'wasm') showMsg('Running on CPU (single thread). This will be slow.', 'warn');
 
+      panel.stage('separate', { frac: 0, label: 'Separating… getting the first chunk ready', detail: `${loadInfo.backend === 'webgpu' ? 'WebGPU' : 'CPU (WASM)'}` });
       const info = await sep.separate(audio, {
         onProgress: (p) => {
           if (p.phase === 'separate') {
-            setProgress(`Separating… ${p.done}/${p.total} segments`, p.done / p.total,
-              `${p.backend === 'webgpu' ? 'WebGPU' : 'CPU (WASM)'} · about ${fmtTime(p.etaMs)} left`);
+            panel.chunkProgress(p.done, p.total);
+            panel.stage('separate', { frac: p.done / p.total, label: `Separating… chunk ${p.done} of ${p.total}`,
+              detail: `${Math.round((p.done / p.total) * 100)}% · ${p.backend === 'webgpu' ? 'WebGPU' : 'CPU (WASM)'} · about ${fmtEta(p.etaMs)} left` });
+          } else if (p.phase === 'stem-chunk') {
+            panel.stemChunk(p);
           } else if (p.phase === 'fallback') {
+            panel.restartSeparation();
             showMsg(`WebGPU gave unusable output (${p.reason}). Restarted on the CPU — this will take longer.`, 'warn');
           }
         },
       });
-      setProgress('Done', 1, '');
+      panel.finish({ message: `Done — ${info.stems.length} stems ready.` });
       renderStems(info);
     } catch (e) {
-      if (e?.cancelled) { showMsg('Cancelled.', 'info'); prog.hidden = true; }
-      else { console.error(e); showMsg(`Something went wrong: ${e?.message || e}`, 'error'); prog.hidden = true; }
+      panel.stop();
+      if (e?.cancelled) showMsg('Cancelled.', 'info');
+      else { console.error(e); showMsg(`Something went wrong: ${e?.message || e}`, 'error'); }
     } finally {
       state.busy = false; refresh(); refreshCache().catch(() => {});
     }
@@ -328,5 +326,5 @@ export function mountStemSplit(root, { workerUrl } = {}) {
     window.__rfCaps = caps;
   });
 
-  return { separator: sep, state };
+  return { separator: sep, state, panel };
 }

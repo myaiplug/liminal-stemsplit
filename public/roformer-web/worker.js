@@ -6,7 +6,7 @@ import { MODELS, ORT_MODULE_URL, ORT_WASM_BASE, ORT_CDN_MODULE_URL, ORT_CDN_BASE
 import { RoformerEngine } from './engine.js';
 import { getModelFiles } from './model-store.js';
 import { wavBlob, zipBlob } from './wav.js';
-import { MemorySink, OpfsSink } from './sinks.js';
+import { MemorySink, OpfsSink, TapSink } from './sinks.js';
 
 let engine = null;
 let ortPromise = null;
@@ -59,6 +59,10 @@ async function disposeSink() {
 function makeSinkFactory(model) {
   const storeInfo = { note: null };
   const createSink = async (N) => {
+    const inner = await createInner(N);
+    return new TapSink(inner, (m) => post({ type: 'progress', phase: 'stem-chunk', ...m }, [m.peaks.buffer, m.preview?.buffer].filter(Boolean)), { sampleRate: model.sampleRate });
+  };
+  const createInner = async (N) => {
     const need = N * 2 * 4 * model.stems.length;
     if (OpfsSink.supported()) {
       let room = true;
