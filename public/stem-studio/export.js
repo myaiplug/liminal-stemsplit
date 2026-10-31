@@ -12,6 +12,11 @@ export const BRAND_LIMINAL = {
   name: 'NoDAW Liminal', credit: 'Made with NoDAW Liminal', url: 'https://liminal-stemsplit.onrender.com/',
   upgradeUrl: 'https://nodaw.gumroad.com/l/LiminalPro',
 };
+/** Same studio on the CoProducer site: credit says CoProducer; the upsell still points at the paid Liminal desktop app (the stem product). */
+export const BRAND_COPRODUCER = {
+  name: 'NoDAW CoProducer', credit: 'Made with NoDAW CoProducer', url: 'https://myaiplug.github.io/coproducer-web/',
+  upgradeUrl: 'https://nodaw.gumroad.com/l/LiminalPro',
+};
 
 const enc = new TextEncoder();
 const u32 = (n) => { const b = new Uint8Array(4); new DataView(b.buffer).setUint32(0, n >>> 0, true); return b; };
