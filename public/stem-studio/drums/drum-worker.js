@@ -1,11 +1,13 @@
 /**
  * Module worker: DrumSep inference.  messages in:  {op:'split', rid, L, R, device?}  {op:'cancel'}  {op:'probe', rid}
- * out: {type:'progress', rid, phase, fraction, ...}  {type:'done', rid, stems:[[L,R]x4], backend, ms}  {type:'error', rid, message}
+ * out: {type:'progress', rid, phase, fraction, ...}  {type:'done', rid, parts, events, notes, backend, ms}  {type:'error', rid, message}
  */
 import { ORT_MODULE_URL, ORT_WASM_BASE, ORT_CDN_MODULE_URL, ORT_CDN_BASE } from '../../roformer-web/models.js';
 import { getModelFiles } from '../../roformer-web/model-store.js';
 import { drumModel } from './drum-models.js';
 import { separateLong } from './hdemucs.js';
+import { dspDrumSplit } from './drum-dsp.js';
+import { buildParts } from './pipeline.js';
 
 let ortP = null, session = null, backend = null, cancelled = false;
 const post = (m, tr = []) => self.postMessage(m, tr);
@@ -38,8 +40,7 @@ async function ensureSession(rid, device) {
   if (!session) { session = await mk('wasm'); backend = 'wasm'; }
 }
 
-async function split({ rid, L, R, device }) {
-  const t0 = Date.now(); cancelled = false;
+async function mlSeparate(rid, L, R, device) {
   await ensureSession(rid, device);
   const ort = await loadOrt(), model = drumModel(), W = model.window;
   const run = async (mix, mag, le) => {
@@ -47,10 +48,22 @@ async function split({ rid, L, R, device }) {
     const f = res.freq_out.data, t = res.time_out.data;
     return { freq: f instanceof Float32Array ? f.slice() : Float32Array.from(f), time: t instanceof Float32Array ? t.slice() : Float32Array.from(t) };
   };
-  const stems = await separateLong({ L, R, run, W, S: 4, overlap: model.overlap, isCancelled: () => cancelled,
+  const st = await separateLong({ L, R, run, W, S: 4, overlap: model.overlap, isCancelled: () => cancelled,
     onProgress: (f) => post({ type: 'progress', rid, phase: 'separate', fraction: f, backend }) });
-  const flat = stems.flat();
-  post({ type: 'done', rid, stems: flat, backend, ms: Date.now() - t0 }, flat.map((a) => a.buffer));
+  return { kick: st[0], snare: st[1], cymbals: st[2], toms: st[3] };
+}
+
+/** m: {rid, L, R, bass?:[L,R], mode:'ml'|'dsp', sr (=44100 for ml), device, opts} -> done {parts:[{key,name,kind,parent,L,R}], events, notes, backend, ms} */
+async function split(m) {
+  const t0 = Date.now(); cancelled = false; const { rid, L, R, mode, sr, opts = {} } = m, drums = [L, R];
+  const bass = m.bass || null;
+  const step = (phase, fraction = 0) => post({ type: 'progress', rid, phase, fraction, backend });
+  let ml = null, dsp = null;
+  if (mode === 'ml') ml = await mlSeparate(rid, L, R, m.device); else { step('dsp'); dsp = dspDrumSplit(L, R, sr, { onProgress: (f) => step('dsp', f) }); }
+  step('post');
+  const out = buildParts({ drums, bass, ml, dsp, sr, ...opts, onProgress: (p) => step('post') });
+  const parts = out.parts.map((p) => ({ key: p.key, name: p.name, kind: p.kind, parent: p.parent, rmsDb: p.rmsDb, L: p.audio[0], R: p.audio[1] }));
+  post({ type: 'done', rid, parts, events: out.events, notes: out.notes, backend: mode === 'ml' ? backend : 'dsp', ms: Date.now() - t0 }, parts.flatMap((p) => [p.L.buffer, p.R.buffer]));
 }
 
 self.onmessage = async (ev) => {

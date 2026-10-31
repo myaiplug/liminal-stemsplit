@@ -64,3 +64,23 @@ test('dspDrumSplit partitions the signal (sum = input)', () => {
   for (const p of Object.values(o)) for (let i = 0; i < x.length; i++) tot[i] += p[0][i];
   assert.ok(maxErr(x, tot) < 1e-5, 'sum err ' + maxErr(x, tot));
 });
+
+import { buildParts } from '../public/stem-studio/drums/pipeline.js';
+test('buildParts: drums and bass are conserved exactly (ML-style input with a remainder)', () => {
+  const { x } = hatsAndCrash(3), { k } = kicks(), N = Math.min(x.length, k.length), r = rng(9);
+  const mk = (f) => { const a = new Float32Array(N); for (let i = 0; i < N; i++) a[i] = f(i); return [a, a.slice()]; };
+  const kick = mk((i) => k[i]), snare = mk((i) => 0.05 * r()), toms = mk(() => 0), cym = mk((i) => x[i]);
+  const drums = mk((i) => kick[0][i] + snare[0][i] + cym[0][i] + 0.01 * Math.sin(i * 0.01)); // 0.01 sine = remainder
+  const bass = mk((i) => 0.3 * Math.sin(2 * Math.PI * 40 * i / sr) + 0.2 * Math.sin(2 * Math.PI * 400 * i / sr));
+  const { parts } = buildParts({ drums, bass, ml: { kick, snare, cymbals: cym, toms }, sr });
+  const by = Object.fromEntries(parts.map((p) => [p.key, p]));
+  assert.ok(by.kick && by.snare && by.toms && by.hats && by.cymbals && by.sub808 && by.bassRest && by.remainder);
+  for (let c = 0; c < 2; c++) {
+    const dsum = new Float32Array(N), bsum = new Float32Array(N);
+    for (const p of parts) { if (p.parent === 'drums' && p.key !== 'sub808') for (let i = 0; i < N; i++) dsum[i] += p.audio[c][i]; if (p.key === 'bassRest') for (let i = 0; i < N; i++) bsum[i] += p.audio[c][i]; }
+    // drums children (without 808) + the kick low band moved to 808 = drums ; 808 - bass low band = that kick part
+    const lo = by.sub808.audio[c].map((v, i) => v + by.bassRest.audio[c][i] - bass[c][i]); // kick part moved into 808
+    for (let i = 0; i < N; i += 7) assert.ok(Math.abs(dsum[i] + lo[i] - drums[c][i]) < 1e-4, `drums @${i}`);
+  }
+  assert.ok(by.remainder.rmsDb < -20 && by.remainder.rmsDb > -80);
+});
