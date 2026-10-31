@@ -1,0 +1,12 @@
+import { chromium } from 'playwright-core'; import fs from 'node:fs';
+const browser = await chromium.launch({ executablePath: '/usr/bin/google-chrome', headless: true, args: ['--autoplay-policy=no-user-gesture-required'] });
+const page = await (await browser.newContext({ viewport: { width: 1400, height: 1100 }, acceptDownloads: true })).newPage();
+const errs = []; page.on('console', (m) => { if (['error', 'warning'].includes(m.type())) errs.push(m.text()); }); page.on('pageerror', (e) => errs.push('PAGEERR ' + e.stack));
+await page.goto('http://localhost:8123/stem-studio.html'); await page.waitForFunction(() => window.__studioUi, null, { timeout: 15000 });
+const files = fs.readdirSync('/workspace/studio-fixtures/mini').filter((f) => f.endsWith('.wav')).map((f) => '/workspace/studio-fixtures/mini/' + f);
+await page.setInputFiles('.drop input', files); await page.waitForSelector('.lane', { timeout: 20000 });
+await page.waitForTimeout(1500);
+console.log('lanes', await page.$$eval('.lane', (e) => e.length), 'sr', await page.evaluate(() => __studio.sr));
+await (await page.$('section[aria-labelledby=h-st]')).screenshot({ path: '/workspace/studio-shots/smoke2.png' });
+console.log(errs.join('\n'));
+await browser.close();
