@@ -10,12 +10,16 @@ fs.rmSync(out, { recursive: true, force: true });
 fs.mkdirSync(out, { recursive: true });
 
 const FILES = ['public/browser-split.html', 'public/browser-split-sw.js', 'public/roformer-web', 'public/assets/liminal.png'];
+// Stem Studio (static, no server): staged when present. Model weights (*.onnx) are NEVER staged; host them separately.
+const STUDIO = ['public/stem-studio.html', 'public/stem-studio'].filter((r) => fs.existsSync(path.join(root, r)));
+FILES.push(...STUDIO);
+const skip = (src) => !/\.onnx$/i.test(src) && !src.includes(`${path.sep}__fix`);
 for (const rel of FILES) {
   const src = path.join(root, rel);
   if (!fs.existsSync(src)) { console.error(`missing: ${rel}`); process.exit(1); }
   const dst = path.join(out, rel.replace(/^public\//, ''));
   fs.mkdirSync(path.dirname(dst), { recursive: true });
-  fs.cpSync(src, dst, { recursive: true });
+  fs.cpSync(src, dst, { recursive: true, filter: skip });
 }
 // On this preview host '/' shows the stem page: let the offline cache answer '/' too.
 const swPath = path.join(out, 'browser-split-sw.js');

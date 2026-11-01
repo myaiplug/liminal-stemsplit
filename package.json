@@ -1,7 +1,7 @@
 {
   "name": "liminal-stemsplit",
   "version": "2.0.0",
-  "description": "Liminal StemSplit \u2014 AI-powered stem separation. Local-first. One-time purchase $49.",
+  "description": "Liminal StemSplit \u2014 AI-powered stem separation. Local-first. One-time purchase $29.",
   "type": "module",
   "scripts": {
     "start": "node server.js",

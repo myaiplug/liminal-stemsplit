@@ -29,6 +29,7 @@ SHA-256 of the vendored ORT files (npm `onnxruntime-web@1.30.0`, unmodified):
 | BS-RoFormer-SW 6-stem, fp16 ONNX | https://huggingface.co/Acapellas/bs-roformer-sw-6stem-FP16-FP32-onnx @ 3a8d965 | MIT (model card / repo metadata) | 352,778,874 B | Architecture: lucidrains/BS-RoFormer (MIT), ZFTurbo Music-Source-Separation-Training (MIT). **Provenance caveat:** the model card says the pretrained weights were re-hosted by jarredou *without a stated license*, and that the re-host owner "were not involved in training and have no provenance information". The MIT tag covers the ONNX export/code lineage, not a verified license on the weights. Review before relying on this model commercially. |
 | Mel-Band RoFormer "Duality" student, ONNX | https://huggingface.co/musetric/mel-band-roformer-duality-student-onnx @ 0e04989 | Apache-2.0 | 5,539,495 B + 213,244,940 B (external data) | Distilled from Aname-Tommy's Mel-Band RoFormer (Apache-2.0). Mel-Band RoFormer: Wang et al., arXiv:2310.01809. |
 | Mini-BS-RoFormer V2.5 (46.2M), ONNX | https://huggingface.co/HiDolen/Mini-BS-RoFormer-V2.5-46.2M @ 38dafc7 | MIT | 96,538,997 B | Shipped fp16 ONNX (weights are natively bf16; used as published). |
+| DrumSep v2 drum separator (HDemucs, 4 stems), browser build 10 s window / fp16 weights | https://huggingface.co/gridshiftstudio/drumsep-onnx (v2), fine-tune of https://github.com/inagoy/drumsep | MIT | 168,050,967 B (derived, sha256 b05779ea…32839a) | **Provenance of the training audio is not independently verified** (owner's one-shots + Magenta Groove MIDI, CC BY 4.0). Not hosted yet. See docs/stem-studio-drums.md. |
 
 ## Code consulted / derived
 
@@ -67,3 +68,11 @@ OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
 ## Apache License 2.0
 
 Applies to the Duality student weights. Full text: https://www.apache.org/licenses/LICENSE-2.0
+
+## Stem Studio (public/stem-studio) bundled code
+
+* **lamejs** 1.2.1 — LGPL-3.0, vendored unmodified at `public/stem-studio/vendor/lamejs`, lazy-loaded only for MP3 export (can be removed without affecting WAV export).
+* **fflate** — MIT, ZIP export.
+* **onnxruntime-web** 1.30.0 — MIT (vendored by the browser splitter, reused by the drum worker).
+* Desktop effect-chain parameters are extracted from this repository's own desktop app (`scripts/extract-desktop-presets.mjs`).
+* Loudness follows ITU-R BS.1770-4 / EBU R128; implemented independently (checked against ffmpeg `ebur128`).
