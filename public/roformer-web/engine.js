@@ -158,7 +158,7 @@ export class RoformerEngine {
       await this.#switchToWasm(e.message || e, onProgress);
       result = await attempt();
     }
-    return { sink: result.sink, stems: result.stems, backend: this.backend, ms: Date.now() - t0, chunks: result.chunks };
+    return { sink: result.sink, stems: result.stems, backend: this.backend, ms: Date.now() - t0, chunks: result.chunks, nullDb: result.nullDb };
   }
 }
 

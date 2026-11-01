@@ -917,6 +917,9 @@ class OutputEncoder:
     """
 
     SUPPORTED_FORMATS = ['wav', 'mp3']
+    # WAV stems are written as 24-bit PCM. 16-bit adds a noise floor at about -96 dBFS
+    # that stacks up when stems are processed and summed back in a DAW.
+    WAV_SUBTYPE = 'PCM_24'
 
     @staticmethod
     def encode_stem(
@@ -969,7 +972,7 @@ class OutputEncoder:
                 str(output_path),
                 audio.T,  # soundfile expects (samples, channels)
                 sr,
-                subtype='PCM_16',
+                subtype=OutputEncoder.WAV_SUBTYPE,
             )
             # Todo: add RIFF tags if possible using soundfile/taglib if soundfile supports it or post-process
             # Soundfile doesn't easily support arbitrary tags. We might skip this for WAV or use ffmpeg.

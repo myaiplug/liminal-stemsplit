@@ -10,6 +10,7 @@
  */
 
 import { MemorySink } from './sinks.js';
+import { NullMeter } from './fidelity.js';
 
 export class CancelledError extends Error {
   constructor() { super('Separation cancelled'); this.name = 'CancelledError'; }
@@ -56,6 +57,7 @@ export async function separateTrack({
   const bufL = new Float32Array(C);
   const bufR = new Float32Array(C);
   let sanityDone = false;
+  const meter = new NullMeter();
   const t0 = Date.now();
 
   for (let i = 0; i < total; i++) {
@@ -99,6 +101,7 @@ export async function separateTrack({
     // Flush the finished region [start, nextStart) and slide the window.
     const nextStart = i < total - 1 ? starts[i + 1] : N;
     const fin = Math.min(nextStart - start, len);
+    const flushed = [];
     for (const [name, [al, ar]] of Object.entries(win)) {
       const outL = new Float32Array(fin);
       const outR = new Float32Array(fin);
@@ -106,12 +109,14 @@ export async function separateTrack({
         const inv = wwin[j] > 0 ? 1 / wwin[j] : 0;
         outL[j] = al[j] * inv; outR[j] = ar[j] * inv;
       }
+      flushed.push([outL, outR]);
       await sink.write(name, 0, start, outL);
       await sink.write(name, 1, start, outR);
       al.copyWithin(0, fin); ar.copyWithin(0, fin);
       al.fill(0, C - fin); ar.fill(0, C - fin);
     }
     wwin.copyWithin(0, fin); wwin.fill(0, C - fin);
+    meter.add(left.subarray(start, start + fin), right.subarray(start, start + fin), flushed, fin);
 
     const done = i + 1;
     const elapsed = Date.now() - t0;
@@ -120,5 +125,5 @@ export async function separateTrack({
     await new Promise((r) => setTimeout(r, 0));
   }
 
-  return { sink, stems: sink.data || null, chunks: total };
+  return { sink, stems: sink.data || null, chunks: total, nullDb: meter.db };
 }

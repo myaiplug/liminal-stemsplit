@@ -20,6 +20,7 @@
  */
 
 import { stftFrames, istftFrames, numFrames } from './dsp.js';
+import { residualInto } from './fidelity.js';
 
 function alloc2(n) { return [new Float32Array(n), new Float32Array(n)]; }
 
@@ -51,11 +52,11 @@ export const bs6Adapter = {
         spec_real: { data: re, dims: [1, 2, F, T] },
         spec_imag: { data: im, dims: [1, 2, F, T] },
       },
-      ctx: null,
+      ctx: { left, right },
     };
   },
 
-  finish(outputs, _ctx) {
+  finish(outputs, ctx) {
     const { nFft, hop, F, T, chunkSamples, names } = this;
     const outRe = outputs.out_spec_real, outIm = outputs.out_spec_imag;
     const plane = F * T;
@@ -72,7 +73,9 @@ export const bs6Adapter = {
       }, nFft, hop, T, chunkSamples, l, r);
       stems[name] = [l, r];
     });
-    return stems;
+    // The network's own "other" misses whatever the masks lose. Rebuild it as
+    // mix - (the other five) so the six stems add back to the input.
+    return ctx ? residualInto(stems, ctx.left, ctx.right, 'other') : stems;
   },
 };
 
@@ -135,7 +138,7 @@ export const miniAdapter = {
       }, fftMask, hop, T, chunkSamples, l, r);
       stems[name] = [l, r];
     });
-    return stems;
+    return residualInto(stems, ctx.left, ctx.right, 'other');
   },
 };
 
