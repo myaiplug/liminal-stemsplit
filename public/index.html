@@ -1489,7 +1489,7 @@ async function checkoutPro(e) {
     fetch('/api/sales', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ email, product: 'liminal_pro', amount: 4900 }),
+      body: JSON.stringify({ email, product: 'liminal_pro', amount: 2900 }),
     }).catch(() => {});
     try {
       const sales = JSON.parse(localStorage.getItem('liminal_sales') || '[]');
