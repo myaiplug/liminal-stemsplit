@@ -10,8 +10,8 @@
 
 /** Paid products offered in the gentle upsell (same two on both sites). No prices unless a product page states one. */
 export const OFFERS = [
-  { id: 'liminal', name: 'NoDAW Liminal', tag: 'Windows desktop', blurb: 'Per-stem presets, full-length models on your GPU, batch folders, export straight to your DAW.', cta: 'Get NoDAW Liminal', url: 'https://nodaw.gumroad.com/l/LiminalPro' },
-  { id: 'coproducer', name: 'NoDAW CoProducer Pro', tag: 'Desktop, $49 one-time', blurb: 'Local LUFS, true-peak, clip and phase analysis with conservative repair that writes a file. No subscription.', cta: 'Get CoProducer Pro', url: 'https://nodawlabs.com/products/nodaw-coproducer-audio-quality-analyzer-repair-tool?utm_source=stem-studio&utm_medium=referral&utm_campaign=upsell' },
+  { id: 'liminal', name: 'NoDAW Liminal', tag: 'Windows desktop, $29 one-time', blurb: 'Per-stem presets, full-length models on your GPU, batch folders, export straight to your DAW.', cta: 'Get NoDAW Liminal', url: 'https://nodaw.gumroad.com/l/LiminalPro' },
+  { id: 'coproducer', name: 'NoDAW CoProducer Pro', tag: 'Desktop, $29 one-time', blurb: 'Local LUFS, true-peak, clip and phase analysis with conservative repair that writes a file. No subscription.', cta: 'Get CoProducer Pro', url: 'https://nodawlabs.com/products/nodaw-coproducer-audio-quality-analyzer-repair-tool?utm_source=stem-studio&utm_medium=referral&utm_campaign=upsell' },
 ];
 export const BRAND_LIMINAL = {
   name: 'NoDAW Liminal', credit: 'Made with NoDAW Liminal', url: 'https://liminal-stemsplit.onrender.com/',
