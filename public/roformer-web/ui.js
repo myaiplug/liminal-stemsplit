@@ -11,6 +11,9 @@ import { MODELS, MODEL_ORDER, formatBytes } from './models.js';
 import { StemSeparator, detectCapabilities, decodeToStereo44k } from './client.js';
 import { createProgressPanel, computePeaks, fmtEta } from './progress.js';
 import { cachedModelIds, clearModelCache, partialModelBytes, storageInfo, requestPersistence } from './model-store.js';
+import { pickBusyWindow, fmtClock } from './window.js';
+import { deriveDesk } from './derive.js';
+import { encodeWav } from './wav.js';
 
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
@@ -30,12 +33,13 @@ const MODEL_BLURB = {
   bs6: 'Full 6-stem (BS-Roformer-SW)',
 };
 
-export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {}) {
+export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle, mode, previewSeconds = 20 } = {}) {
+  const preview = mode === 'preview';
   root.classList.add('rf-root');
   root.textContent = '';
 
   const sep = new StemSeparator({ workerUrl });
-  const state = { modelId: 'mini', file: null, busy: false, caps: null, cached: new Set(), partial: {}, urls: [], stems: [], loadedModel: null };
+  const state = { modelId: 'mini', file: null, busy: false, caps: null, cached: new Set(), partial: {}, urls: [], stems: [], loadedModel: null, decoded: null, pick: null, decodeJob: null };
 
   // ---- capability banner
   const banner = el('div', 'rf-banner rf-banner--wait', 'Checking your GPU…');
@@ -81,9 +85,13 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
   drop.append(fileInput, dropTitle, dropSub);
   const setFile = (f) => {
     state.file = f || null;
+    state.decoded = null;
+    state.pick = null;
+    state.decodeJob = null;
     dropTitle.textContent = f ? f.name : 'Drop a track here or click to choose';
-    dropSub.textContent = f ? `${(f.size / 1e6).toFixed(1)} MB — click to change` : 'WAV, MP3, FLAC, M4A, OGG. Decoded and processed on this device — nothing is uploaded.';
+    dropSub.textContent = f ? `${(f.size / 1e6).toFixed(1)} MB. Click to change.` : 'WAV, MP3, FLAC, M4A, OGG. Decoded and processed on this device. Nothing is uploaded.';
     refresh();
+    if (preview && f) analyzePreview(f);
   };
   fileInput.addEventListener('change', () => setFile(fileInput.files[0]));
   drop.addEventListener('dragover', (e) => { e.preventDefault(); drop.classList.add('rf-drop--over'); });
@@ -94,11 +102,18 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
   });
 
   // ---- actions + progress
-  const goBtn = el('button', 'rf-btn rf-btn--primary', 'Split stems');
+  const goBtn = el('button', 'rf-btn rf-btn--primary', preview ? 'Split this 20 seconds' : 'Split stems');
   goBtn.type = 'button'; goBtn.disabled = true;
   const cancelBtn = el('button', 'rf-btn rf-btn--ghost', 'Cancel'); cancelBtn.type = 'button'; cancelBtn.hidden = true;
   const clearBtn = el('button', 'rf-btn rf-btn--link', 'Clear downloaded models'); clearBtn.type = 'button'; clearBtn.hidden = true;
   const actions = el('div', 'rf-actions'); actions.append(goBtn, cancelBtn, clearBtn);
+
+  const windowBox = el('div', 'rf-window');
+  windowBox.hidden = true;
+  const windowText = el('p', 'rf-window__text', '');
+  const reshuffle = el('button', 'rf-btn rf-btn--ghost rf-btn--sm', 'Pick another 20 seconds');
+  reshuffle.type = 'button';
+  windowBox.append(windowText, reshuffle);
 
   const storageRow = el('div', 'rf-storage');
   const storageText = el('span', 'rf-storage__text');
@@ -126,7 +141,7 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
   const resNote = el('p', 'rf-note');
   results.append(resHead, resList, resNote);
 
-  root.append(banner, deviceRow, el('h3', 'rf-h', '1 · Pick a model'), picker, el('h3', 'rf-h', '2 · Choose a track'), drop, actions, storageRow, prog, msg, results);
+  root.append(banner, deviceRow, el('h3', 'rf-h', '1 · Pick a model'), picker, el('h3', 'rf-h', preview ? '2 · Choose a track. Only 20 seconds are split.' : '2 · Choose a track'), drop, windowBox, actions, storageRow, prog, msg, results);
 
   // ---- helpers
   function showMsg(text, kind = 'info') { msg.hidden = !text; msg.textContent = text || ''; msg.className = `rf-msg rf-msg--${kind}`; }
@@ -144,7 +159,9 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
     deviceSel.disabled = state.busy;
     clearBtn.hidden = state.busy || (state.cached.size === 0 && !Object.values(state.partial).some((n) => n > 0));
     const m = MODELS[state.modelId];
-    goBtn.textContent = state.cached.has(m.id) ? 'Split stems' : `Download model (${formatBytes(m.sizeBytes)}) & split`;
+    if (preview) goBtn.textContent = state.cached.has(m.id) ? 'Split this 20 seconds' : `Download model (${formatBytes(m.sizeBytes)}) and split 20 seconds`;
+    else goBtn.textContent = state.cached.has(m.id) ? 'Split stems' : `Download model (${formatBytes(m.sizeBytes)}) & split`;
+    reshuffle.disabled = state.busy || !state.decoded;
   }
   async function refreshCache() {
     try { state.cached = new Set(await cachedModelIds()); } catch { state.cached = new Set(); }
@@ -224,6 +241,98 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
     finally { allBtn.disabled = false; allBtn.textContent = prev; }
   });
 
+  function ensureDecoded(file) {
+    if (state.decodeJob && state.decodeJob.file === file) return state.decodeJob.promise;
+    const promise = decodeToStereo44k(file).then((audio) => {
+      if (state.file === file) state.decoded = audio;
+      return audio;
+    });
+    state.decodeJob = { file, promise };
+    return promise;
+  }
+  function rollWindow(full) {
+    const audio = full || state.decoded;
+    if (!audio) return;
+    state.pick = pickBusyWindow(audio.left, audio.right, 44100, previewSeconds);
+    const p = state.pick;
+    windowBox.hidden = false;
+    windowText.textContent = p.candidates <= 1
+      ? p.reason
+      : `${fmtClock(p.startSec)} to ${fmtClock(p.startSec + p.seconds)}. ${p.reason}`;
+    refresh();
+  }
+  async function analyzePreview(file) {
+    windowBox.hidden = false;
+    windowText.textContent = 'Reading the file to find a 20 second stretch with bass, drums, and vocals together.';
+    reshuffle.disabled = true;
+    try {
+      const audio = await ensureDecoded(file);
+      if (state.file !== file) return;
+      rollWindow(audio);
+    } catch (e) {
+      if (state.file !== file) return;
+      windowText.textContent = e?.message || String(e);
+    }
+  }
+  function playableUrl(left, right) {
+    const blob = new Blob([encodeWav([left, right], 44100, 'pcm16')], { type: 'audio/wav' });
+    const url = URL.createObjectURL(blob);
+    state.urls.push(url);
+    return url;
+  }
+  async function offerDesk() {
+    const existing = results.querySelector('.rf-desk');
+    if (existing) existing.remove();
+    const desk = el('div', 'rf-desk');
+    desk.append(el('h3', 'rf-h', 'Break the stems down'));
+    desk.append(el('p', 'rf-note', 'Lead vocal, backup / adlibs, 808, and the drum pieces (kick, snare/clap, hi-hats, crash, perk) are cut from the model stems above. The vocals, drums, bass, and other rows are the RoFormer. This second pass is not another neural model.'));
+    const btn = el('button', 'rf-btn rf-btn--ghost', 'Cut lead, backup, 808, and the drum kit');
+    btn.type = 'button';
+    const list = el('div', 'rf-stems');
+    desk.append(btn, list);
+    results.append(desk);
+    btn.addEventListener('click', async () => {
+      btn.disabled = true;
+      btn.textContent = 'Cutting…';
+      try {
+        const planes = {};
+        for (const name of state.stems) {
+          const p = await sep.readStem(name);
+          planes[name] = [p.left, p.right];
+        }
+        const parts = deriveDesk(planes, 44100);
+        list.textContent = '';
+        let group = '';
+        for (const part of parts) {
+          if (part.group !== group) {
+            group = part.group;
+            list.append(el('p', 'rf-desk__group', group));
+          }
+          const row = el('div', 'rf-stem');
+          row.append(el('span', 'rf-stem__name', part.name));
+          const audio = el('audio', 'rf-stem__audio');
+          audio.controls = true;
+          audio.preload = 'none';
+          audio.src = playableUrl(part.left, part.right);
+          audio.addEventListener('play', () => results.querySelectorAll('audio').forEach((a) => { if (a !== audio) a.pause(); }));
+          const dl = el('button', 'rf-btn rf-btn--ghost rf-btn--sm', 'Download WAV');
+          dl.type = 'button';
+          dl.addEventListener('click', () => {
+            const blob = new Blob([encodeWav([part.left, part.right], 44100, 'pcm16')], { type: 'audio/wav' });
+            saveBlob(blob, `${baseName()} - ${part.name}.wav`);
+          });
+          row.append(audio, dl);
+          list.append(row);
+        }
+        btn.hidden = true;
+      } catch (e) {
+        btn.disabled = false;
+        btn.textContent = 'Cut lead, backup, 808, and the drum kit';
+        showMsg(`Could not cut the extra lanes: ${e?.message || e}`, 'error');
+      }
+    });
+  }
+
   // ---- main flow
   async function run() {
     if (state.busy || !state.file) return;
@@ -239,11 +348,25 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
     const needsDownload = !state.cached.has(model.id);
     panel.begin({ stems: model.stems, needsDownload, file: state.file });
     try {
-      panel.stage('decode', { frac: null, label: 'Reading your audio…', detail: 'Decoding and resampling on this device.' });
-      const audio = await decodeToStereo44k(state.file);
+      panel.stage('decode', { frac: null, label: 'Reading your audio…', detail: preview ? 'Picking a 20 second stretch on this device.' : 'Decoding and resampling on this device.' });
+      let audio;
+      if (preview) {
+        const full = await ensureDecoded(state.file);
+        if (!state.pick) rollWindow(full);
+        const p = state.pick;
+        audio = {
+          left: full.left.slice(p.startSample, p.startSample + p.length),
+          right: full.right.slice(p.startSample, p.startSample + p.length),
+          duration: p.length / 44100,
+          sourceRate: full.sourceRate,
+        };
+        showMsg(`${fmtClock(p.startSec)} to ${fmtClock(p.startSec + p.seconds)}. ${p.reason} The rest of the file stays on this device and is not split.`, 'info');
+      } else {
+        audio = await decodeToStereo44k(state.file);
+      }
       panel.setTrack(computePeaks(audio.left, audio.right, 480), audio.duration); // before the buffers are handed to the worker
-      if (audio.duration > 1200) showMsg(`This track is ${fmtTime(audio.duration * 1000)} long. Separation is streamed to keep memory low, but it will take a while and the decoded audio alone needs about ${Math.round(audio.duration * 44100 * 8 / 1e6)} MB of RAM.`, 'warn');
-      else if (audio.sourceRate && audio.sourceRate !== 44100) showMsg(`Resampled from ${audio.sourceRate} Hz to 44100 Hz in your browser.`, 'info');
+      if (!preview && audio.duration > 1200) showMsg(`This track is ${fmtTime(audio.duration * 1000)} long. Separation is streamed to keep memory low, but it will take a while and the decoded audio alone needs about ${Math.round(audio.duration * 44100 * 8 / 1e6)} MB of RAM.`, 'warn');
+      else if (!preview && audio.sourceRate && audio.sourceRate !== 44100) showMsg(`Resampled from ${audio.sourceRate} Hz to 44100 Hz in your browser.`, 'info');
 
       const dl = { t0: 0, b0: 0 };
       const loadInfo = await sep.load(model.id, {
@@ -288,8 +411,9 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
         },
       });
       window.__rfLast.sep = info;
-      panel.finish({ message: `Done — ${info.stems.length} stems ready.` });
+      panel.finish({ message: `Done. ${info.stems.length} stems ready.` });
       renderStems(info);
+      if (preview) offerDesk();
     } catch (e) {
       panel.stop();
       if (e?.cancelled) showMsg('Cancelled.', 'info');
@@ -299,6 +423,7 @@ export function mountStemSplit(root, { workerUrl, tips, tipLinks, appTitle } = {
     }
   }
   goBtn.addEventListener('click', run);
+  reshuffle.addEventListener('click', () => { if (state.decoded && !state.busy) rollWindow(state.decoded); });
   cancelBtn.addEventListener('click', () => { sep.cancel(); cancelBtn.disabled = true; setTimeout(() => (cancelBtn.disabled = false), 1500); });
   clearBtn.addEventListener('click', async () => {
     sep.release();

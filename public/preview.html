@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#020617">
+<title>20 second stem preview | Liminal StemSplit</title>
+<meta name="description" content="Drop a song. Liminal picks a random 20 second stretch that has several parts in it, then splits that stretch in your browser. Nothing is uploaded.">
+<link rel="icon" href="/assets/liminal.png" type="image/png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/roformer-web/rf.css">
+<style>
+:root{--cyan:#22d3ee;--purple:#a855f7;--navy:#020617;--muted:#9ca3af;--text:#f3f4f6}
+*{box-sizing:border-box}
+body{margin:0;background:#020617;color:var(--text);font-family:Inter,system-ui,sans-serif}
+.wrap{max-width:920px;margin:0 auto;padding:1.25rem 1rem 3rem}
+nav{display:flex;flex-wrap:wrap;gap:.75rem 1rem;align-items:center;font-size:.85rem;margin-bottom:1.25rem}
+nav a{color:var(--muted);text-decoration:none}
+nav a:hover{color:var(--cyan)}
+h1{font-size:clamp(1.6rem,4vw,2.4rem);letter-spacing:-.03em;margin:0 0 .5rem}
+h1 span{background:linear-gradient(135deg,var(--cyan),var(--purple));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.lede{color:var(--muted);max-width:42rem;margin:0 0 1.25rem;font-size:.95rem}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <nav>
+    <a href="/">Liminal StemSplit</a>
+    <a href="/browser-split.html">Full-length split</a>
+    <a href="/#demo">Hear a finished demo</a>
+  </nav>
+  <h1>Split <span>20 seconds</span> in this browser.</h1>
+  <p class="lede">Drop a song. A 20 second stretch is chosen at random from the parts of the file where sub, drums, and vocal-range energy sit together. The RoFormer then splits only that stretch: vocals, drums, bass, and other. Nothing is uploaded. After it finishes, cut a lead vocal, backup / adlibs, an 808, and a deeper drum kit (kick, snare/clap, hi-hats, crash, perk) from those stems. The first run downloads the fast model (about 97 MB) into this browser.</p>
+  <div id="app"></div>
+</div>
+<script type="module">
+  import { registerStemSW } from '/roformer-web/register-sw.js';
+  registerStemSW({ url: '/browser-split-sw.js', coi: false });
+  const { mountStemSplit } = await import('/roformer-web/ui.js');
+  mountStemSplit(document.getElementById('app'), { mode: 'preview', previewSeconds: 20, appTitle: 'Liminal StemSplit' });
+</script>
+</body>
+</html>

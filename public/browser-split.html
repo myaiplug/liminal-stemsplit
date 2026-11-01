@@ -62,8 +62,11 @@ noscript p{color:var(--orange)}
 <script type="module">
   import { registerStemSW } from '/roformer-web/register-sw.js';
   registerStemSW({ url: '/browser-split-sw.js', coi: false }); // offline cache; COOP/COEP come from the server
+  const preview = new URLSearchParams(location.search).get('preview') === '1';
   const { mountStemSplit } = await import('/roformer-web/ui.js');
-  mountStemSplit(document.getElementById('app'), { appTitle: 'Liminal StemSplit' });
+  mountStemSplit(document.getElementById('app'), preview
+    ? { mode: 'preview', previewSeconds: 20, appTitle: 'Liminal StemSplit' }
+    : { appTitle: 'Liminal StemSplit' });
 </script>
 </body>
 </html>

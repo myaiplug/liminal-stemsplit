@@ -133,6 +133,14 @@ self.onmessage = async (ev) => {
         post({ type: 'exported', reqId: msg.reqId, stem: msg.stem, format: msg.format, blob });
         break;
       }
+      case 'planes': {
+        if (!lastSink || !lastMeta.names.includes(msg.stem)) throw new Error('No separated audio available');
+        const N = lastMeta.frames;
+        const left = new Float32Array(lastSink.read(msg.stem, 0, 0, N));
+        const right = new Float32Array(lastSink.read(msg.stem, 1, 0, N));
+        post({ type: 'exported', reqId: msg.reqId, stem: msg.stem, planes: { left, right } }, [left.buffer, right.buffer]);
+        break;
+      }
       case 'zip': {
         if (!lastSink) throw new Error('No separated audio available');
         const fflate = await import('./vendor/fflate/fflate.mjs');

@@ -33,7 +33,7 @@ app.use(billingRouter);
 // `credentialless` keeps cross-origin CDN assets (Google Fonts, jsDelivr,
 // Hugging Face model files) loadable without CORP headers.
 app.use((req, res, next) => {
-  if (req.path === '/browser-split.html' || req.path.startsWith('/roformer-web/') || req.path === '/stem-studio.html' || req.path.startsWith('/stem-studio/')) {
+  if (req.path === '/browser-split.html' || req.path === '/preview.html' || req.path.startsWith('/roformer-web/') || req.path === '/stem-studio.html' || req.path.startsWith('/stem-studio/')) {
     res.set('Cross-Origin-Opener-Policy', 'same-origin');
     res.set('Cross-Origin-Embedder-Policy', 'credentialless');
   }
