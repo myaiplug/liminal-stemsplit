@@ -36,7 +36,8 @@ The published ONNX has a fixed 40 s window (4–6 GB of RAM in a tab) and fp16 d
 **Provenance caveat (not independently verified):** the v2 fine-tune's model card says it was trained on the owner's own one-shots plus Magenta Groove MIDI rendered with them (Groove is CC BY 4.0). The upstream drumsep v1 training data is not documented in detail. MIT covers the *weights file*, not the unknown rights in the training audio. Treat it like the existing BS-RoFormer-SW flag: fine to ship as a free browser tool, get a decision before it is sold as part of Liminal.
 
 ### Hosting
-The ONNX is **not committed** (`public/stem-studio/drums/models/*.onnx` is git-ignored) and **not hosted anywhere yet** (needs a decision, see PR). GitHub Pages rejects files over 100 MB, so it needs an external host (e.g. a Hugging Face model repo). The URL is read from, in order: `?drummodel=<url>`, `globalThis.STEM_STUDIO_DRUM_MODEL_URL`, `./models/drumsep_v2_w10_f16w.onnx`. If nothing answers, the tab says so and only offers the DSP split. The worker checks the sha256 after download and caches the file in OPFS.
+The ONNX is **not committed** (git-ignored; GitHub Pages rejects files over 100 MB). It is hosted on Hugging Face: **https://huggingface.co/b33zy/drumsep-v2-onnx** (public, MIT model card with the provenance caveat). The app pins the immutable commit URL
+`https://huggingface.co/b33zy/drumsep-v2-onnx/resolve/592d7cc503b4adb75b6a9ef5514fe6bbe40367d3/drumsep_v2_w10_f16w.onnx` (168,050,967 B, sha256 `b05779ea756870f3fe359c63ac501dd12caf3b24d66237b1404bb4dd5b32839a`). HF answers with `Access-Control-Allow-Origin` and `Accept-Ranges`; the worker verifies the sha256 after download and caches the file in OPFS. Override order: `?drummodel=<url>`, `globalThis.STEM_STUDIO_DRUM_MODEL_URL`, the pinned HF URL. If the download fails, the tab says so and only offers the DSP split.
 
 ## How the pieces are derived
 
