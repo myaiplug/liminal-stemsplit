@@ -117,14 +117,14 @@ self.onmessage = async (ev) => {
         const frames = msg.left.length;
         const { createSink, storeInfo } = makeSinkFactory(model);
         if (!swept) { swept = true; if (OpfsSink.supported()) await OpfsSink.sweep(); }
-        const { sink, backend, ms } = await eng.separate(msg.left, msg.right, {
+        const { sink, backend, ms, nullDb } = await eng.separate(msg.left, msg.right, {
           createSink,
           onProgress: (p) => post({ type: 'progress', ...p }),
         });
         lastSink = sink;
         const names = model.stems.filter((n) => sink.names().includes(n));
         lastMeta = { names, frames, sampleRate: sr };
-        post({ type: 'done', stems: names, backend, ms, sampleRate: sr, frames, store: sink.kind, storeNote: storeInfo.note });
+        post({ type: 'done', stems: names, backend, ms, nullDb, sampleRate: sr, frames, store: sink.kind, storeNote: storeInfo.note });
         break;
       }
       case 'export': {
