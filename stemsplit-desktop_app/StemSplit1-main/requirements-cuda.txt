@@ -1,0 +1,16 @@
+# NVIDIA GPU runtime (Windows / Linux, CUDA 12.6 wheels, driver >= 560).
+#
+# Preferred way to apply this is `python scripts/gpu_runtime.py --install`, which installs the pins
+# below, verifies them (CUDA tensor, CUDAExecutionProvider, demucs import) and rolls back to the CPU
+# stack automatically if anything fails. Use this file only for manual / dev installs:
+#
+#   pip install onnxruntime-gpu==1.23.2 --force-reinstall --no-deps   (after: pip uninstall -y onnxruntime)
+#   pip install -r requirements-cuda.txt --force-reinstall --no-deps
+#
+# Verified on RTX 2080 Super (8 GB, sm_75, driver 610): htdemucs, 20 s of audio in 0.6 s warm.
+# Note: PyTorch publishes no torchaudio build for torch>2.9; demucs only needs the import to succeed
+# and the app falls back to a stub (see gpu_runtime.ensure_torchaudio), so torchaudio is not pinned here.
+--extra-index-url https://download.pytorch.org/whl/cu126
+torch==2.13.0+cu126
+torchvision==0.28.0+cu126
+onnxruntime-gpu==1.23.2

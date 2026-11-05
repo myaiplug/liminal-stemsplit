@@ -34,6 +34,10 @@ export interface SeparationModel {
   recommendedFor: string[];
   speed: 'fast' | 'balanced' | 'slow';
   quality: number;
+  /** Downloaded from the model library (user registry) rather than built in. */
+  dynamic?: boolean;
+  sizeMb?: number | null;
+  vramGb?: number | null;
 }
 
 export const ENGINE_META: Record<
@@ -737,12 +741,36 @@ export const DEFAULT_MODEL_BY_ENGINE: Record<SeparationEngine, string> = {
   instrument: 'inst_guitar_sw',
 };
 
+// ── Dynamic models (downloaded from the model library) ───────────────────
+// Registered through the Python user registry; mirrored here so the picker can list them.
+let dynamicModels: SeparationModel[] = [];
+let dynamicVersion = 0;
+const dynamicListeners = new Set<() => void>();
+
+export function setDynamicModels(models: SeparationModel[]): void {
+  const builtIn = new Set(SEPARATION_MODELS_ALL.map((m) => m.id));
+  dynamicModels = models.filter((m) => !builtIn.has(m.id));
+  dynamicVersion += 1;
+  dynamicListeners.forEach((fn) => fn());
+}
+
+export function getDynamicModelsVersion(): number {
+  return dynamicVersion;
+}
+
+export function subscribeDynamicModels(fn: () => void): () => void {
+  dynamicListeners.add(fn);
+  return () => {
+    dynamicListeners.delete(fn);
+  };
+}
+
 export function getModelsForEngine(engine: SeparationEngine): SeparationModel[] {
-  return SEPARATION_MODELS_ALL.filter((m) => m.engine === engine);
+  return [...SEPARATION_MODELS_ALL, ...dynamicModels].filter((m) => m.engine === engine);
 }
 
 export function getModelById(id: string): SeparationModel | undefined {
-  return SEPARATION_MODELS_ALL.find((m) => m.id === id);
+  return SEPARATION_MODELS_ALL.find((m) => m.id === id) ?? dynamicModels.find((m) => m.id === id);
 }
 
 export function supportsStems(model: SeparationModel, stemCount: number): boolean {

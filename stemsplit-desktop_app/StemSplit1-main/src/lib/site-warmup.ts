@@ -56,7 +56,7 @@ export async function pingProductionSite(event: string) {
     await fetch(`${PRODUCTION_SITE}/api/ping`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ event, version: '0.5.1' }),
+      body: JSON.stringify({ event, version: '0.7.0' }),
       signal: AbortSignal.timeout(COLD_START_TIMEOUT_MS),
     });
   } catch {

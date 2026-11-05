@@ -123,6 +123,14 @@ def check_runtime() -> Dict[str, Any]:
         if module.split(".")[0] in missing_required:
             continue
         try:
+            if module != "torch":
+                # torch 2.13+cu126 has no matching torchaudio; demucs only needs the import to
+                # succeed, so use the same shim the splitter uses instead of flagging a false failure.
+                try:
+                    import gpu_runtime
+                    gpu_runtime.ensure_torchaudio()
+                except Exception:
+                    pass
             importlib.import_module(module)
         except Exception as exc:
             broken.append(f"{module}: {type(exc).__name__}: {str(exc)[:160]}")

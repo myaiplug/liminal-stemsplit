@@ -1,3 +1,4 @@
+# CPU baseline. For NVIDIA GPUs see requirements-cuda.txt (applied automatically by scripts/gpu_runtime.py).
 torch==2.8.0
 demucs==4.0.1
 librosa

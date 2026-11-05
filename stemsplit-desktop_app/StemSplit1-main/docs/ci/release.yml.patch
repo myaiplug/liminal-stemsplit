@@ -1,0 +1,27 @@
+diff --git a/.github/workflows/release.yml b/.github/workflows/release.yml
+index 4989a7c..53a4a03 100644
+--- a/.github/workflows/release.yml
++++ b/.github/workflows/release.yml
+@@ -1,10 +1,9 @@
+-name: Build & Release v0.5.0
++name: Legacy release (Inno online installer + macOS)
+ 
++# Manual-only. The tagged release flow (signed NSIS/MSI + updater latest.json -> DRAFT release) lives in
++# release-windows.yml. Run this one by hand when you also want the Inno online installer / macOS DMG.
+ on:
+   workflow_dispatch:
+-  push:
+-    tags:
+-      - 'v*'
+ 
+ permissions:
+   contents: write
+@@ -186,7 +185,7 @@ jobs:
+         with:
+           tag_name: ${{ github.ref_name }}
+           name: Liminal StemSplit ${{ github.ref_name }}
+-          draft: false
++          draft: true
+           prerelease: false
+           generate_release_notes: true
+           files: |

@@ -8,6 +8,7 @@
 
 mod hardware;
 mod downloader;
+mod engine;
 
 use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
@@ -2636,6 +2637,12 @@ pub struct SeparationResult {
     pub stems: std::collections::HashMap<String, StemInfo>,
     pub process_duration_seconds: f64,
     pub errors: Vec<String>,
+    /// Auto-recovery summary written by splitter.py (attempts, category, final message).
+    #[serde(default)]
+    pub recovery: Option<serde_json::Value>,
+    /// Path to split_diagnostics.log for this run.
+    #[serde(default)]
+    pub diagnostic_log: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -3493,6 +3500,13 @@ async fn execute_splice(
             Ok(json_line) => {
                 // Try to parse as JSON (progress events)
                 if let Ok(progress) = serde_json::from_str::<serde_json::Value>(&json_line) {
+                    // Auto-recovery events (split_recovery.py): surfaced separately so the UI can
+                    // show "Recovering..." without disturbing the normal progress bar.
+                    if let Some(kind) = progress.get("event").and_then(|v| v.as_str()) {
+                        if kind == "recovery" || kind == "recovery_result" {
+                            let _ = window.emit("stem-split-recovery", progress.clone());
+                        }
+                    }
                     if let Some("progress") = progress.get("event").and_then(|v| v.as_str()) {
                         // Emit progress event to frontend
                         if let (Some(step), Some(total), Some(msg), Some(pct)) = (
@@ -3582,6 +3596,8 @@ async fn execute_splice(
         stems: std::collections::HashMap::new(),
         process_duration_seconds: 0.0,
         errors,
+        recovery: None,
+        diagnostic_log: None,
     })
 }
 
@@ -4914,6 +4930,8 @@ const OPTIONAL_PYTHON_PACKAGES: [&str; 8] = ["pedalboard", "pydub", "psutil", "p
 const STABLE_TORCH_VERSION: &str = "2.5.1";
 const STABLE_TORCHVISION_VERSION: &str = "0.20.1";
 const STABLE_DEMUCS_VERSION: &str = "4.0.1";
+/// CUDA runtime installed by scripts/gpu_runtime.py (torch 2.13.0+cu126 + onnxruntime-gpu).
+const CUDA_RUNTIME_TORCH_PREFIX: &str = "2.13.0+cu";
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 struct PythonSetupAttempt {
@@ -5296,7 +5314,40 @@ fn normalize_torch_version(version: &str) -> String {
         .to_string()
 }
 
+/// True when the interpreter has the CUDA runtime stack installed by scripts/gpu_runtime.py.
+/// That stack intentionally has no matching torchaudio (PyTorch stopped publishing it after 2.9),
+/// so it must not be judged - or "repaired" - by the legacy torch/torchaudio pairing check.
+fn is_cuda_runtime_stack(python_exe: &Path) -> bool {
+    run_python_eval(python_exe, "import torch; print(torch.__version__)")
+        .map(|v| v.starts_with(CUDA_RUNTIME_TORCH_PREFIX))
+        .unwrap_or(false)
+}
+
+/// Install the CUDA runtime through scripts/gpu_runtime.py. The script verifies the result and
+/// restores the CPU stack on failure, so Ok(true) means "CUDA is verified working".
+fn install_gpu_runtime_via_script(
+    python_exe: &Path,
+    env_dir: &Path,
+    diagnostics: &mut PythonSetupDiagnostics,
+) -> Result<bool, String> {
+    let script = resolve_python_script_path("gpu_runtime.py");
+    if !script.exists() {
+        return Err("gpu_runtime.py not found".into());
+    }
+    let args = vec![
+        script.to_string_lossy().to_string(),
+        "--install".to_string(),
+        "--python".to_string(),
+        python_exe.to_string_lossy().to_string(),
+    ];
+    run_python_step(python_exe, env_dir, "Install CUDA runtime (torch 2.13 cu126 + onnxruntime-gpu)", args, diagnostics)?;
+    Ok(verify_torch_cuda_available(python_exe))
+}
+
 fn is_torch_stack_compatible(python_exe: &Path) -> bool {
+    if is_cuda_runtime_stack(python_exe) {
+        return true;
+    }
     let Some((torch_version, torchaudio_version)) = torch_package_versions(python_exe) else {
         return false;
     };
@@ -5370,6 +5421,18 @@ fn pin_torch_stack(
     diagnostics: &mut PythonSetupDiagnostics,
 ) -> Result<(), String> {
     if prefer_cuda {
+        // Preferred: verified CUDA 12.6 runtime (works on current drivers/GPUs, with its own CPU rollback).
+        match install_gpu_runtime_via_script(python_exe, env_dir, diagnostics) {
+            Ok(true) => return Ok(()),
+            Ok(false) => diagnostics.warnings.push(
+                "CUDA 12.6 runtime could not be verified; trying the legacy CUDA 12.1 stack.".into(),
+            ),
+            Err(error) => diagnostics.warnings.push(format!(
+                "CUDA 12.6 runtime step failed ({error}); trying the legacy CUDA 12.1 stack."
+            )),
+        }
+        save_python_setup_diagnostics(diagnostics);
+
         install_torch_stack_variant(python_exe, env_dir, true, force_reinstall, diagnostics)?;
         if verify_torch_cuda_available(python_exe) {
             return Ok(());
@@ -5390,6 +5453,10 @@ fn cleanup_conflicting_torch_packages(
     env_dir: &Path,
     diagnostics: &mut PythonSetupDiagnostics,
 ) {
+    // The CUDA 12.6 runtime ships its own matching torchvision; re-pinning would downgrade it.
+    if is_cuda_runtime_stack(python_exe) {
+        return;
+    }
     // MDX-Net ONNX models need torchvision; pin a build that matches the installed torch stack.
     let use_cuda = verify_torch_cuda_available(python_exe);
     let _ = install_torch_stack_variant(python_exe, env_dir, use_cuda, false, diagnostics);
@@ -5513,6 +5580,17 @@ fn format_manifest_process_failure(
             message.push_str("\n\n");
             for error in errors {
                 message.push_str(&format!("• {}\n", error));
+            }
+
+            if let Some(summary) = parsed
+                .get("recovery")
+                .and_then(|r| r.get("final_message"))
+                .and_then(|v| v.as_str())
+            {
+                message.push_str(&format!("\nAuto-recovery: {}\n", summary));
+            }
+            if let Some(log_path) = parsed.get("diagnostic_log").and_then(|v| v.as_str()) {
+                message.push_str(&format!("Diagnostic log: {}\n", log_path));
             }
 
             let log_tail = read_splitter_log_tail(12);
@@ -6314,8 +6392,12 @@ fn main() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .plugin(tauri_plugin_shell::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .setup(|app| {
             enforce_window_security_policy(&app.app_handle());
+            // After an app update: verify/repair the embedded Python deps (no-op on normal launches).
+            engine::spawn_post_update_check(&app.app_handle());
             warm_production_site_background();
             tauri::async_runtime::spawn(async {
                 flush_queued_security_incidents().await;
@@ -6365,6 +6447,14 @@ fn main() {
             // Hardware and downloading
             hardware::get_system_profile,
             downloader::download_file,
+            // Engine maintenance: model catalog, repair, diagnostics
+            engine::catalog_list,
+            engine::catalog_download,
+            engine::catalog_remove,
+            engine::engine_doctor,
+            engine::engine_post_update_check,
+            engine::engine_gpu_status,
+            engine::read_diagnostic_log,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

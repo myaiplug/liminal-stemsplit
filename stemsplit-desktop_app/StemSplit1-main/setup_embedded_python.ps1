@@ -3,7 +3,8 @@
 
 param(
     [switch]$RepairIfNeeded,
-    [switch]$ForceReinstall
+    [switch]$ForceReinstall,
+    [switch]$SkipGpu   # keep the CPU PyTorch stack even when an NVIDIA GPU is present
 )
 
 $ErrorActionPreference = "Stop"
@@ -235,6 +236,29 @@ try {
     Invoke-PythonInstallStep "Installing optional enhancement packages..." @("-m", "pip", "install", "pedalboard>=0.8.0", "pydub>=0.25.1", "pynvml", "psutil", "sounddevice", "pyloudnorm", "audio-separator[cpu]", "yt-dlp", "openai-whisper", "--no-warn-script-location", "--no-cache-dir") -BestEffort
 } catch {
     Write-Warning "Optional enhancement packages install failed: $($_.Exception.Message)"
+}
+
+# 4b. GPU runtime. When an NVIDIA GPU + a recent driver are present, swap in the CUDA build of PyTorch
+# (torch 2.13.0+cu126) and onnxruntime-gpu. scripts\gpu_runtime.py verifies the result (CUDA tensor,
+# CUDAExecutionProvider, demucs import) and automatically restores the CPU stack if anything fails,
+# so this step can never leave the install worse than the CPU baseline.
+$diagnostics.gpuRuntime = "skipped"
+if (-not $SkipGpu -and -not $env:LIMINAL_FORCE_CPU) {
+    $prevEap = $ErrorActionPreference
+    $ErrorActionPreference = "Continue"   # native stderr output must not abort the script
+    try {
+        Write-Host "Checking for NVIDIA GPU / CUDA runtime..." -ForegroundColor Yellow
+        $gpuOut = & "$EMBED_DIR\python.exe" "scripts\gpu_runtime.py" "--install" "--python" "$EMBED_DIR\python.exe" 2>&1
+        $gpuExit = $LASTEXITCODE
+        $gpuOut | ForEach-Object { Write-Host "  $_" }
+        $diagnostics.gpuRuntime = if ($gpuExit -eq 0) { "ok" } else { "cpu-fallback" }
+        $diagnostics.steps += "GPU runtime step: $($diagnostics.gpuRuntime)"
+    } catch {
+        Write-Warning "GPU runtime step failed (CPU runtime kept): $($_.Exception.Message)"
+        $diagnostics.gpuRuntime = "error"
+    } finally {
+        $ErrorActionPreference = $prevEap
+    }
 }
 
 & "$EMBED_DIR\python.exe" -m pip cache purge

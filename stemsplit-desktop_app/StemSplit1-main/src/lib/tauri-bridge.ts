@@ -27,6 +27,41 @@ export interface SeparationResult {
   stems: Record<string, StemInfo>;
   process_duration_seconds: number;
   errors: string[];
+  /** Auto-recovery summary from splitter.py (present when a split needed troubleshooting). */
+  recovery?: RecoverySummary | null;
+  /** Path to split_diagnostics.log written by the auto-recovery system. */
+  diagnostic_log?: string | null;
+}
+
+export interface RecoveryAttempt {
+  attempt: number;
+  ok: boolean;
+  category?: string;
+  error?: string;
+  recovery_action?: string;
+  repair?: { ok: boolean; detail: string };
+}
+
+export interface RecoverySummary {
+  attempted: boolean;
+  recovered: boolean;
+  attempts: RecoveryAttempt[];
+  final_message: string;
+  log_path?: string | null;
+}
+
+/** `recovery` / `recovery_result` events emitted while a split is being auto-repaired. */
+export interface RecoveryEvent {
+  event: 'recovery' | 'recovery_result';
+  attempt?: number;
+  max_attempts?: number;
+  category?: string;
+  action?: string;
+  message: string;
+  recovered?: boolean;
+  ok?: boolean;
+  log_path?: string | null;
+  timestamp?: string;
 }
 
 export interface StemInfo {
@@ -168,6 +203,124 @@ export async function onStemSplitProgress(
     console.log('[IPC] Progress update:', event.payload);
     callback(event.payload);
   });
+}
+
+/**
+ * Listen for auto-recovery events ("Recovering...") from the split pipeline
+ */
+export async function onStemSplitRecovery(
+  callback: (event: RecoveryEvent) => void
+): Promise<() => void> {
+  return await listen<RecoveryEvent>('stem-split-recovery', (event) => {
+    callback(event.payload);
+  });
+}
+
+// ---------------------------------------------------------------------------
+// Engine maintenance: model catalog, repair, diagnostics, updates
+// ---------------------------------------------------------------------------
+
+export interface CatalogModel {
+  id: string;
+  name: string;
+  filename?: string;
+  family?: string;
+  engine?: string;
+  stems: string[];
+  sdr?: number | null;
+  size_mb?: number | null;
+  size_estimated?: boolean;
+  vram_gb?: number | null;
+  vram_estimated?: boolean;
+  source: string;
+  license?: string;
+  description?: string;
+  registered: boolean;
+  installed: boolean;
+  new?: boolean;
+  variant_id?: string;
+  builtin_variant?: string | null;
+  /** 'ok' | 'tight' | 'too_big' | 'unknown' depending on the VRAM budget passed to catalog_list */
+  vram_status?: string;
+  fits_vram?: boolean;
+}
+
+export interface CatalogListing {
+  models: CatalogModel[];
+  sources: Record<string, string>;
+  fetched_at: string | null;
+  offline: boolean;
+  vram_budget_gb?: number | null;
+}
+
+export interface EngineProgressEvent {
+  event: string;
+  model_id?: string;
+  file?: string;
+  file_index?: number;
+  file_count?: number;
+  /** bytes downloaded / total bytes for the current file (catalog_progress) */
+  bytes?: number;
+  total?: number;
+  /** 0-100, null when the server sent no content length */
+  progress?: number | null;
+  message?: string;
+  [key: string]: unknown;
+}
+
+export async function catalogList(options?: {
+  refresh?: boolean;
+  includeHf?: boolean;
+  installedOnly?: boolean;
+  vramGb?: number;
+}): Promise<CatalogListing> {
+  return await invoke<CatalogListing>('catalog_list', {
+    refresh: options?.refresh ?? false,
+    includeHf: options?.includeHf ?? false,
+    installedOnly: options?.installedOnly ?? false,
+    vramGb: options?.vramGb,
+  });
+}
+
+export async function catalogDownload(modelId: string): Promise<{ ok: boolean; message?: string; [k: string]: unknown }> {
+  return await invoke('catalog_download', { modelId });
+}
+
+export async function catalogRemove(modelId: string): Promise<{ ok: boolean; message?: string; [k: string]: unknown }> {
+  return await invoke('catalog_remove', { modelId });
+}
+
+export interface EngineDoctorReport {
+  ok: boolean;
+  runtime?: Record<string, unknown>;
+  models?: Record<string, unknown>;
+  repairs?: Array<{ module?: string; ok: boolean; detail?: string }>;
+  detail?: string;
+  [k: string]: unknown;
+}
+
+export async function engineDoctor(repair = true): Promise<EngineDoctorReport> {
+  return await invoke<EngineDoctorReport>('engine_doctor', { repair });
+}
+
+export async function engineGpuStatus(): Promise<Record<string, unknown>> {
+  return await invoke('engine_gpu_status');
+}
+
+export async function readDiagnosticLog(path: string, maxBytes?: number): Promise<string> {
+  return await invoke<string>('read_diagnostic_log', { path, maxBytes });
+}
+
+export async function onEngineProgress(
+  callback: (event: EngineProgressEvent) => void
+): Promise<() => void> {
+  return await listen<EngineProgressEvent>('engine-progress', (event) => callback(event.payload));
+}
+
+export async function onEnginePostUpdate(
+  callback: (payload: EngineDoctorReport) => void
+): Promise<() => void> {
+  return await listen<EngineDoctorReport>('engine-post-update', (event) => callback(event.payload));
 }
 
 /**

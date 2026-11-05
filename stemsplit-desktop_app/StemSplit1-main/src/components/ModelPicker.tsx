@@ -9,7 +9,9 @@ import {
   SeparationEngine,
   SeparationModel,
   getModelById,
+  getDynamicModelsVersion,
   getModelsForEngine,
+  subscribeDynamicModels,
   supportsStems,
 } from '@/lib/model-catalog';
 
@@ -290,8 +292,14 @@ const ModelPicker: React.FC<ModelPickerProps> = ({
     }
   }, [preferredCategory, engine]);
 
-  const engineModels = useMemo(() => getModelsForEngine(engine), [engine]);
-  const selectedModel = useMemo(() => getModelById(selectedModelId), [selectedModelId]);
+  // Re-render when models are downloaded/removed in the model library.
+  const [dynamicVersion, setDynamicVersion] = useState(getDynamicModelsVersion());
+  useEffect(() => subscribeDynamicModels(() => setDynamicVersion(getDynamicModelsVersion())), []);
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const engineModels = useMemo(() => getModelsForEngine(engine), [engine, dynamicVersion]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  const selectedModel = useMemo(() => getModelById(selectedModelId), [selectedModelId, dynamicVersion]);
 
   const categories = useMemo(() => {
     const cats = new Set(engineModels.map((m) => m.category));

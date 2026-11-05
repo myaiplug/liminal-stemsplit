@@ -16,6 +16,10 @@ import { APP_FOOTER_LABEL } from '@/lib/app-version';
 import StemPlayer from './StemPlayer';
 import OriginalPlayer from './OriginalPlayer';
 import ModelPicker from './ModelPicker';
+import ModelCatalogPanel from './ModelCatalogPanel';
+import EngineSettingsPanel from './EngineSettingsPanel';
+import { RecoveryBanner, RecoveryOutcome } from './RecoveryNotice';
+import { syncInstalledModels } from '@/lib/model-library';
 import SampleBank, { type SampleEntry } from './SampleBank';
 
 import {
@@ -728,6 +732,9 @@ const ReactorZone: React.FC = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const { status, progress: progressEvent, progressPercent, result, error, startSeparation, cancel } = useStemSplit();
     const [stemsLoaded, setStemsLoaded] = useState(false);
+    const [showModelLibrary, setShowModelLibrary] = useState(false);
+    // Mirror models downloaded from the library into the picker on launch.
+    useEffect(() => { void syncInstalledModels(); }, []);
     const [stemsRevision, setStemsRevision] = useState(0);
     const [modelPickerCategory, setModelPickerCategory] = useState<string>('all');
     const stemsResultRef = useRef(result);
@@ -1477,6 +1484,7 @@ const ReactorZone: React.FC = () => {
                             className="mb-4 px-4 py-2 rounded border border-red-500/30 bg-red-950/30 backdrop-blur-sm"
                         >
                             <span className="text-red-400 font-mono text-xs">{error instanceof Error ? error.message : (error || 'An error occurred.')}</span>
+                            <RecoveryOutcome result={result} errorText={error instanceof Error ? error.message : (error || null)} />
                         </motion.div>
                     )}
                     {uiError && (
@@ -1581,6 +1589,7 @@ const ReactorZone: React.FC = () => {
                                         {progressPercent}%
                                     </span>
                                 </div>
+                                <RecoveryBanner active={status === StemSplitStatus.PROCESSING} />
 
                                 {/* Progress bar track */}
                                 <div className="relative w-full h-2.5 rounded-full bg-slate-800/80 border border-slate-700/50 overflow-hidden">
@@ -1657,6 +1666,10 @@ const ReactorZone: React.FC = () => {
                         )}
                     </AnimatePresence>
                 </div>
+
+                {status === StemSplitStatus.COMPLETED && result?.recovery?.attempted && (
+                    <div className="w-full max-w-md"><RecoveryOutcome result={result} /></div>
+                )}
 
                 {/* Stem Results / LED Indicators (during processing) */}
                 <AnimatePresence>
@@ -1797,6 +1810,19 @@ const ReactorZone: React.FC = () => {
                 }}
             />
 
+            {showModelLibrary && (
+                <ModelCatalogPanel
+                    onClose={() => setShowModelLibrary(false)}
+                    onUseModel={(variantId) => {
+                        const m = getModelById(variantId);
+                        if (m) {
+                            setSplitEngine(m.engine as typeof splitEngine);
+                            setSplitModelVariant(variantId);
+                        }
+                    }}
+                />
+            )}
+
             {/* Config Modal */}
             <AnimatePresence>
                 {showSettings && (
@@ -1841,6 +1867,7 @@ const ReactorZone: React.FC = () => {
                                         )}
                                     </div>
                                 )}
+                                <EngineSettingsPanel onOpenModelLibrary={() => setShowModelLibrary(true)} />
                                 {/* Neural Model Matrix */}
                                 <div className={`border rounded-xl p-2.5 ${isFreeMode ? 'border-slate-800/40 bg-slate-950/30 opacity-60' : 'border-slate-800 bg-slate-950/60'}`}>
                                     <label className="block mb-1.5 text-slate-400 text-[10px] font-mono uppercase tracking-widest">
@@ -2653,19 +2680,19 @@ const ReactorZone: React.FC = () => {
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
                 <span className="text-[9px] font-mono text-slate-500 tracking-[0.15em] uppercase select-none">LIMINAL&trade;</span>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/NoDAW.Liminal_0.5.1_x64-setup.exe"
-                   download="NoDAW.Liminal_0.5.1_x64-setup.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.7.0/NoDAW.Liminal_0.7.0_x64-setup.exe"
+                   download="NoDAW.Liminal_0.7.0_x64-setup.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Full Installer
                 </a>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online.exe"
-                   download="Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.7.0/Liminal-StemSplit-Setup-v0.7.0-Windows-x64-Online.exe"
+                   download="Liminal-StemSplit-Setup-v0.7.0-Windows-x64-Online.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Online Installer
                 </a>
-                <span className="text-[9px] text-slate-600 font-mono">v0.5.1</span>
+                <span className="text-[9px] text-slate-600 font-mono">v0.7.0</span>
             </footer>
         </div>
     );
