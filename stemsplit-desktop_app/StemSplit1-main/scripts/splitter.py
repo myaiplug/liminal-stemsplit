@@ -1109,8 +1109,14 @@ class AudioSeparator:
         
         # Import Demucs here to allow optional import
         try:
-            # Demucs v4.0.1 uses subprocess-based separation
-            from demucs.separate import main as demucs_main
+            # NOTE: deliberately NOT importing demucs.separate here. It imports torchaudio at module
+            # level, and torch 2.13+cu126 has no matching torchaudio wheel, so that import would
+            # break GPU splits for no benefit (we call demucs.apply / demucs.pretrained directly).
+            try:
+                import gpu_runtime
+                gpu_runtime.ensure_torchaudio()
+            except Exception:
+                pass
             from demucs import apply
             import torch
 
@@ -1397,7 +1403,16 @@ class AudioSeparator:
             logger.info(f"Performing stem separation with shifts={shifts}, split={split}, overlap={overlap}...")
             with torch.no_grad():
                 # apply_model expects (batch, channels, samples) input
-                sources = apply_model(model, waveform[None], shifts=shifts, split=split, overlap=overlap)  # Add batch dimension
+                apply_kwargs = {'shifts': shifts, 'split': split, 'overlap': overlap}
+                # Run on the selected device (apply_model otherwise follows the CPU-resident waveform
+                # and silently moves the model back to CPU).
+                if self.device in ('cuda', 'cpu'):
+                    apply_kwargs['device'] = self.device
+                # Smaller segments lower peak VRAM; set by the recovery ladder after a CUDA OOM.
+                demucs_segment = self.config.get('demucs_segment')
+                if demucs_segment:
+                    apply_kwargs['segment'] = float(demucs_segment)
+                sources = apply_model(model, waveform[None], **apply_kwargs)  # Add batch dimension
             
             # Extract stems: sources shape is [batch=1, sources, channels, samples]
             stems = {}
@@ -1426,6 +1441,9 @@ class AudioSeparator:
 
     def _mdx_chunk_size_for_vram(self, gpu_vram_gb: float, is_gpu_available: bool) -> int:
         """MVSEP defaults to 1M chunks; larger chunks OOM or stall on 8GB cards."""
+        override = self.config.get('mdx_chunk_size') if hasattr(self, 'config') else None
+        if override:
+            return int(override)
         if not is_gpu_available:
             return 500000
         if gpu_vram_gb >= 12:
@@ -3151,6 +3169,10 @@ def main():
                         help='Enable trial/free-tier duration limits')
     parser.add_argument('--max-duration', type=int, default=None,
                         help='Max input duration in seconds (trial mode)')
+    parser.add_argument('--device', type=str, default='auto', choices=['auto', 'cuda', 'cpu'],
+                        help='Compute device (auto = CUDA when available). LIMINAL_FORCE_CPU=1 forces CPU.')
+    parser.add_argument('--no-recovery', action='store_true',
+                        help='Disable automatic troubleshooting/retries of failed splits')
     parser.add_argument('--analyze', action='store_true', help='Just analyze file and exit')
     parser.add_argument('--fast', action='store_true', 
                         help='Skip analytics (BPM/key/onset), mastering effects, and spectral cleanup for maximum speed')
@@ -3200,6 +3222,13 @@ def main():
         import torch
         if torch.cuda.is_available():
             default_device = "cuda"
+    except Exception:
+        pass
+
+    # onnxruntime-gpu needs the CUDA DLLs torch ships; load them before anything creates an ORT session
+    try:
+        import gpu_runtime
+        gpu_runtime.preload_onnxruntime_dlls()
     except Exception:
         pass
 
@@ -3254,13 +3283,41 @@ def main():
     else:
         logger.warning(f"No hardware config found. Using default auto-detected config (Device: {default_device}).")
 
+    # Re-check the GPU on every run so a stale hardware_config.json never pins splits to CPU
+    if default_device == "cuda" and config.get("device") != "cuda" and not os.environ.get("LIMINAL_FORCE_CPU"):
+        logger.info(f"CUDA is available; overriding saved device '{config.get('device')}' with cuda")
+        config["device"] = "cuda"
+
+    # Explicit --device / LIMINAL_FORCE_CPU win over auto-detection
+    if os.environ.get("LIMINAL_FORCE_CPU") or args.device == 'cpu':
+        config["device"] = "cpu"
+    elif args.device == 'cuda':
+        if default_device == "cuda":
+            config["device"] = "cuda"
+        else:
+            logger.warning("--device cuda requested but CUDA is unavailable; using CPU")
+            config["device"] = "cpu"
+    if default_device == "cpu" and config.get("device") == "cuda":
+        logger.warning("Saved config requests CUDA but it is unavailable; using CPU")
+        config["device"] = "cpu"
+    if config.get("device") == "cpu":
+        config["shifts"] = min(int(config.get("shifts", 1) or 1), 1)
+
     # Initialize separator
+    separator = None
     try:
         separator = AudioSeparator(config)
-    except ImportError:
+    except ImportError as import_err:
         logger.error("Required dependencies missing. Install with:")
         logger.error("pip install demucs librosa soundfile numpy pedalboard pydub")
-        return
+        if args.no_recovery or args.engine == 'analyze':
+            return
+        # Otherwise the recovery loop below tries to repair the import and retry.
+        logger.error(f"Import failed ({import_err}); auto-recovery will try to repair it")
+    except Exception as init_err:
+        if args.no_recovery or args.engine == 'analyze':
+            raise
+        logger.error(f"Separator init failed ({type(init_err).__name__}: {init_err}); auto-recovery will take over")
 
     # Progress hook prints JSON lines to stdout for the caller to parse
     def progress_printer(step: int, total: int, message: str, percent: int):
@@ -3281,6 +3338,13 @@ def main():
             pass
         except Exception as e:
             logger.warning(f"Unexpected error in progress_printer: {e}")
+            pass
+
+    def event_printer(payload: Dict[str, Any]) -> None:
+        """Print a non-progress JSON event line (e.g. recovery) for the Rust parent."""
+        try:
+            print(json.dumps(payload), flush=True)
+        except Exception:
             pass
 
     # --- SPECIAL MODE: Analysis via Engine Flag ---
@@ -3336,7 +3400,68 @@ def main():
                 file_handler.setLevel(logging.INFO)
                 file_handler.setFormatter(logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s'))
                 logging.getLogger().addHandler(file_handler)
-            manifest = separator.separate(args.input_file, output_dir=args.output, progress_hook=progress_printer)
+            if args.no_recovery:
+                manifest = separator.separate(args.input_file, output_dir=args.output, progress_hook=progress_printer)
+            else:
+                from split_recovery import run_with_recovery
+                holder = {"separator": separator, "first": True}
+
+                def run_attempt(attempt_config: Dict[str, Any], attempt_input: str) -> Dict[str, Any]:
+                    # The first attempt reuses the separator built above; retries rebuild it with the
+                    # (possibly overridden) config. Failures become a failed manifest so the
+                    # recovery loop can classify them.
+                    try:
+                        if holder["first"] and holder["separator"] is not None:
+                            sep = holder["separator"]
+                        else:
+                            sep = AudioSeparator(attempt_config)
+                            holder["separator"] = sep
+                        holder["first"] = False
+                        result = sep.separate(attempt_input, output_dir=args.output, progress_hook=progress_printer)
+                    except Exception as attempt_err:
+                        holder["first"] = False
+                        import traceback
+                        logger.error(f"Split attempt failed: {attempt_err}", exc_info=True)
+                        return {
+                            "status": "failed",
+                            "error_type": type(attempt_err).__name__,
+                            "error_message": str(attempt_err)[:500],
+                            "timestamp": datetime.now().isoformat(),
+                            "input_file": args.input_file,
+                            "stems": {},
+                            "process_duration_seconds": 0,
+                            "errors": [f"{type(attempt_err).__name__}: {str(attempt_err)[:500]}"],
+                            "traceback": traceback.format_exc()[-1500:],
+                        }
+                    if isinstance(result, dict):
+                        result["input_file"] = args.input_file
+                    return result
+
+                manifest, final_config = run_with_recovery(
+                    run_attempt=run_attempt,
+                    config=config,
+                    input_file=args.input_file,
+                    emit_progress=progress_printer,
+                    emit_event=event_printer,
+                    output_dir=args.output,
+                )
+                config = final_config
+                separator = holder["separator"]
+                if manifest.get('status') != 'success' and error_log_path:
+                    try:
+                        with open(error_log_path, 'w', encoding='utf-8') as f_err:
+                            f_err.write("=== Liminal StemSplit Error Report ===\n")
+                            f_err.write(f"Timestamp: {datetime.now().isoformat()}\n")
+                            f_err.write(f"Input: {args.input_file}\n")
+                            f_err.write(f"Engine: {args.engine}\n")
+                            f_err.write(f"Model: {args.model_variant or '(default)'}\n")
+                            f_err.write(f"Errors: {manifest.get('errors')}\n")
+                            f_err.write(f"Recovery: {json.dumps(manifest.get('recovery'), indent=2)}\n")
+                            if manifest.get('traceback'):
+                                f_err.write(f"\n--- Traceback ---\n{manifest['traceback']}\n")
+                    except Exception:
+                        logger.error("Failed to write error log", exc_info=True)
+                    manifest.setdefault("_error_log", error_log_path)
         except Exception as sep_err:
             error_code = f"SEP-{int(time.time()) % 100000:05d}"
             error_type = type(sep_err).__name__
@@ -3378,6 +3503,8 @@ def main():
 
     # Export manifest to file
     try:
+        if separator is None:
+            raise RuntimeError("separator unavailable - writing manifest directly")
         manifest_path = separator.export_manifest(manifest)
     except Exception:
         # If export_manifest fails, write manifest directly
