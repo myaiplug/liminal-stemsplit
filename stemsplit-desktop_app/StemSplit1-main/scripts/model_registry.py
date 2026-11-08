@@ -3,9 +3,30 @@ Model variant registry — maps Liminal catalog IDs to backend routing.
 Models marked audio_separator auto-download via python-audio-separator on first use.
 """
 
-from typing import Any, Dict
+import json
+import os
+from pathlib import Path
+from typing import Any, Dict, Optional
 
 MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
+    'mini_bs_roformer': {
+        'backend': 'crisp',
+        'filename': 'mini-bs-roformer-q8_0.gguf',
+        'stems': 4,
+        'license': 'MIT',
+    },
+    'mini_bs_roformer_q4': {
+        'backend': 'crisp',
+        'filename': 'mini-bs-roformer-q4_k.gguf',
+        'stems': 4,
+        'license': 'MIT',
+    },
+    'kara2_student': {
+        'backend': 'kara2',
+        'filename': 'duality_kara2_student_core_t1100.onnx',
+        'stems': 3,
+        'license': 'Apache-2.0',
+    },
     # ── Demucs ──────────────────────────────────────────────
     'demucs_htdemucs': {'backend': 'demucs', 'model': 'htdemucs'},
     'demucs_htdemucs_ft': {'backend': 'demucs', 'model': 'htdemucs_ft'},
@@ -549,5 +570,77 @@ def resolve_audio_separator_filename(filename: str) -> str:
     return AUDIO_SEPARATOR_FILENAME_ALIASES.get(filename, filename)
 
 
+# ---------------------------------------------------------------------------
+# User registry — models downloaded from the discovery catalog are recorded in
+# <app data>/user_models.json and merged here so splitter.py can route to them.
+# Built-in MODEL_VARIANTS always win on id collisions.
+# ---------------------------------------------------------------------------
+
+_USER_CACHE: Dict[str, Any] = {"mtime": None, "path": None, "variants": {}}
+
+
+def _user_registry_file() -> Optional[Path]:
+    override = os.environ.get("LIMINAL_USER_MODELS")
+    if override:
+        return Path(override)
+    try:
+        from liminal_paths import user_registry_path
+        return user_registry_path()
+    except Exception:
+        return None
+
+
+def load_user_variants(force: bool = False) -> Dict[str, Dict[str, Any]]:
+    """Return {variant_id: variant_meta} from the user registry (empty when absent/corrupt)."""
+    path = _user_registry_file()
+    if path is None or not path.exists():
+        return {}
+    try:
+        mtime = path.stat().st_mtime
+        if not force and _USER_CACHE["path"] == str(path) and _USER_CACHE["mtime"] == mtime:
+            return _USER_CACHE["variants"]
+        data = json.loads(path.read_text(encoding="utf-8"))
+        variants: Dict[str, Dict[str, Any]] = {}
+        for vid, entry in (data.get("models") or {}).items():
+            meta = entry.get("variant") if isinstance(entry, dict) else None
+            if isinstance(meta, dict) and meta.get("backend"):
+                variants[str(vid)] = meta
+        _USER_CACHE.update(mtime=mtime, path=str(path), variants=variants)
+        return variants
+    except (OSError, ValueError):
+        return {}
+
+
+def all_model_variants() -> Dict[str, Dict[str, Any]]:
+    """Built-ins merged with user-registered models (built-ins win)."""
+    merged = dict(load_user_variants())
+    merged.update(MODEL_VARIANTS)
+    return merged
+
+
 def resolve_model_variant(variant_id: str) -> Dict[str, Any]:
-    return MODEL_VARIANTS.get(variant_id, {})
+    meta = MODEL_VARIANTS.get(variant_id)
+    if meta is not None:
+        return meta
+    return load_user_variants().get(variant_id, {})
+
+
+DEFAULT_ROFORMER_FILENAME = 'model_bs_roformer_ep_317_sdr_12.9755.ckpt'
+
+
+def resolve_roformer_filename(variant_id: str, stems_count: int = 2) -> str:
+    """Checkpoint filename for a Roformer variant (falls back to the BS-Roformer default)."""
+    meta = resolve_model_variant(variant_id) if variant_id else {}
+    filename = meta.get('filename') or DEFAULT_ROFORMER_FILENAME
+    return resolve_audio_separator_filename(filename)
+
+
+def variant_supports_stems(variant_id: str, stems_count: int) -> bool:
+    """False only when a Demucs variant is asked for more stems than Demucs can produce.
+
+    (The splitter promotes any Demucs variant to htdemucs_6s when 5-6 stems are requested.)
+    """
+    meta = resolve_model_variant(variant_id) if variant_id else {}
+    if meta.get('backend') == 'demucs':
+        return stems_count <= 6
+    return True

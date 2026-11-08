@@ -1,0 +1,3653 @@
+{
+  "version": "2026.11.04",
+  "generated_by": "scripts/model_catalog.py --build-manifest",
+  "notes": "Curated size/VRAM data for audio-separator models. Add extra open models under 'models' with 'files' (name+url[+sha256]). VRAM figures are estimates for default chunk settings.",
+  "models": [
+    {
+      "id": "catalog_1_hp_uvr",
+      "filename": "1_HP-UVR.pth",
+      "name": "1_HP-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.73,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "1_HP-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/1_HP-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_2_hp_uvr",
+      "filename": "2_HP-UVR.pth",
+      "name": "2_HP-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.49,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "2_HP-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/2_HP-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_3_hp_vocal_uvr",
+      "filename": "3_HP-Vocal-UVR.pth",
+      "name": "3_HP-Vocal-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 14.05,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "3_HP-Vocal-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/3_HP-Vocal-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_4_hp_vocal_uvr",
+      "filename": "4_HP-Vocal-UVR.pth",
+      "name": "4_HP-Vocal-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 13.56,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "4_HP-Vocal-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/4_HP-Vocal-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_5_hp_karaoke_uvr",
+      "filename": "5_HP-Karaoke-UVR.pth",
+      "name": "5_HP-Karaoke-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 12.22,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "5_HP-Karaoke-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/5_HP-Karaoke-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_6_hp_karaoke_uvr",
+      "filename": "6_HP-Karaoke-UVR.pth",
+      "name": "6_HP-Karaoke-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 12.97,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "6_HP-Karaoke-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/6_HP-Karaoke-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_7_hp2_uvr",
+      "filename": "7_HP2-UVR.pth",
+      "name": "7_HP2-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.51,
+      "size_mb": 525,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "7_HP2-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/7_HP2-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_8_hp2_uvr",
+      "filename": "8_HP2-UVR.pth",
+      "name": "8_HP2-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.5,
+      "size_mb": 525,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "8_HP2-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/8_HP2-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_9_hp2_uvr",
+      "filename": "9_HP2-UVR.pth",
+      "name": "9_HP2-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.66,
+      "size_mb": 525,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "9_HP2-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/9_HP2-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_10_sp_uvr_2b_32000_1",
+      "filename": "10_SP-UVR-2B-32000-1.pth",
+      "name": "10_SP-UVR-2B-32000-1",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.32,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "10_SP-UVR-2B-32000-1.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/10_SP-UVR-2B-32000-1.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_11_sp_uvr_2b_32000_2",
+      "filename": "11_SP-UVR-2B-32000-2.pth",
+      "name": "11_SP-UVR-2B-32000-2",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.79,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "11_SP-UVR-2B-32000-2.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/11_SP-UVR-2B-32000-2.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_12_sp_uvr_3b_44100",
+      "filename": "12_SP-UVR-3B-44100.pth",
+      "name": "12_SP-UVR-3B-44100",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.06,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "12_SP-UVR-3B-44100.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/12_SP-UVR-3B-44100.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_13_sp_uvr_4b_44100_1",
+      "filename": "13_SP-UVR-4B-44100-1.pth",
+      "name": "13_SP-UVR-4B-44100-1",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.32,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "13_SP-UVR-4B-44100-1.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/13_SP-UVR-4B-44100-1.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_14_sp_uvr_4b_44100_2",
+      "filename": "14_SP-UVR-4B-44100-2.pth",
+      "name": "14_SP-UVR-4B-44100-2",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.55,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "14_SP-UVR-4B-44100-2.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/14_SP-UVR-4B-44100-2.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_15_sp_uvr_mid_44100_1",
+      "filename": "15_SP-UVR-MID-44100-1.pth",
+      "name": "15_SP-UVR-MID-44100-1",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.12,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "15_SP-UVR-MID-44100-1.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/15_SP-UVR-MID-44100-1.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_16_sp_uvr_mid_44100_2",
+      "filename": "16_SP-UVR-MID-44100-2.pth",
+      "name": "16_SP-UVR-MID-44100-2",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.32,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "16_SP-UVR-MID-44100-2.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/16_SP-UVR-MID-44100-2.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_17_hp_wind_inst_uvr",
+      "filename": "17_HP-Wind_Inst-UVR.pth",
+      "name": "17_HP-Wind_Inst-UVR",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "no woodwinds",
+        "woodwinds"
+      ],
+      "sdr": null,
+      "size_mb": 213,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "17_HP-Wind_Inst-UVR.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/17_HP-Wind_Inst-UVR.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_de_echo_aggressive",
+      "filename": "UVR-De-Echo-Aggressive.pth",
+      "name": "UVR-De-Echo-Aggressive by FoxJoy",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "no echo",
+        "echo"
+      ],
+      "sdr": null,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-De-Echo-Aggressive.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-De-Echo-Aggressive.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_de_echo_normal",
+      "filename": "UVR-De-Echo-Normal.pth",
+      "name": "UVR-De-Echo-Normal by FoxJoy",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "no echo",
+        "echo"
+      ],
+      "sdr": null,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-De-Echo-Normal.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-De-Echo-Normal.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_deecho_dereverb",
+      "filename": "UVR-DeEcho-DeReverb.pth",
+      "name": "UVR-DeEcho-DeReverb by FoxJoy",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "no reverb",
+        "reverb"
+      ],
+      "sdr": null,
+      "size_mb": 213,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-DeEcho-DeReverb.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-DeEcho-DeReverb.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_denoise_lite",
+      "filename": "UVR-DeNoise-Lite.pth",
+      "name": "UVR-DeNoise-Lite by FoxJoy",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "noise",
+        "no noise"
+      ],
+      "sdr": null,
+      "size_mb": 17,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-DeNoise-Lite.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-DeNoise-Lite.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_denoise",
+      "filename": "UVR-DeNoise.pth",
+      "name": "UVR-DeNoise by FoxJoy",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "noise",
+        "no noise"
+      ],
+      "sdr": null,
+      "size_mb": 121,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-DeNoise.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-DeNoise.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_bve_4b_sn_44100_1",
+      "filename": "UVR-BVE-4B_SN-44100-1.pth",
+      "name": "UVR-BVE-4B_SN-44100-1",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 7.71,
+      "size_mb": 213,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-BVE-4B_SN-44100-1.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-BVE-4B_SN-44100-1.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mgm_highend_v4",
+      "filename": "MGM_HIGHEND_v4.pth",
+      "name": "MGM_HIGHEND_v4",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 12.27,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "MGM_HIGHEND_v4.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MGM_HIGHEND_v4.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mgm_lowend_a_v4",
+      "filename": "MGM_LOWEND_A_v4.pth",
+      "name": "MGM_LOWEND_A_v4",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.05,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "MGM_LOWEND_A_v4.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MGM_LOWEND_A_v4.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mgm_lowend_b_v4",
+      "filename": "MGM_LOWEND_B_v4.pth",
+      "name": "MGM_LOWEND_B_v4",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 13.11,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "MGM_LOWEND_B_v4.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MGM_LOWEND_B_v4.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mgm_main_v4",
+      "filename": "MGM_MAIN_v4.pth",
+      "name": "MGM_MAIN_v4",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 12.41,
+      "size_mb": 30,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "MGM_MAIN_v4.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MGM_MAIN_v4.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_de_reverb_aufr33_jarredou",
+      "filename": "UVR-De-Reverb-aufr33-jarredou.pth",
+      "name": "UVR-De-Reverb by aufr33-jarredou",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [
+        "dry",
+        "no dry"
+      ],
+      "sdr": null,
+      "size_mb": null,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-De-Reverb-aufr33-jarredou.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-De-Reverb-aufr33-jarredou.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_bve_4b_sn_44100_2",
+      "filename": "UVR-BVE-4B_SN-44100-2.pth",
+      "name": "UVR-BVE-4B_SN-44100-2",
+      "family": "VR",
+      "engine": "vr",
+      "stems": [],
+      "sdr": null,
+      "size_mb": null,
+      "vram_gb": 2.0,
+      "files": [
+        {
+          "name": "UVR-BVE-4B_SN-44100-2.pth",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-BVE-4B_SN-44100-2.pth"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_hq_1",
+      "filename": "UVR-MDX-NET-Inst_HQ_1.onnx",
+      "name": "UVR-MDX-NET Inst HQ 1",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.4,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_HQ_1.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_HQ_1.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_hq_2",
+      "filename": "UVR-MDX-NET-Inst_HQ_2.onnx",
+      "name": "UVR-MDX-NET Inst HQ 2",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.25,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_HQ_2.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_HQ_2.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_hq_3",
+      "filename": "UVR-MDX-NET-Inst_HQ_3.onnx",
+      "name": "UVR-MDX-NET Inst HQ 3",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.42,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_HQ_3.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_HQ_3.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_hq_4",
+      "filename": "UVR-MDX-NET-Inst_HQ_4.onnx",
+      "name": "UVR-MDX-NET Inst HQ 4",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.51,
+      "size_mb": 56,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_HQ_4.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_HQ_4.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_hq_5",
+      "filename": "UVR-MDX-NET-Inst_HQ_5.onnx",
+      "name": "UVR-MDX-NET Inst HQ 5",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.3,
+      "size_mb": 56,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_HQ_5.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_HQ_5.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_main",
+      "filename": "UVR_MDXNET_Main.onnx",
+      "name": "UVR-MDX-NET Main",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.41,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_Main.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_Main.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_main",
+      "filename": "UVR-MDX-NET-Inst_Main.onnx",
+      "name": "UVR-MDX-NET Inst Main",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.12,
+      "size_mb": 50,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_Main.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_Main.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_1_9703",
+      "filename": "UVR_MDXNET_1_9703.onnx",
+      "name": "UVR-MDX-NET 1",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 14.96,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_1_9703.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_1_9703.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_2_9682",
+      "filename": "UVR_MDXNET_2_9682.onnx",
+      "name": "UVR-MDX-NET 2",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 14.99,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_2_9682.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_2_9682.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_3_9662",
+      "filename": "UVR_MDXNET_3_9662.onnx",
+      "name": "UVR-MDX-NET 3",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.0,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_3_9662.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_3_9662.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_1",
+      "filename": "UVR-MDX-NET-Inst_1.onnx",
+      "name": "UVR-MDX-NET Inst 1",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.22,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_1.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_1.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_2",
+      "filename": "UVR-MDX-NET-Inst_2.onnx",
+      "name": "UVR-MDX-NET Inst 2",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.31,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_2.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_2.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_inst_3",
+      "filename": "UVR-MDX-NET-Inst_3.onnx",
+      "name": "UVR-MDX-NET Inst 3",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.32,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Inst_3.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Inst_3.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_kara",
+      "filename": "UVR_MDXNET_KARA.onnx",
+      "name": "UVR-MDX-NET Karaoke",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 14.08,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_KARA.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_KARA.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_kara_2",
+      "filename": "UVR_MDXNET_KARA_2.onnx",
+      "name": "UVR-MDX-NET Karaoke 2",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 14.77,
+      "size_mb": 50,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_KARA_2.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_KARA_2.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdxnet_9482",
+      "filename": "UVR_MDXNET_9482.onnx",
+      "name": "UVR_MDXNET_9482",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 14.92,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR_MDXNET_9482.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR_MDXNET_9482.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_voc_ft",
+      "filename": "UVR-MDX-NET-Voc_FT.onnx",
+      "name": "UVR-MDX-NET Voc FT",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.43,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET-Voc_FT.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET-Voc_FT.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kim_vocal_1",
+      "filename": "Kim_Vocal_1.onnx",
+      "name": "Kim Vocal 1",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.48,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "Kim_Vocal_1.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/Kim_Vocal_1.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kim_vocal_2",
+      "filename": "Kim_Vocal_2.onnx",
+      "name": "Kim Vocal 2",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.36,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "Kim_Vocal_2.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/Kim_Vocal_2.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kim_inst",
+      "filename": "Kim_Inst.onnx",
+      "name": "Kim Inst",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.46,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "Kim_Inst.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/Kim_Inst.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_reverb_hq_by_foxjoy",
+      "filename": "Reverb_HQ_By_FoxJoy.onnx",
+      "name": "Reverb HQ By FoxJoy",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "reverb",
+        "no reverb"
+      ],
+      "sdr": null,
+      "size_mb": 64,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "Reverb_HQ_By_FoxJoy.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/Reverb_HQ_By_FoxJoy.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_uvr_mdx_net_crowd_hq_1",
+      "filename": "UVR-MDX-NET_Crowd_HQ_1.onnx",
+      "name": "UVR-MDX-NET Crowd HQ 1 By Aufr33",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "no crowd",
+        "crowd"
+      ],
+      "sdr": null,
+      "size_mb": 56,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "UVR-MDX-NET_Crowd_HQ_1.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/UVR-MDX-NET_Crowd_HQ_1.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_a_vocals",
+      "filename": "kuielab_a_vocals.onnx",
+      "name": "kuielab_a_vocals",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.29,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_a_vocals.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_a_vocals.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_a_other",
+      "filename": "kuielab_a_other.onnx",
+      "name": "kuielab_a_other",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "other",
+        "no other"
+      ],
+      "sdr": 2.93,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_a_other.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_a_other.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_a_bass",
+      "filename": "kuielab_a_bass.onnx",
+      "name": "kuielab_a_bass",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "bass",
+        "no bass"
+      ],
+      "sdr": 10.45,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_a_bass.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_a_bass.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_a_drums",
+      "filename": "kuielab_a_drums.onnx",
+      "name": "kuielab_a_drums",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "drums",
+        "no drums"
+      ],
+      "sdr": 7.0,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_a_drums.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_a_drums.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_b_vocals",
+      "filename": "kuielab_b_vocals.onnx",
+      "name": "kuielab_b_vocals",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.06,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_b_vocals.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_b_vocals.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_b_other",
+      "filename": "kuielab_b_other.onnx",
+      "name": "kuielab_b_other",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "other",
+        "no other"
+      ],
+      "sdr": 3.19,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_b_other.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_b_other.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_b_bass",
+      "filename": "kuielab_b_bass.onnx",
+      "name": "kuielab_b_bass",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "bass",
+        "no bass"
+      ],
+      "sdr": 9.91,
+      "size_mb": 28,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_b_bass.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_b_bass.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_kuielab_b_drums",
+      "filename": "kuielab_b_drums.onnx",
+      "name": "kuielab_b_drums",
+      "family": "MDX",
+      "engine": "mdx_net",
+      "stems": [
+        "drums",
+        "no drums"
+      ],
+      "sdr": 7.08,
+      "size_mb": 21,
+      "vram_gb": 3.0,
+      "files": [
+        {
+          "name": "kuielab_b_drums.onnx",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/kuielab_b_drums.onnx"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mdx23c_8kfft_instvoc_hq",
+      "filename": "MDX23C-8KFFT-InstVoc_HQ.ckpt",
+      "name": "MDX23C-InstVoc HQ",
+      "family": "MDX23C",
+      "engine": "mdx_net",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.83,
+      "size_mb": 427,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MDX23C-8KFFT-InstVoc_HQ.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MDX23C-8KFFT-InstVoc_HQ.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MDX23C-8KFFT-InstVoc_HQ.ckpt"
+        },
+        {
+          "name": "model_2_stem_full_band_8k.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/model_2_stem_full_band_8k.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_2_stem_full_band_8k.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_model_bs_roformer_ep_317_sdr_12_9755",
+      "filename": "model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+      "name": "BS-Roformer-Viperx-1297",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 16.45,
+      "size_mb": 610,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/model_bs_roformer_ep_317_sdr_12.9755.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_bs_roformer_ep_317_sdr_12.9755.ckpt"
+        },
+        {
+          "name": "model_bs_roformer_ep_317_sdr_12.9755.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/model_bs_roformer_ep_317_sdr_12.9755.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_bs_roformer_ep_317_sdr_12.9755.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_model_bs_roformer_ep_368_sdr_12_9628",
+      "filename": "model_bs_roformer_ep_368_sdr_12.9628.ckpt",
+      "name": "BS-Roformer-Viperx-1296",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 16.31,
+      "size_mb": 610,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "model_bs_roformer_ep_368_sdr_12.9628.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/model_bs_roformer_ep_368_sdr_12.9628.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_bs_roformer_ep_368_sdr_12.9628.ckpt"
+        },
+        {
+          "name": "model_bs_roformer_ep_368_sdr_12.9628.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/model_bs_roformer_ep_368_sdr_12.9628.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_bs_roformer_ep_368_sdr_12.9628.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_model_bs_roformer_ep_937_sdr_10_5309",
+      "filename": "model_bs_roformer_ep_937_sdr_10.5309.ckpt",
+      "name": "BS-Roformer-Viperx-1053",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "no drum-bass",
+        "drum-bass"
+      ],
+      "sdr": null,
+      "size_mb": 375,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "model_bs_roformer_ep_937_sdr_10.5309.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/model_bs_roformer_ep_937_sdr_10.5309.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_bs_roformer_ep_937_sdr_10.5309.ckpt"
+        },
+        {
+          "name": "model_bs_roformer_ep_937_sdr_10.5309.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/model_bs_roformer_ep_937_sdr_10.5309.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_bs_roformer_ep_937_sdr_10.5309.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_model_mel_band_roformer_ep_3005_sdr_11_4360",
+      "filename": "model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt",
+      "name": "Mel-Roformer-Viperx-1143",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 15.13,
+      "size_mb": 961,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_mel_band_roformer_ep_3005_sdr_11.4360.ckpt"
+        },
+        {
+          "name": "model_mel_band_roformer_ep_3005_sdr_11.4360.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/model_mel_band_roformer_ep_3005_sdr_11.4360.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_mel_band_roformer_ep_3005_sdr_11.4360.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_inst_v1",
+      "filename": "melband_roformer_inst_v1.ckpt",
+      "name": "MelBand Roformer Kim | Inst V1 by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.86,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "melband_roformer_inst_v1.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_inst_v1.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_inst_v1.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_inst.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_inst.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_inst.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_inst_v2",
+      "filename": "melband_roformer_inst_v2.ckpt",
+      "name": "MelBand Roformer Kim | Inst V2 by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 16.06,
+      "size_mb": 1502,
+      "vram_gb": 8.5,
+      "files": [
+        {
+          "name": "melband_roformer_inst_v2.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_inst_v2.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_inst_v2.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_inst_v2.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_inst_v2.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_inst_v2.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_instvoc_duality_v1",
+      "filename": "melband_roformer_instvoc_duality_v1.ckpt",
+      "name": "MelBand Roformer Kim | InstVoc Duality V1 by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 16.11,
+      "size_mb": 1639,
+      "vram_gb": 9.1,
+      "files": [
+        {
+          "name": "melband_roformer_instvoc_duality_v1.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_instvoc_duality_v1.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_instvoc_duality_v1.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_instvoc_duality.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_instvoc_duality.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_instvoc_duality.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_instvox_duality_v2",
+      "filename": "melband_roformer_instvox_duality_v2.ckpt",
+      "name": "MelBand Roformer Kim | InstVoc Duality V2 by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 16.08,
+      "size_mb": 1639,
+      "vram_gb": 9.1,
+      "files": [
+        {
+          "name": "melband_roformer_instvox_duality_v2.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_instvox_duality_v2.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_instvox_duality_v2.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_instvoc_duality.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_instvoc_duality.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_instvoc_duality.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mdx23c_de_reverb_aufr33_jarredou",
+      "filename": "MDX23C-De-Reverb-aufr33-jarredou.ckpt",
+      "name": "MDX23C De-Reverb by aufr33-jarredou",
+      "family": "MDX23C",
+      "engine": "mdx_net",
+      "stems": [
+        "dry",
+        "no dry"
+      ],
+      "sdr": null,
+      "size_mb": 427,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MDX23C-De-Reverb-aufr33-jarredou.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MDX23C-De-Reverb-aufr33-jarredou.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MDX23C-De-Reverb-aufr33-jarredou.ckpt"
+        },
+        {
+          "name": "config_dereverb_mdx23c.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_dereverb_mdx23c.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_dereverb_mdx23c.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mdx23c_drumsep_aufr33_jarredou",
+      "filename": "MDX23C-DrumSep-aufr33-jarredou.ckpt",
+      "name": "MDX23C DrumSep by aufr33-jarredou",
+      "family": "MDX23C",
+      "engine": "mdx_net",
+      "stems": [
+        "kick",
+        "snare",
+        "toms",
+        "hh",
+        "ride",
+        "crash"
+      ],
+      "sdr": null,
+      "size_mb": 417,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MDX23C-DrumSep-aufr33-jarredou.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MDX23C-DrumSep-aufr33-jarredou.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MDX23C-DrumSep-aufr33-jarredou.ckpt"
+        },
+        {
+          "name": "config_drumsep_mdx23c.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_drumsep_mdx23c.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_drumsep_mdx23c.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_karaoke_aufr33_viperx_sdr_10_1956",
+      "filename": "mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt",
+      "name": "Mel-Roformer-Karaoke-Aufr33-Viperx",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental"
+      ],
+      "sdr": 14.65,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956.ckpt"
+        },
+        {
+          "name": "mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956_config.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956_config.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_karaoke_aufr33_viperx_sdr_10.1956_config.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_karaoke_gabox",
+      "filename": "mel_band_roformer_karaoke_gabox.ckpt",
+      "name": "MelBand Roformer | Karaoke by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental",
+        "seconds_per_minute_m3"
+      ],
+      "sdr": 16.37,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_karaoke_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_karaoke_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_karaoke_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_karaoke_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_karaoke_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_karaoke_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_karaoke_gabox_v2",
+      "filename": "mel_band_roformer_karaoke_gabox_v2.ckpt",
+      "name": "MelBand Roformer | Karaoke V2 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_karaoke_gabox_v2.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_karaoke_gabox_v2.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_karaoke_gabox_v2.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_karaoke_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_karaoke_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_karaoke_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_karaoke_becruily",
+      "filename": "mel_band_roformer_karaoke_becruily.ckpt",
+      "name": "MelBand Roformer | Karaoke by becruily",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 1639,
+      "vram_gb": 9.1,
+      "files": [
+        {
+          "name": "mel_band_roformer_karaoke_becruily.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_karaoke_becruily.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_karaoke_becruily.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_karaoke_becruily.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_karaoke_becruily.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_karaoke_becruily.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_karaoke_frazer_becruily",
+      "filename": "bs_roformer_karaoke_frazer_becruily.ckpt",
+      "name": "BS Roformer | Karaoke by frazer-becruily",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 195,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_karaoke_frazer_becruily.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_karaoke_frazer_becruily.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_karaoke_frazer_becruily.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_karaoke_frazer_becruily.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_karaoke_frazer_becruily.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_karaoke_frazer_becruily.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_karaoke_anvuew",
+      "filename": "bs_roformer_karaoke_anvuew.ckpt",
+      "name": "BS Roformer | Karaoke by anvuew",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 195,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_karaoke_anvuew.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_karaoke_anvuew.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_karaoke_anvuew.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_karaoke_anvuew.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_karaoke_anvuew.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_karaoke_anvuew.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_denoise_mel_band_roformer_aufr33_sdr_27_9959",
+      "filename": "denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt",
+      "name": "Mel-Roformer-Denoise-Aufr33",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "dry",
+        "other"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/denoise_mel_band_roformer_aufr33_sdr_27.9959.ckpt"
+        },
+        {
+          "name": "denoise_mel_band_roformer_aufr33_sdr_27.9959_config.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/denoise_mel_band_roformer_aufr33_sdr_27.9959_config.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/denoise_mel_band_roformer_aufr33_sdr_27.9959_config.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_denoise_mel_band_roformer_aufr33_aggr_sdr_27_9768",
+      "filename": "denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt",
+      "name": "Mel-Roformer-Denoise-Aufr33-Aggr",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "dry",
+        "other"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768.ckpt"
+        },
+        {
+          "name": "denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768_config.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768_config.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/denoise_mel_band_roformer_aufr33_aggr_sdr_27.9768_config.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_denoise_debleed_gabox",
+      "filename": "mel_band_roformer_denoise_debleed_gabox.ckpt",
+      "name": "MelBand Roformer | Denoise-Debleed by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental",
+        "seconds_per_minute_m3"
+      ],
+      "sdr": 5.76,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_denoise_debleed_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_denoise_debleed_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_denoise_debleed_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_crowd_aufr33_viperx_sdr_8_7144",
+      "filename": "mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144.ckpt",
+      "name": "Mel-Roformer-Crowd-Aufr33-Viperx",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "crowd",
+        "other"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144.ckpt"
+        },
+        {
+          "name": "mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144_config.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144_config.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_crowd_aufr33_viperx_sdr_8.7144_config.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_deverb_bs_roformer_8_384dim_10depth",
+      "filename": "deverb_bs_roformer_8_384dim_10depth.ckpt",
+      "name": "BS-Roformer-De-Reverb",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "noreverb",
+        "reverb"
+      ],
+      "sdr": null,
+      "size_mb": 345,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "deverb_bs_roformer_8_384dim_10depth.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/deverb_bs_roformer_8_384dim_10depth.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/deverb_bs_roformer_8_384dim_10depth.ckpt"
+        },
+        {
+          "name": "deverb_bs_roformer_8_384dim_10depth_config.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/deverb_bs_roformer_8_384dim_10depth_config.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/deverb_bs_roformer_8_384dim_10depth_config.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_vocals_mel_band_roformer",
+      "filename": "vocals_mel_band_roformer.ckpt",
+      "name": "MelBand Roformer | Vocals by Kimberley Jensen",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 12.6,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "vocals_mel_band_roformer.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/vocals_mel_band_roformer.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/vocals_mel_band_roformer.ckpt"
+        },
+        {
+          "name": "vocals_mel_band_roformer.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/vocals_mel_band_roformer.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/vocals_mel_band_roformer.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_kim_ft_unwa",
+      "filename": "mel_band_roformer_kim_ft_unwa.ckpt",
+      "name": "MelBand Roformer Kim | FT by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 12.44,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_kim_ft_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_kim_ft_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_kim_ft_unwa.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_kim_ft_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_kim_ft_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_kim_ft_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_kim_ft2_unwa",
+      "filename": "mel_band_roformer_kim_ft2_unwa.ckpt",
+      "name": "MelBand Roformer Kim | FT 2 by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "seconds_per_minute_m3"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_kim_ft2_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_kim_ft2_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_kim_ft2_unwa.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_kim_ft_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_kim_ft_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_kim_ft_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_kim_ft2_bleedless_unwa",
+      "filename": "mel_band_roformer_kim_ft2_bleedless_unwa.ckpt",
+      "name": "MelBand Roformer Kim | FT 2 Bleedless by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "seconds_per_minute_m3"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_kim_ft2_bleedless_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_kim_ft2_bleedless_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_kim_ft2_bleedless_unwa.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_kim_ft_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_kim_ft_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_kim_ft_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_kim_ft3_unwa",
+      "filename": "mel_band_roformer_kim_ft3_unwa.ckpt",
+      "name": "MelBand Roformer Kim | FT 3 by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_kim_ft3_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_kim_ft3_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_kim_ft3_unwa.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_kim_ft_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_kim_ft_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_kim_ft_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_inst_v1_plus",
+      "filename": "melband_roformer_inst_v1_plus.ckpt",
+      "name": "MelBand Roformer Kim | Inst V1 Plus by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "melband_roformer_inst_v1_plus.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_inst_v1_plus.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_inst_v1_plus.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_inst.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_inst.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_inst.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_inst_v1e",
+      "filename": "melband_roformer_inst_v1e.ckpt",
+      "name": "MelBand Roformer Kim | Inst V1 (E) by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "instrumental",
+        "vocals"
+      ],
+      "sdr": 15.82,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "melband_roformer_inst_v1e.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_inst_v1e.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_inst_v1e.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_inst.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_inst.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_inst.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_inst_v1e_plus",
+      "filename": "melband_roformer_inst_v1e_plus.ckpt",
+      "name": "MelBand Roformer Kim | Inst V1 (E) Plus by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "melband_roformer_inst_v1e_plus.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_inst_v1e_plus.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_inst_v1e_plus.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_inst.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_inst.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_inst.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_vocals_revive_unwa",
+      "filename": "bs_roformer_vocals_revive_unwa.ckpt",
+      "name": "BS Roformer | Vocals Revive by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 610,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_vocals_revive_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_vocals_revive_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_vocals_revive_unwa.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_vocals_revive_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_vocals_revive_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_vocals_revive_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_vocals_revive_v2_unwa",
+      "filename": "bs_roformer_vocals_revive_v2_unwa.ckpt",
+      "name": "BS Roformer | Vocals Revive V2 by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 610,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_vocals_revive_v2_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_vocals_revive_v2_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_vocals_revive_v2_unwa.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_vocals_revive_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_vocals_revive_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_vocals_revive_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_vocals_revive_v3e_unwa",
+      "filename": "bs_roformer_vocals_revive_v3e_unwa.ckpt",
+      "name": "BS Roformer | Vocals Revive V3e by Unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 610,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_vocals_revive_v3e_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_vocals_revive_v3e_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_vocals_revive_v3e_unwa.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_vocals_revive_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_vocals_revive_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_vocals_revive_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_becruily",
+      "filename": "mel_band_roformer_vocals_becruily.ckpt",
+      "name": "MelBand Roformer | Vocals by becruily",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "seconds_per_minute_m3"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_becruily.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_becruily.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_becruily.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_becruily.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_becruily.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_becruily.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_becruily",
+      "filename": "mel_band_roformer_instrumental_becruily.ckpt",
+      "name": "MelBand Roformer | Instrumental by becruily",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental",
+        "seconds_per_minute_m3"
+      ],
+      "sdr": 15.36,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_becruily.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_becruily.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_becruily.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_becruily.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_becruily.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_becruily.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocal_fullness_aname",
+      "filename": "mel_band_roformer_vocal_fullness_aname.ckpt",
+      "name": "MelBand Roformer | Vocals Fullness by Aname",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "seconds_per_minute_m3"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocal_fullness_aname.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocal_fullness_aname.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocal_fullness_aname.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocal_fullness_aname.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocal_fullness_aname.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocal_fullness_aname.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_vocals_gabox",
+      "filename": "bs_roformer_vocals_gabox.ckpt",
+      "name": "BS Roformer | Vocals by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "instrumental",
+        "seconds_per_minute_m3"
+      ],
+      "sdr": 17.21,
+      "size_mb": 610,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_vocals_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_vocals_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_vocals_gabox.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_gabox",
+      "filename": "mel_band_roformer_vocals_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_v2_gabox",
+      "filename": "mel_band_roformer_vocals_v2_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals V2 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_v2_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_v2_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_v2_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv1_gabox",
+      "filename": "mel_band_roformer_vocals_fv1_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV1 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv1_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv1_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv1_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv2_gabox",
+      "filename": "mel_band_roformer_vocals_fv2_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV2 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv2_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv2_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv2_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv3_gabox",
+      "filename": "mel_band_roformer_vocals_fv3_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV3 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv3_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv3_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv3_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv4_gabox",
+      "filename": "mel_band_roformer_vocals_fv4_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV4 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv4_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv4_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv4_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv5_gabox",
+      "filename": "mel_band_roformer_vocals_fv5_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV5 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv5_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv5_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv5_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv6_gabox",
+      "filename": "mel_band_roformer_vocals_fv6_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV6 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv6_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv6_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv6_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_vocals_fv7b_gabox",
+      "filename": "mel_band_roformer_vocals_fv7b_gabox.ckpt",
+      "name": "MelBand Roformer | Vocals FV7b by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_vocals_fv7b_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_vocals_fv7b_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_vocals_fv7b_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_vocals_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_vocals_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_vocals_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_gabox",
+      "filename": "mel_band_roformer_instrumental_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_2_gabox",
+      "filename": "mel_band_roformer_instrumental_2_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental 2 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_2_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_2_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_2_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_3_gabox",
+      "filename": "mel_band_roformer_instrumental_3_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental 3 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_3_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_3_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_3_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_bleedless_v1_gabox",
+      "filename": "mel_band_roformer_instrumental_bleedless_v1_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Bleedless V1 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_bleedless_v1_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_bleedless_v1_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_bleedless_v1_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_bleedless_v2_gabox",
+      "filename": "mel_band_roformer_instrumental_bleedless_v2_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Bleedless V2 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_bleedless_v2_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_bleedless_v2_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_bleedless_v2_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_bleedless_v3_gabox",
+      "filename": "mel_band_roformer_instrumental_bleedless_v3_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Bleedless V3 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_bleedless_v3_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_bleedless_v3_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_bleedless_v3_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fullness_v1_gabox",
+      "filename": "mel_band_roformer_instrumental_fullness_v1_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Fullness V1 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fullness_v1_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fullness_v1_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fullness_v1_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fullness_v2_gabox",
+      "filename": "mel_band_roformer_instrumental_fullness_v2_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Fullness V2 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fullness_v2_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fullness_v2_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fullness_v2_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fullness_v3_gabox",
+      "filename": "mel_band_roformer_instrumental_fullness_v3_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Fullness V3 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fullness_v3_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fullness_v3_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fullness_v3_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fullness_v4_gabox",
+      "filename": "mel_band_roformer_instrumental_fullness_v4_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Fullness V4 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fullness_v4_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fullness_v4_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fullness_v4_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fullness_noise_v4_gabox",
+      "filename": "mel_band_roformer_instrumental_fullness_noise_v4_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental Fullness Noisy V4 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fullness_noise_v4_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fullness_noise_v4_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fullness_noise_v4_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv5_gabox",
+      "filename": "mel_band_roformer_instrumental_instv5_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV5 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv5_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv5_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv5_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv5n_gabox",
+      "filename": "mel_band_roformer_instrumental_instv5n_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV5N by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv5n_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv5n_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv5n_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv6_gabox",
+      "filename": "mel_band_roformer_instrumental_instv6_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV6 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv6_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv6_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv6_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv6n_gabox",
+      "filename": "mel_band_roformer_instrumental_instv6n_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV6N by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv6n_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv6n_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv6n_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv7_gabox",
+      "filename": "mel_band_roformer_instrumental_instv7_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV7 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv7_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv7_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv7_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv7n_gabox",
+      "filename": "mel_band_roformer_instrumental_instv7n_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV7N by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv7n_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv7n_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv7n_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv8_gabox",
+      "filename": "mel_band_roformer_instrumental_instv8_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV8 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv8_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv8_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv8_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_instv8n_gabox",
+      "filename": "mel_band_roformer_instrumental_instv8n_gabox.ckpt",
+      "name": "MelBand Roformer | INSTV8N by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_instv8n_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_instv8n_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_instv8n_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fv7z_gabox",
+      "filename": "mel_band_roformer_instrumental_fv7z_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental FV7z by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fv7z_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fv7z_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fv7z_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fv8_gabox",
+      "filename": "mel_band_roformer_instrumental_fv8_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental FV8 by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fv8_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fv8_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fv8_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fv8b_gabox",
+      "filename": "mel_band_roformer_instrumental_fv8b_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental FV8b by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fv8b_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fv8b_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fv8b_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_instrumental_fvx_gabox",
+      "filename": "mel_band_roformer_instrumental_fvx_gabox.ckpt",
+      "name": "MelBand Roformer | Instrumental FVX by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_instrumental_fvx_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_instrumental_fvx_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_instrumental_fvx_gabox.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_instrumental_gabox.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_instrumental_gabox.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_instrumental_gabox.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_mel_band_roformer_anvuew_sdr_19_1729",
+      "filename": "dereverb_mel_band_roformer_anvuew_sdr_19.1729.ckpt",
+      "name": "MelBand Roformer | De-Reverb by anvuew",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "noreverb",
+        "reverb"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb_mel_band_roformer_anvuew_sdr_19.1729.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb_mel_band_roformer_anvuew_sdr_19.1729.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_mel_band_roformer_anvuew_sdr_19.1729.ckpt"
+        },
+        {
+          "name": "dereverb_mel_band_roformer_anvuew.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/dereverb_mel_band_roformer_anvuew.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_mel_band_roformer_anvuew.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_mel_band_roformer_less_aggressive_anvuew_sdr_18_8050",
+      "filename": "dereverb_mel_band_roformer_less_aggressive_anvuew_sdr_18.8050.ckpt",
+      "name": "MelBand Roformer | De-Reverb Less Aggressive by anvuew",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "noreverb",
+        "reverb"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb_mel_band_roformer_less_aggressive_anvuew_sdr_18.8050.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb_mel_band_roformer_less_aggressive_anvuew_sdr_18.8050.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_mel_band_roformer_less_aggressive_anvuew_sdr_18.8050.ckpt"
+        },
+        {
+          "name": "dereverb_mel_band_roformer_anvuew.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/dereverb_mel_band_roformer_anvuew.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_mel_band_roformer_anvuew.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_mel_band_roformer_mono_anvuew",
+      "filename": "dereverb_mel_band_roformer_mono_anvuew.ckpt",
+      "name": "MelBand Roformer | De-Reverb Mono by anvuew",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb_mel_band_roformer_mono_anvuew.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb_mel_band_roformer_mono_anvuew.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_mel_band_roformer_mono_anvuew.ckpt"
+        },
+        {
+          "name": "dereverb_mel_band_roformer_anvuew.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/dereverb_mel_band_roformer_anvuew.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_mel_band_roformer_anvuew.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_big_mbr_ep_362",
+      "filename": "dereverb_big_mbr_ep_362.ckpt",
+      "name": "MelBand Roformer | De-Reverb Big by Sucial",
+      "family": "MDX23C",
+      "engine": "mdx_net",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 435,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb_big_mbr_ep_362.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb_big_mbr_ep_362.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_big_mbr_ep_362.ckpt"
+        },
+        {
+          "name": "config_dereverb_echo_mel_band_roformer_v2.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_dereverb_echo_mel_band_roformer_v2.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_dereverb_echo_mel_band_roformer_v2.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_super_big_mbr_ep_346",
+      "filename": "dereverb_super_big_mbr_ep_346.ckpt",
+      "name": "MelBand Roformer | De-Reverb Super Big by Sucial",
+      "family": "MDX23C",
+      "engine": "mdx_net",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 435,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb_super_big_mbr_ep_346.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb_super_big_mbr_ep_346.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_super_big_mbr_ep_346.ckpt"
+        },
+        {
+          "name": "config_dereverb_echo_mel_band_roformer_v2.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_dereverb_echo_mel_band_roformer_v2.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_dereverb_echo_mel_band_roformer_v2.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_echo_mel_band_roformer_sdr_10_0169",
+      "filename": "dereverb-echo_mel_band_roformer_sdr_10.0169.ckpt",
+      "name": "MelBand Roformer | De-Reverb-Echo by Sucial",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "dry",
+        "no dry"
+      ],
+      "sdr": null,
+      "size_mb": 797,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb-echo_mel_band_roformer_sdr_10.0169.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb-echo_mel_band_roformer_sdr_10.0169.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb-echo_mel_band_roformer_sdr_10.0169.ckpt"
+        },
+        {
+          "name": "config_dereverb-echo_mel_band_roformer.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_dereverb-echo_mel_band_roformer.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_dereverb-echo_mel_band_roformer.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_echo_mel_band_roformer_sdr_13_4843_v2",
+      "filename": "dereverb-echo_mel_band_roformer_sdr_13.4843_v2.ckpt",
+      "name": "MelBand Roformer | De-Reverb-Echo V2 by Sucial",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "dry",
+        "no dry"
+      ],
+      "sdr": null,
+      "size_mb": 435,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb-echo_mel_band_roformer_sdr_13.4843_v2.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb-echo_mel_band_roformer_sdr_13.4843_v2.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb-echo_mel_band_roformer_sdr_13.4843_v2.ckpt"
+        },
+        {
+          "name": "config_dereverb-echo_mel_band_roformer_sdr_13.4843_v2.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_dereverb-echo_mel_band_roformer_sdr_13.4843_v2.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_dereverb-echo_mel_band_roformer_sdr_13.4843_v2.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_dereverb_echo_mbr_fused",
+      "filename": "dereverb_echo_mbr_fused.ckpt",
+      "name": "MelBand Roformer | De-Reverb-Echo Fused by Sucial",
+      "family": "MDX23C",
+      "engine": "mdx_net",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 435,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "dereverb_echo_mbr_fused.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/dereverb_echo_mbr_fused.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/dereverb_echo_mbr_fused.ckpt"
+        },
+        {
+          "name": "config_dereverb_echo_mel_band_roformer_v2.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_dereverb_echo_mel_band_roformer_v2.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_dereverb_echo_mel_band_roformer_v2.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melbandroformersyhft",
+      "filename": "MelBandRoformerSYHFT.ckpt",
+      "name": "MelBand Roformer Kim | SYHFT by SYH99999",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 7.98,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MelBandRoformerSYHFT.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MelBandRoformerSYHFT.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MelBandRoformerSYHFT.ckpt"
+        },
+        {
+          "name": "config_vocals_mel_band_roformer_ft.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_vocals_mel_band_roformer_ft.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_vocals_mel_band_roformer_ft.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melbandroformersyhftv2",
+      "filename": "MelBandRoformerSYHFTV2.ckpt",
+      "name": "MelBand Roformer Kim | SYHFT V2 by SYH99999",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 8.64,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MelBandRoformerSYHFTV2.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MelBandRoformerSYHFTV2.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MelBandRoformerSYHFTV2.ckpt"
+        },
+        {
+          "name": "config_vocals_mel_band_roformer_ft.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_vocals_mel_band_roformer_ft.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_vocals_mel_band_roformer_ft.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melbandroformersyhftv2_5",
+      "filename": "MelBandRoformerSYHFTV2.5.ckpt",
+      "name": "MelBand Roformer Kim | SYHFT V2.5 by SYH99999",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 8.55,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MelBandRoformerSYHFTV2.5.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MelBandRoformerSYHFTV2.5.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MelBandRoformerSYHFTV2.5.ckpt"
+        },
+        {
+          "name": "config_vocals_mel_band_roformer_ft.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_vocals_mel_band_roformer_ft.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_vocals_mel_band_roformer_ft.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melbandroformersyhftv3epsilon",
+      "filename": "MelBandRoformerSYHFTV3Epsilon.ckpt",
+      "name": "MelBand Roformer Kim | SYHFT V3 by SYH99999",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 9.45,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "MelBandRoformerSYHFTV3Epsilon.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MelBandRoformerSYHFTV3Epsilon.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MelBandRoformerSYHFTV3Epsilon.ckpt"
+        },
+        {
+          "name": "config_vocals_mel_band_roformer_ft.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_vocals_mel_band_roformer_ft.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_vocals_mel_band_roformer_ft.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melbandroformerbigsyhftv1",
+      "filename": "MelBandRoformerBigSYHFTV1.ckpt",
+      "name": "MelBand Roformer Kim | Big SYHFT V1 by SYH99999",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 12.26,
+      "size_mb": 1411,
+      "vram_gb": 10.0,
+      "files": [
+        {
+          "name": "MelBandRoformerBigSYHFTV1.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/MelBandRoformerBigSYHFTV1.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/MelBandRoformerBigSYHFTV1.ckpt"
+        },
+        {
+          "name": "config_vocals_mel_band_roformer_big_v1_ft.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_vocals_mel_band_roformer_big_v1_ft.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_vocals_mel_band_roformer_big_v1_ft.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_big_beta4",
+      "filename": "melband_roformer_big_beta4.ckpt",
+      "name": "MelBand Roformer Kim | Big Beta 4 FT by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 12.52,
+      "size_mb": 1502,
+      "vram_gb": 10.0,
+      "files": [
+        {
+          "name": "melband_roformer_big_beta4.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_big_beta4.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_big_beta4.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_big_beta4.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_big_beta4.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_big_beta4.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_big_beta5e",
+      "filename": "melband_roformer_big_beta5e.ckpt",
+      "name": "MelBand Roformer Kim | Big Beta 5e FT by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "vocals",
+        "other"
+      ],
+      "sdr": 12.35,
+      "size_mb": 1411,
+      "vram_gb": 10.0,
+      "files": [
+        {
+          "name": "melband_roformer_big_beta5e.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_big_beta5e.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_big_beta5e.ckpt"
+        },
+        {
+          "name": "config_melband_roformer_big_beta5e.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melband_roformer_big_beta5e.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melband_roformer_big_beta5e.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_big_beta6",
+      "filename": "melband_roformer_big_beta6.ckpt",
+      "name": "MelBand Roformer | Big Beta 6 by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 1485,
+      "vram_gb": 10.0,
+      "files": [
+        {
+          "name": "melband_roformer_big_beta6.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_big_beta6.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_big_beta6.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_big_beta6.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_big_beta6.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_big_beta6.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_melband_roformer_big_beta6x",
+      "filename": "melband_roformer_big_beta6x.ckpt",
+      "name": "MelBand Roformer | Big Beta 6X by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 1629,
+      "vram_gb": 10.0,
+      "files": [
+        {
+          "name": "melband_roformer_big_beta6x.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/melband_roformer_big_beta6x.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/melband_roformer_big_beta6x.ckpt"
+        },
+        {
+          "name": "config_melbandroformer_big_beta6x.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_melbandroformer_big_beta6x.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_melbandroformer_big_beta6x.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_model_chorus_bs_roformer_ep_267_sdr_24_1275",
+      "filename": "model_chorus_bs_roformer_ep_267_sdr_24.1275.ckpt",
+      "name": "BS Roformer | Chorus Male-Female by Sucial",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "male",
+        "female"
+      ],
+      "sdr": null,
+      "size_mb": 503,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "model_chorus_bs_roformer_ep_267_sdr_24.1275.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/model_chorus_bs_roformer_ep_267_sdr_24.1275.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/model_chorus_bs_roformer_ep_267_sdr_24.1275.ckpt"
+        },
+        {
+          "name": "config_chorus_male_female_bs_roformer.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_chorus_male_female_bs_roformer.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_chorus_male_female_bs_roformer.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_male_female_by_aufr33_sdr_7_2889",
+      "filename": "bs_roformer_male_female_by_aufr33_sdr_7.2889.ckpt",
+      "name": "BS Roformer | Male-Female by aufr33",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 503,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_male_female_by_aufr33_sdr_7.2889.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_male_female_by_aufr33_sdr_7.2889.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_male_female_by_aufr33_sdr_7.2889.ckpt"
+        },
+        {
+          "name": "config_chorus_male_female_bs_roformer.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_chorus_male_female_bs_roformer.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_chorus_male_female_bs_roformer.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_aspiration_mel_band_roformer_sdr_18_9845",
+      "filename": "aspiration_mel_band_roformer_sdr_18.9845.ckpt",
+      "name": "MelBand Roformer | Aspiration by Sucial",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "aspiration",
+        "other"
+      ],
+      "sdr": null,
+      "size_mb": 797,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "aspiration_mel_band_roformer_sdr_18.9845.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/aspiration_mel_band_roformer_sdr_18.9845.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/aspiration_mel_band_roformer_sdr_18.9845.ckpt"
+        },
+        {
+          "name": "config_aspiration_mel_band_roformer.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_aspiration_mel_band_roformer.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_aspiration_mel_band_roformer.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_aspiration_mel_band_roformer_less_aggr_sdr_18_1201",
+      "filename": "aspiration_mel_band_roformer_less_aggr_sdr_18.1201.ckpt",
+      "name": "MelBand Roformer | Aspiration Less Aggressive by Sucial",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "aspiration",
+        "other"
+      ],
+      "sdr": null,
+      "size_mb": 797,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "aspiration_mel_band_roformer_less_aggr_sdr_18.1201.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/aspiration_mel_band_roformer_less_aggr_sdr_18.1201.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/aspiration_mel_band_roformer_less_aggr_sdr_18.1201.ckpt"
+        },
+        {
+          "name": "config_aspiration_mel_band_roformer.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_aspiration_mel_band_roformer.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_aspiration_mel_band_roformer.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_mel_band_roformer_bleed_suppressor_v1",
+      "filename": "mel_band_roformer_bleed_suppressor_v1.ckpt",
+      "name": "MelBand Roformer | Bleed Suppressor V1 by unwa-97chris",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [
+        "instrumental",
+        "bleed"
+      ],
+      "sdr": null,
+      "size_mb": 871,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "mel_band_roformer_bleed_suppressor_v1.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mel_band_roformer_bleed_suppressor_v1.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/mel_band_roformer_bleed_suppressor_v1.ckpt"
+        },
+        {
+          "name": "config_mel_band_roformer_bleed_suppressor_v1.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_mel_band_roformer_bleed_suppressor_v1.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_mel_band_roformer_bleed_suppressor_v1.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_vocals_resurrection_unwa",
+      "filename": "bs_roformer_vocals_resurrection_unwa.ckpt",
+      "name": "BS Roformer | Vocals Resurrection by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 195,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_vocals_resurrection_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_vocals_resurrection_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_vocals_resurrection_unwa.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_vocals_resurrection_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_vocals_resurrection_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_vocals_resurrection_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_instrumental_resurrection_unwa",
+      "filename": "bs_roformer_instrumental_resurrection_unwa.ckpt",
+      "name": "BS Roformer | Instrumental Resurrection by unwa",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 195,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_instrumental_resurrection_unwa.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_instrumental_resurrection_unwa.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_instrumental_resurrection_unwa.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_instrumental_resurrection_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_instrumental_resurrection_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_instrumental_resurrection_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_instrumental_resurrection_gabox",
+      "filename": "bs_roformer_instrumental_resurrection_gabox.ckpt",
+      "name": "BS Roformer | Instrumental ResurrectioN by Gabox",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 195,
+      "vram_gb": 6.0,
+      "files": [
+        {
+          "name": "bs_roformer_instrumental_resurrection_gabox.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/bs_roformer_instrumental_resurrection_gabox.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/bs_roformer_instrumental_resurrection_gabox.ckpt"
+        },
+        {
+          "name": "config_bs_roformer_instrumental_resurrection_unwa.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/config_bs_roformer_instrumental_resurrection_unwa.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/config_bs_roformer_instrumental_resurrection_unwa.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    },
+    {
+      "id": "catalog_bs_roformer_sw",
+      "filename": "BS-Roformer-SW.ckpt",
+      "name": "BS Roformer SW by jarredou",
+      "family": "Roformer",
+      "engine": "roformer",
+      "stems": [],
+      "sdr": null,
+      "size_mb": 667,
+      "vram_gb": 5.0,
+      "files": [
+        {
+          "name": "BS-Roformer-SW.ckpt",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/BS-Roformer-SW.ckpt",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.ckpt"
+        },
+        {
+          "name": "BS-Roformer-SW.yaml",
+          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/BS-Roformer-SW.yaml",
+          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.yaml"
+        }
+      ],
+      "license": "open (UVR / community)"
+    }
+  ]
+}

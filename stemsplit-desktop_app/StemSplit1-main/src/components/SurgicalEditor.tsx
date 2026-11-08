@@ -63,6 +63,12 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
     const [exporting, setExporting] = useState(false);
     const [exportPath, setExportPath] = useState<string | null>(null);
     const [statusMsg, setStatusMsg] = useState('');
+    const selectionRange = useMemo(() => {
+        const start = Math.min(selStart, selEnd);
+        const end = Math.max(selStart, selEnd);
+        return { start, end, has: end > start };
+    }, [selStart, selEnd]);
+    const pendingDragRef = useRef<{ x: number; t: number } | null>(null);
 
     useEffect(() => {
         if (!isOpen) return;
@@ -263,7 +269,7 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
             const x = i;
             // Progress coloring
             const timeAtBar = zoomStart + (i / totalBars) * (zoomEnd - zoomStart);
-            const isSelected = timeAtBar >= selStart && timeAtBar <= selEnd;
+            const isSelected = timeAtBar >= Math.min(selStart, selEnd) && timeAtBar <= Math.max(selStart, selEnd);
             if (isSelected) {
                 ctx.fillStyle = 'rgba(34,211,238,0.3)';
             } else if (timeAtBar <= currentTime) {
@@ -277,9 +283,11 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
         ctx.globalAlpha = 1;
 
         // Selection overlay
-        if (selEnd > selStart) {
-            const selX1 = ((selStart - zoomStart) / (zoomEnd - zoomStart)) * w;
-            const selX2 = ((selEnd - zoomStart) / (zoomEnd - zoomStart)) * w;
+        if (Math.abs(selEnd - selStart) > 0.001) {
+            const regionA = Math.min(selStart, selEnd);
+            const regionB = Math.max(selStart, selEnd);
+            const selX1 = ((regionA - zoomStart) / (zoomEnd - zoomStart)) * w;
+            const selX2 = ((regionB - zoomStart) / (zoomEnd - zoomStart)) * w;
             ctx.fillStyle = 'rgba(34,211,238,0.06)';
             ctx.fillRect(selX1, 0, selX2 - selX1, h);
             ctx.strokeStyle = 'rgba(34,211,238,0.3)';
@@ -327,24 +335,7 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
     const [dragging, setDragging] = useState<'seek' | 'select' | 'scroll' | null>(null);
     const dragStartRef = useRef<number>(0);
 
-    const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
-        if (e.button === 1 || e.button === 2) {
-            // Middle click or right click: scroll/pan
-            setDragging('scroll');
-            dragStartRef.current = e.clientX;
-            return;
-        }
-        if (e.shiftKey) {
-            // Shift+click: add to selection
-            const t = canvasXToTime(e.clientX);
-            setDragging('select');
-            setSelStart(t);
-            setSelEnd(t);
-            return;
-        }
-        // Left click: seek
-        const t = canvasXToTime(e.clientX);
-        setDragging('seek');
+    const seekTo = useCallback((t: number) => {
         setCurrentTime(t);
         if (playing) {
             sourceRef.current?.stop();
@@ -359,7 +350,28 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
                 startOffsetRef.current = t;
             }
         }
-    }, [canvasXToTime, playing]);
+    }, [playing]);
+
+    const handleCanvasMouseDown = useCallback((e: React.MouseEvent) => {
+        if (e.button === 1 || e.button === 2) {
+            // Middle click or right click: scroll/pan
+            setDragging('scroll');
+            dragStartRef.current = e.clientX;
+            pendingDragRef.current = null;
+            return;
+        }
+        const t = canvasXToTime(e.clientX);
+        pendingDragRef.current = { x: e.clientX, t };
+        if (e.shiftKey) {
+            pendingDragRef.current = null;
+            setDragging('select');
+            setSelStart(t);
+            setSelEnd(t);
+            return;
+        }
+        // Left click starts a pending gesture: drag selects, a click seeks.
+        setDragging('seek');
+    }, [canvasXToTime]);
 
     const handleCanvasMouseMove = useCallback((e: React.MouseEvent) => {
         if (dragging === 'scroll') {
@@ -375,24 +387,49 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
             setZoomStart(newStart);
             setZoomEnd(newEnd);
             dragStartRef.current = e.clientX;
-        } else if (dragging === 'select') {
-            const t = canvasXToTime(e.clientX);
-            setSelEnd(t);
-        } else if (dragging === 'seek') {
-            const t = canvasXToTime(e.clientX);
-            setCurrentTime(t);
+            return;
+        }
+        const pending = pendingDragRef.current;
+        if (dragging === 'seek' && pending && Math.abs(e.clientX - pending.x) >= 4) {
+            setDragging('select');
+            setSelStart(pending.t);
+            setSelEnd(canvasXToTime(e.clientX));
+            return;
+        }
+        if (dragging === 'select') {
+            setSelEnd(canvasXToTime(e.clientX));
         }
     }, [dragging, zoomStart, zoomEnd, duration, canvasXToTime]);
 
-    const handleCanvasMouseUp = useCallback(() => {
+    const handleCanvasMouseUp = useCallback((e?: React.MouseEvent | MouseEvent) => {
+        const clientX = e && 'clientX' in e ? e.clientX : undefined;
         if (dragging === 'select') {
-            if (selEnd < selStart) {
-                setSelStart(selEnd);
-                setSelEnd(selStart);
-            }
+            const endT = clientX !== undefined ? canvasXToTime(clientX) : selEnd;
+            const origin = pendingDragRef.current?.t ?? selStart;
+            setSelStart(Math.min(origin, endT));
+            setSelEnd(Math.max(origin, endT));
+        } else if (dragging === 'seek' && pendingDragRef.current) {
+            seekTo(pendingDragRef.current.t);
         }
+        pendingDragRef.current = null;
         setDragging(null);
-    }, [dragging, selStart, selEnd]);
+    }, [dragging, selStart, selEnd, canvasXToTime, seekTo]);
+
+    useEffect(() => {
+        if (!dragging) return;
+        const onMove = (event: MouseEvent) => {
+            if (!containerRef.current) return;
+            const fake = { clientX: event.clientX } as React.MouseEvent;
+            handleCanvasMouseMove(fake);
+        };
+        const onUp = (event: MouseEvent) => handleCanvasMouseUp(event);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onUp);
+        return () => {
+            window.removeEventListener('mousemove', onMove);
+            window.removeEventListener('mouseup', onUp);
+        };
+    }, [dragging, handleCanvasMouseMove, handleCanvasMouseUp]);
 
     // Zoom: mouse wheel
     const handleWheel = useCallback((e: React.WheelEvent) => {
@@ -430,16 +467,16 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
     }, [currentTime, duration, filePath, stemName]);
 
     const handleTrimToSelection = useCallback(async () => {
-        if (selEnd <= selStart) return;
+        if (!selectionRange.has) return;
         try {
             const { invoke } = await import('@tauri-apps/api/core');
             const newPath = await invoke('export_audio_clip', {
                 filePath,
-                startSec: selStart,
-                endSec: selEnd,
+                startSec: selectionRange.start,
+                endSec: selectionRange.end,
                 stemName: `${stemName}_trimmed`,
             });
-            pushEdit({ type: 'trim', position: selStart, endPosition: selEnd });
+            pushEdit({ type: 'trim', position: selectionRange.start, endPosition: selectionRange.end });
             setExportPath(newPath as string);
             setStatusMsg('Trim applied');
             onApply?.(newPath as string);
@@ -447,15 +484,15 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
             console.error('Trim failed:', e);
             setStatusMsg('Trim failed');
         }
-    }, [selStart, selEnd, filePath, stemName, onApply]);
+    }, [selectionRange, filePath, stemName, onApply]);
 
     const handleSilenceSelection = useCallback(async () => {
-        if (selEnd <= selStart || !bufferRef.current) return;
+        if (!selectionRange.has || !bufferRef.current) return;
         try {
             const ctx = new (window.AudioContext || (window as any).webkitAudioContext)();
             const buf = bufferRef.current;
-            const startSample = Math.floor(selStart * buf.sampleRate);
-            const endSample = Math.floor(selEnd * buf.sampleRate);
+            const startSample = Math.floor(selectionRange.start * buf.sampleRate);
+            const endSample = Math.floor(selectionRange.end * buf.sampleRate);
             const newBuf = ctx.createBuffer(buf.numberOfChannels, buf.length, buf.sampleRate);
             for (let ch = 0; ch < buf.numberOfChannels; ch++) {
                 const data = buf.getChannelData(ch);
@@ -464,7 +501,7 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
                 newData.fill(0, startSample, endSample);
             }
             bufferRef.current = newBuf;
-            pushEdit({ type: 'silence', position: selStart, endPosition: selEnd });
+            pushEdit({ type: 'silence', position: selectionRange.start, endPosition: selectionRange.end });
             setExportPath(null);
         } catch (e) { console.error('Silence failed:', e); }
     }, [selStart, selEnd]);
@@ -474,31 +511,31 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
     }, [handleTrimToSelection]);
 
     const handleExportSelectionAsFile = useCallback(async () => {
-        if (selEnd <= selStart) return;
+        if (!selectionRange.has) return;
         setExporting(true);
         setExportProgress(0);
         try {
             const { invoke } = await import('@tauri-apps/api/core');
             const newPath = await invoke('export_audio_clip', {
                 filePath,
-                startSec: selStart,
-                endSec: selEnd,
+                startSec: selectionRange.start,
+                endSec: selectionRange.end,
                 stemName: stemName,
             });
             setExportPath(newPath as string);
             setExportProgress(100);
         } catch (e) { console.error('Export failed:', e); }
         setExporting(false);
-    }, [selStart, selEnd, filePath, stemName]);
+    }, [selectionRange, filePath, stemName]);
 
     const handleSaveToSampleBank = useCallback(async () => {
-        if (selEnd <= selStart) return;
+        if (!selectionRange.has) return;
         try {
             const { invoke } = await import('@tauri-apps/api/core');
             await invoke('save_to_sample_bank', {
                 sourcePath: filePath,
-                startSec: selStart,
-                endSec: selEnd,
+                startSec: selectionRange.start,
+                endSec: selectionRange.end,
                 stemType: stemName,
                 bpm,
                 key,
@@ -508,7 +545,7 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
             console.error('Sample bank save failed:', e);
             setStatusMsg('Sample bank save failed');
         }
-    }, [selStart, selEnd, filePath, stemName, bpm, key]);
+    }, [selectionRange, filePath, stemName, bpm, key]);
 
     // Undo/Redo
     const pushEdit = useCallback((edit: Omit<EditOp, 'timestamp'>) => {
@@ -548,7 +585,7 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
 
     const canUndo = editIndex >= 0;
     const canRedo = editIndex < editHistory.length - 1;
-    const hasSelection = selEnd > selStart;
+    const hasSelection = selectionRange.has;
 
     return (
         <AnimatePresence>
@@ -659,7 +696,7 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
                         {/* Selection info */}
                         {hasSelection && (
                             <span className="text-[9px] font-mono text-cyan-400/70 tracking-wider">
-                                {formatTime(selStart)} — {formatTime(selEnd)} ({formatTime(selEnd - selStart)})
+                                {formatTime(selectionRange.start)} — {formatTime(selectionRange.end)} ({formatTime(selectionRange.end - selectionRange.start)})
                             </span>
                         )}
 
@@ -691,7 +728,8 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
                         <span>{formatTime(duration)}</span>
                         <span>{bufferRef.current?.sampleRate}Hz</span>
                         <span>{bufferRef.current?.numberOfChannels}ch</span>
-                        <span className="ml-auto truncate max-w-[50%]">
+                        <span className="text-slate-600">Drag to select · click to seek · Save to Sample Bank</span>
+                        <span className="ml-auto truncate max-w-[40%]">
                             {statusMsg || (exporting ? `Exporting... ${exportProgress}%` : exportPath ? `Saved: ${exportPath.split(/[\\/]/).pop()}` : '')}
                         </span>
                     </div>
@@ -722,8 +760,6 @@ const SurgicalEditor: React.FC<SurgicalEditorProps> = ({ filePath, stemName, isO
                             className="w-full h-full"
                             onMouseDown={handleCanvasMouseDown}
                             onMouseMove={handleCanvasMouseMove}
-                            onMouseUp={handleCanvasMouseUp}
-                            onMouseLeave={handleCanvasMouseUp}
                             onWheel={handleWheel}
                         />
                     </div>

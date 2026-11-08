@@ -29,7 +29,7 @@ export const EXTENDED_ENGINE_META = {
 
 export const EXTENDED_DEFAULT_MODELS = {
   ensemble: 'ensemble_vocal_balanced',
-  karaoke: 'karaoke_mvsep_team',
+  karaoke: 'kara2_student',
   postfx: 'postfx_apollo_vocal',
   instrument: 'inst_guitar_sw',
 } as const;

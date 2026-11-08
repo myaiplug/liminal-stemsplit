@@ -599,7 +599,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <p class="text-white/40 max-w-lg mx-auto mt-3">Install the Windows app free. Try 1 Spleeter 2-stem split, then upgrade to Pro for unlimited access.</p>
     </div>
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto">
-      <a id="windowsDownloadExe" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_x64-setup.exe" data-download="NoDAW.Liminal_0.5.0_x64-setup.exe" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center group">
+      <a id="windowsDownloadExe" data-liminal-download="windows" href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/NoDAW.Liminal_0.5.1_x64-setup.exe" data-download="NoDAW.Liminal_0.5.1_x64-setup.exe" class="download-link p-5 rounded-xl bg-white/[0.02] border border-liminal-500/20 hover:border-liminal-500/40 transition-colors text-center group">
         <div class="w-12 h-12 mb-3 mx-auto flex items-center justify-center">
           <img src="assets/windows.svg" alt="Windows" class="w-10 h-10 object-contain" loading="lazy" />
         </div>
@@ -628,7 +628,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
         </div>
       </div>
     </div>
-    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Liminal processes all audio locally on your machine — no cloud uploads. Windows may show a SmartScreen notice for new independent software. Choose "More info" → "Run anyway". Verify the SHA-256 checksum from the <a href="https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.5.0" class="text-liminal-400 hover:text-liminal-300 underline" target="_blank" rel="noopener">GitHub release</a>. macOS and Linux versions coming soon.</p>
+    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Liminal processes all audio locally on your machine — no cloud uploads. Windows may show a SmartScreen notice for new independent software. Choose "More info" → "Run anyway". Verify the SHA-256 checksum from the <a data-liminal-release href="https://github.com/myaiplug/liminal-stemsplit/releases/latest" class="text-liminal-400 hover:text-liminal-300 underline" target="_blank" rel="noopener">GitHub release (<span data-liminal-version>latest</span>)</a>. macOS and Linux versions coming soon.</p>
   </div>
 </section>
 
@@ -1599,5 +1599,6 @@ if (demoSection) demoObserver.observe(demoSection);
 
 
 </script>
+<script type="module" src="js/liminal-latest.js"></script>
 </body>
 </html>
