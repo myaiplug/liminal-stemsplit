@@ -1166,6 +1166,10 @@ class AudioSeparator:
                 self.engine = 'postfx'
             elif variant_meta.get('backend') == 'spleeter':
                 self.engine = 'spleeter'
+            elif variant_meta.get('backend') == 'crisp':
+                self.engine = 'crisp'
+            elif variant_meta.get('backend') == 'kara2':
+                self.engine = 'kara2'
             elif variant_meta.get('backend') == 'drumsep':
                 self.engine = 'drumsep' if self.model_variant == 'drumsep_49469' else 'drumsep_mdx'
             elif self.model_variant.startswith('drumsep_mdx23c_'):
@@ -2799,7 +2803,7 @@ class AudioSeparator:
     def _validate_stem_output(self, stems: Dict[str, np.ndarray]) -> None:
         """Fail fast if the model did not produce the requested number of stems."""
         engine = getattr(self, 'engine', '')
-        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke', 'postfx', 'analyze'):
+        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke', 'kara2', 'postfx', 'analyze', 'crisp'):
             return
         requested = getattr(self, 'stems_count', None)
         if not requested:
@@ -2811,6 +2815,26 @@ class AudioSeparator:
                 f"({', '.join(sorted(stems.keys()))}). "
                 f"Model {getattr(self, 'model_variant', '') or engine} cannot satisfy this stem count."
             )
+
+    def _separate_crisp(self, input_file: str, audio, sr, progress_hook=None):
+        from crisp_separate import separate_crisp
+        filename = resolve_model_variant(getattr(self, 'model_variant', '')).get(
+            'filename'
+        ) or 'mini-bs-roformer-q8_0.gguf'
+        stems = separate_crisp(input_file, model_filename=filename, progress_hook=progress_hook)
+        if getattr(self, 'stems_count', 4) == 2 and 'vocals' in stems:
+            leftovers = [stem for name, stem in stems.items() if name != 'vocals']
+            if leftovers:
+                instrumental = leftovers[0].copy()
+                for extra in leftovers[1:]:
+                    if extra.shape == instrumental.shape:
+                        instrumental = instrumental + extra
+                stems = {'vocals': stems['vocals'], 'instrumental': instrumental}
+        return stems
+
+    def _separate_kara2(self, input_file: str, audio, sr, progress_hook=None):
+        from kara2_separate import separate_kara2
+        return separate_kara2(audio, sr, progress_hook=progress_hook)
 
     def separate(
         self,
@@ -2883,7 +2907,7 @@ class AudioSeparator:
             engine_with_real_progress = None
             if hasattr(self, 'engine'):
                 eng = self.engine
-                if eng in ('mdx', 'ensemble', 'karaoke', 'drumsep_mdx', 'mdx_net', 'instrument', 'vr', 'roformer'):
+                if eng in ('mdx', 'ensemble', 'karaoke', 'kara2', 'crisp', 'drumsep_mdx', 'mdx_net', 'instrument', 'vr', 'roformer'):
                     engine_with_real_progress = eng
 
             is_cpu = self.device == 'cpu'
@@ -2922,6 +2946,10 @@ class AudioSeparator:
                 stems = self._separate_ensemble(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'karaoke':
                 stems = self._separate_ensemble(input_file, audio, sr, progress_hook)
+            elif engine_with_real_progress == 'kara2':
+                stems = self._separate_kara2(input_file, audio, sr, progress_hook)
+            elif engine_with_real_progress == 'crisp':
+                stems = self._separate_crisp(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'drumsep_mdx':
                 stems = self._separate_drumsep_mdx(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'mdx_net':
@@ -2981,7 +3009,7 @@ class AudioSeparator:
             if (
                 hasattr(self, 'stems_count')
                 and self.stems_count == 2
-                and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke')
+                and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke', 'kara2')
             ):
                 if 'vocals' in stems:
                     # Create 2 stems: vocals + instrumental (everything else)
@@ -3035,6 +3063,22 @@ class AudioSeparator:
                 bpm=bpm, key=key, pitch=pitch_hz,
                 progress_hook=progress_hook
             )
+
+            if not self.fast_mode:
+                try:
+                    from remix_kit import write_remix_session
+                    write_remix_session(
+                        output_dir=output_dir,
+                        stem_files=saved_files,
+                        mix_audio=audio,
+                        sr=sr,
+                        bpm=bpm,
+                        key=key,
+                        title=Path(input_file).stem,
+                        progress_hook=progress_hook,
+                    )
+                except Exception as remix_exc:
+                    logger.warning(f"Remix kit extras failed: {remix_exc}")
             
             if progress_hook:
                 progress_hook(5, 5, " Stems saved", 98)
@@ -3147,7 +3191,7 @@ def main():
     parser.add_argument('--emit-json', action='store_true', help='Emit manifest JSON to stdout')
     parser.add_argument('--engine', type=str, default='demucs',
                         choices=['demucs', 'spleeter', 'mdx', 'mdx_net', 'roformer', 'vr',
-                                 'ensemble', 'karaoke', 'drumsep', 'postfx', 'instrument', 'analyze'],
+                                 'ensemble', 'karaoke', 'kara2', 'crisp', 'drumsep', 'postfx', 'instrument', 'analyze'],
                         help='Separation engine to use or analyze')
     parser.add_argument('--model-variant', type=str, default=None,
                         help='Model variant ID from the Liminal model catalog')

@@ -107,6 +107,48 @@ export const ENGINE_META: Record<
 };
 
 export const SEPARATION_MODELS: SeparationModel[] = [
+  {
+    id: 'mini_bs_roformer',
+    engine: 'demucs',
+    category: 'fast',
+    name: 'Mini-BS-RoFormer V2.5',
+    tagline: 'Tiny 4-stem GGUF — downloads on first use',
+    filename: 'mini-bs-roformer-q8_0.gguf',
+    description:
+      'HiDolen Mini-BS-RoFormer V2.5 (MIT) running in CrispASR. About 50 MB Q8 GGUF, 4 stems (bass, drums, other, vocals) at 44.1 kHz stereo. Built to fit an 8 GB GPU. The binary and model download on first use.',
+    stems: [2, 4],
+    tier: 'A',
+    accent: '#22d3ee',
+    glow: 'rgba(34,211,238,0.45)',
+    glyph: '▣',
+    tags: ['fast', 'gguf', 'mit', 'crispasr', '8gb'],
+    recommendedFor: ['local 4-stem splits', 'RTX 2080 Super', 'quick drafts'],
+    speed: 'fast',
+    quality: 80,
+    sizeMb: 50,
+    vramGb: 2,
+  },
+  {
+    id: 'kara2_student',
+    engine: 'karaoke',
+    category: 'karaoke',
+    name: 'KARA2 Student',
+    tagline: 'Lead · backing · instrumental in one pass',
+    filename: 'duality_kara2_student_core_t1100.onnx',
+    description:
+      'Mel-Band RoFormer Duality + KARA2 student ONNX (Apache-2.0, ~242 MB). Host-side STFT at 44.1 kHz stereo produces lead vocals, backing vocals, and instrumental. Both the .onnx graph and .onnx.data weights download on first use.',
+    stems: [3],
+    tier: 'S',
+    accent: '#fb7185',
+    glow: 'rgba(251,113,133,0.5)',
+    glyph: '♬',
+    tags: ['lead', 'backing', 'karaoke', 'onnx'],
+    recommendedFor: ['karaoke', 'duets', 'harmony edits'],
+    speed: 'balanced',
+    quality: 91,
+    sizeMb: 242,
+    vramGb: 3,
+  },
   // ── Demucs ──────────────────────────────────────────────
   {
     id: 'demucs_htdemucs',
@@ -736,7 +778,7 @@ export const DEFAULT_MODEL_BY_ENGINE: Record<SeparationEngine, string> = {
   spleeter: 'spleeter_2',
   drumsep: 'drumsep_mdx23c_6',
   ensemble: 'mdx23_ensemble',
-  karaoke: 'karaoke_mvsep_team',
+  karaoke: 'kara2_student',
   postfx: 'postfx_apollo_vocal',
   instrument: 'inst_guitar_sw',
 };

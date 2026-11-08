@@ -9,6 +9,24 @@ from pathlib import Path
 from typing import Any, Dict, Optional
 
 MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
+    'mini_bs_roformer': {
+        'backend': 'crisp',
+        'filename': 'mini-bs-roformer-q8_0.gguf',
+        'stems': 4,
+        'license': 'MIT',
+    },
+    'mini_bs_roformer_q4': {
+        'backend': 'crisp',
+        'filename': 'mini-bs-roformer-q4_k.gguf',
+        'stems': 4,
+        'license': 'MIT',
+    },
+    'kara2_student': {
+        'backend': 'kara2',
+        'filename': 'duality_kara2_student_core_t1100.onnx',
+        'stems': 3,
+        'license': 'Apache-2.0',
+    },
     # ── Demucs ──────────────────────────────────────────────
     'demucs_htdemucs': {'backend': 'demucs', 'model': 'htdemucs'},
     'demucs_htdemucs_ft': {'backend': 'demucs', 'model': 'htdemucs_ft'},

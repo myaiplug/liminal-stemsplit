@@ -4870,6 +4870,109 @@ fn delete_sample_from_bank(sample_id: String) -> Result<(), String> {
     Ok(())
 }
 
+const SPLIT_HISTORY_MAX: usize = 100;
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+struct SplitHistoryFile {
+    name: String,
+    path: String,
+    #[serde(default)]
+    stem_type: String,
+    #[serde(default)]
+    available: bool,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+struct SplitHistoryEntry {
+    id: String,
+    title: String,
+    #[serde(default)]
+    source_path: String,
+    output_directory: String,
+    created_at: String,
+    #[serde(default)]
+    engine: Option<String>,
+    #[serde(default)]
+    model: Option<String>,
+    files: Vec<SplitHistoryFile>,
+}
+
+fn split_history_dir() -> Result<PathBuf, String> {
+    let base = dirs::data_local_dir().ok_or("Could not find local data directory")?;
+    let dir = base.join("StemSplit").join("split_history");
+    std::fs::create_dir_all(&dir).map_err(|e| format!("Failed to create split history directory: {}", e))?;
+    Ok(dir)
+}
+
+fn split_history_index_path() -> Result<PathBuf, String> {
+    Ok(split_history_dir()?.join("index.json"))
+}
+
+fn load_split_history() -> Result<Vec<SplitHistoryEntry>, String> {
+    let index_path = split_history_index_path()?;
+    if !index_path.exists() {
+        return Ok(Vec::new());
+    }
+    let data = std::fs::read_to_string(&index_path)
+        .map_err(|e| format!("Failed to read split history: {}", e))?;
+    serde_json::from_str(&data).map_err(|e| format!("Failed to parse split history: {}", e))
+}
+
+fn save_split_history(entries: &[SplitHistoryEntry]) -> Result<(), String> {
+    let index_path = split_history_index_path()?;
+    let data = serde_json::to_string_pretty(entries)
+        .map_err(|e| format!("Failed to serialize split history: {}", e))?;
+    std::fs::write(&index_path, data).map_err(|e| format!("Failed to write split history: {}", e))?;
+    Ok(())
+}
+
+fn mark_history_availability(mut entries: Vec<SplitHistoryEntry>) -> Vec<SplitHistoryEntry> {
+    for entry in &mut entries {
+        for file in &mut entry.files {
+            file.available = PathBuf::from(&file.path).exists();
+        }
+    }
+    entries
+}
+
+#[tauri::command]
+fn record_split_history(
+    title: String,
+    source_path: String,
+    output_directory: String,
+    engine: Option<String>,
+    model: Option<String>,
+    files: Vec<SplitHistoryFile>,
+) -> Result<SplitHistoryEntry, String> {
+    let mut entries = load_split_history()?;
+    let fallback_title = PathBuf::from(&source_path)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("Untitled split")
+        .to_string();
+    let entry = SplitHistoryEntry {
+        id: uuid::Uuid::new_v4().to_string(),
+        title: if title.trim().is_empty() { fallback_title } else { title },
+        source_path,
+        output_directory,
+        created_at: chrono::Utc::now().to_rfc3339(),
+        engine,
+        model,
+        files,
+    };
+    entries.insert(0, entry.clone());
+    entries.truncate(SPLIT_HISTORY_MAX);
+    save_split_history(&entries)?;
+    Ok(entry)
+}
+
+#[tauri::command]
+fn list_split_history() -> Result<Vec<SplitHistoryEntry>, String> {
+    Ok(mark_history_availability(load_split_history()?))
+}
+
 fn chrono_lite_now_iso() -> String {
     use std::time::{SystemTime, UNIX_EPOCH};
     let secs = SystemTime::now()
@@ -6443,6 +6546,8 @@ fn main() {
             save_to_sample_bank,
             list_sample_bank,
             delete_sample_from_bank,
+            record_split_history,
+            list_split_history,
             get_bundled_vst_paths,
             // Hardware and downloading
             hardware::get_system_profile,

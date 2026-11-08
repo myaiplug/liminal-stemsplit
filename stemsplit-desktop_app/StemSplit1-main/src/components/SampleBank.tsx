@@ -1,11 +1,7 @@
-// src/components/SampleBank.tsx
-'use client';
+import React, { useEffect, useState } from 'react';
+import { invoke } from '@tauri-apps/api/core';
 
-import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-
-// ---- Types ----
-interface SampleEntry {
+export interface SampleEntry {
     id: string;
     name: string;
     path: string;
@@ -17,281 +13,205 @@ interface SampleEntry {
     createdAt: string;
 }
 
+export interface SplitHistoryFile {
+    name: string;
+    path: string;
+    stemType: string;
+    available: boolean;
+}
+
+export interface SplitHistoryEntry {
+    id: string;
+    title: string;
+    sourcePath: string;
+    outputDirectory: string;
+    createdAt: string;
+    engine?: string | null;
+    model?: string | null;
+    files: SplitHistoryFile[];
+}
+
 interface SampleBankProps {
     isOpen: boolean;
     onClose: () => void;
-    onSelectSample?: (sample: SampleEntry) => void;
+    onSelectSample: (sample: SampleEntry) => void;
+    onOpenHistoryFile?: (file: SplitHistoryFile, entry: SplitHistoryEntry) => void;
 }
 
-const CATEGORIES = [
-    { id: 'all', label: 'All Samples', icon: '⬡' },
-    { id: 'vocals_hook', label: 'Hooks', icon: '🎤' },
-    { id: 'vocals_verse', label: 'Verses', icon: '📝' },
-    { id: 'vocals_chant', label: 'Chants', icon: '🗣' },
-    { id: 'vocals_oneshot', label: 'One-Shots', icon: '💥' },
-    { id: 'drums_kick', label: 'Kicks', icon: '🥁' },
-    { id: 'drums_snare', label: 'Snares', icon: '🔔' },
-    { id: 'drums_hihat', label: 'Hi-Hats', icon: '✨' },
-    { id: 'drums_percussion', label: 'Percussion', icon: '🪘' },
-    { id: 'drums_loop', label: 'Drum Loops', icon: '🎵' },
-    { id: 'drums_fill', label: 'Fills', icon: '🎪' },
-    { id: 'bass_808', label: '808s', icon: '📢' },
-    { id: 'bass_synth', label: 'Synth Bass', icon: '🔊' },
-    { id: 'bass_live', label: 'Live Bass', icon: '🎸' },
-    { id: 'bass_loop', label: 'Bass Loops', icon: '🔄' },
-    { id: 'instrument_synth', label: 'Synth', icon: '🎹' },
-    { id: 'instrument_piano', label: 'Piano', icon: '🎼' },
-    { id: 'instrument_guitar', label: 'Guitar', icon: '🎸' },
-    { id: 'instrument_brass', label: 'Brass', icon: '📯' },
-    { id: 'instrument_fx', label: 'FX', icon: '⚡' },
-];
-
-function formatTime(seconds: number): string {
-    const m = Math.floor(seconds / 60);
-    const s = Math.floor(seconds % 60);
-    const ms = Math.floor((seconds % 1) * 1000);
-    return `${m}:${s.toString().padStart(2, '0')}.${ms.toString().padStart(3, '0')}`;
+function formatHistoryDate(value: string): string {
+    if (!value) return '';
+    const asNumber = Number(value.replace(/Z$/, ''));
+    const date = Number.isFinite(asNumber) && asNumber > 1_000_000_000
+        ? new Date(asNumber * 1000)
+        : new Date(value);
+    if (Number.isNaN(date.getTime())) return value;
+    return date.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: 'numeric', minute: '2-digit' });
 }
 
-const SampleBank: React.FC<SampleBankProps> = ({ isOpen, onClose, onSelectSample }) => {
+export const SampleBank: React.FC<SampleBankProps> = ({ isOpen, onClose, onSelectSample, onOpenHistoryFile }) => {
     const [samples, setSamples] = useState<SampleEntry[]>([]);
-    const [activeCategory, setActiveCategory] = useState('all');
-    const [searchQuery, setSearchQuery] = useState('');
-    const [sortBy, setSortBy] = useState<'name' | 'date' | 'bpm'>('date');
-    const [previewSample, setPreviewSample] = useState<string | null>(null);
-    const [previewPlaying, setPreviewPlaying] = useState(false);
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [selectedSamples, setSelectedSamples] = useState<Set<string>>(new Set());
+    const [history, setHistory] = useState<SplitHistoryEntry[]>([]);
+    const [expanded, setExpanded] = useState<Record<string, boolean>>({});
+    const [filter, setFilter] = useState('all');
 
-    // Load samples
     useEffect(() => {
         if (!isOpen) return;
-        const load = async () => {
-            try {
-                const { invoke } = await import('@tauri-apps/api/core');
-                const data = await invoke<SampleEntry[]>('list_sample_bank');
-                setSamples(data || []);
-            } catch {
-                // Demo data if no backend yet
-                setSamples([]);
-            }
-        };
-        load();
+        invoke<SampleEntry[]>('list_sample_bank')
+            .then(setSamples)
+            .catch(console.error);
+        invoke<SplitHistoryEntry[]>('list_split_history')
+            .then(setHistory)
+            .catch((err) => {
+                console.warn('Split history unavailable:', err);
+                setHistory([]);
+            });
     }, [isOpen]);
 
-    // Filter + sort
-    const filteredSamples = (() => {
-        let result = samples;
-        if (activeCategory !== 'all') {
-            result = result.filter(s => s.category === activeCategory);
-        }
-        if (searchQuery) {
-            const q = searchQuery.toLowerCase();
-            result = result.filter(s =>
-                s.name.toLowerCase().includes(q) ||
-                s.stemType.toLowerCase().includes(q) ||
-                s.key.toLowerCase().includes(q)
-            );
-        }
-        switch (sortBy) {
-            case 'name': result = [...result].sort((a, b) => a.name.localeCompare(b.name)); break;
-            case 'date': result = [...result].sort((a, b) => {
-                const tb = parseInt(b.createdAt, 10) || 0;
-                const ta = parseInt(a.createdAt, 10) || 0;
-                return tb - ta;
-            }); break;
-            case 'bpm': result = [...result].sort((a, b) => a.bpm - b.bpm); break;
-        }
-        return result;
-    })();
+    const categories = ['all', ...Array.from(new Set(samples.map(s => s.category)))];
+    const filtered = filter === 'all' ? samples : samples.filter(s => s.category === filter);
 
-    const handlePreview = useCallback(async (sample: SampleEntry) => {
-        if (previewSample === sample.id) {
-            if (previewPlaying) {
-                audioRef.current?.pause();
-                setPreviewPlaying(false);
-            } else {
-                audioRef.current?.play().catch(() => {});
-                setPreviewPlaying(true);
-            }
-            return;
-        }
-        try {
-            const { convertFileSrc } = await import('@tauri-apps/api/core');
-            const url = `${convertFileSrc(sample.path)}?t=${Date.now()}`;
-            if (audioRef.current) {
-                audioRef.current.pause();
-                if (audioRef.current.src.startsWith('blob:')) {
-                    URL.revokeObjectURL(audioRef.current.src);
-                }
-            }
-            const audio = new Audio(url);
-            audioRef.current = audio;
-            audio.onended = () => setPreviewPlaying(false);
-            audio.onpause = () => setPreviewPlaying(false);
-            audio.onplay = () => setPreviewPlaying(true);
-            await audio.play();
-            setPreviewSample(sample.id);
-            setPreviewPlaying(true);
-        } catch { /* ignore */ }
-    }, [previewSample, previewPlaying]);
-
-    const handleToggleSelect = useCallback((id: string, e: React.MouseEvent) => {
+    const handleDelete = async (id: string, e: React.MouseEvent) => {
         e.stopPropagation();
-        setSelectedSamples(prev => {
-            const next = new Set(prev);
-            if (next.has(id)) next.delete(id);
-            else next.add(id);
-            return next;
-        });
-    }, []);
+        await invoke('delete_sample_from_bank', { sampleId: id });
+        setSamples(prev => prev.filter(s => s.id !== id));
+    };
 
-    const handleDelete = useCallback(async () => {
-        if (selectedSamples.size === 0) return;
+    const revealInFolder = async (filePath: string, e?: React.MouseEvent) => {
+        e?.stopPropagation();
         try {
-            const { invoke } = await import('@tauri-apps/api/core');
-            for (const id of selectedSamples) {
-                await invoke('delete_sample_from_bank', { sampleId: id });
-            }
-            setSamples(prev => prev.filter(s => !selectedSamples.has(s.id)));
-            setSelectedSamples(new Set());
-        } catch (e) { console.error('Delete failed:', e); }
-    }, [selectedSamples]);
+            await invoke('reveal_item_in_dir', { path: filePath });
+        } catch {
+            /* folder reveal is optional */
+        }
+    };
+
+    const toggleEntry = (id: string) => {
+        setExpanded(prev => ({ ...prev, [id]: !prev[id] }));
+    };
+
+    if (!isOpen) return null;
 
     return (
-        <AnimatePresence>
-            {isOpen && (
-                <motion.div
-                    initial={{ x: '100%', opacity: 0 }}
-                    animate={{ x: 0, opacity: 1 }}
-                    exit={{ x: '100%', opacity: 0 }}
-                    transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-                    className="fixed inset-y-0 right-0 z-[110] w-[400px] bg-slate-950/98 backdrop-blur-xl border-l border-slate-800/50 shadow-2xl flex flex-col"
-                >
-                    {/* Header */}
-                    <div className="flex items-center justify-between px-4 py-3 border-b border-slate-800/50">
-                        <div>
-                            <h2 className="text-xs font-mono font-bold text-cyan-400 tracking-[0.2em] uppercase">Sample Bank</h2>
-                            <p className="text-[9px] text-slate-500 mt-0.5">{samples.length} samples</p>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            {selectedSamples.size > 0 && (
-                                <button onClick={handleDelete}
-                                    className="px-2 py-1 rounded text-[9px] font-mono border border-red-500/30 text-red-400/70 hover:text-red-300 hover:bg-red-500/10 transition-all">
-                                    Delete ({selectedSamples.size})
-                                </button>
-                            )}
-                            <button onClick={onClose}
-                                className="w-6 h-6 flex items-center justify-center rounded text-slate-500 hover:text-red-400 hover:bg-red-500/10 transition-all">
-                                <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+        <div className="absolute top-0 right-0 bottom-0 w-[420px] bg-[#0a0a0c]/95 backdrop-blur-xl border-l border-white/10 z-50 flex flex-col shadow-2xl">
+            <div className="flex items-center justify-between px-4 py-3 border-b border-white/10">
+                <h2 className="text-xs font-mono tracking-[0.2em] text-cyan-400 uppercase">Sample Bank</h2>
+                <button onClick={onClose} className="text-slate-500 hover:text-white text-lg leading-none">&times;</button>
+            </div>
 
-                    {/* Search + Sort */}
-                    <div className="px-4 py-2 border-b border-slate-800/30 flex items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder="Search samples..."
-                            value={searchQuery}
-                            onChange={e => setSearchQuery(e.target.value)}
-                            className="flex-1 bg-slate-900/50 border border-slate-700/50 rounded px-2.5 py-1 text-[10px] font-mono text-slate-300 placeholder-slate-600 outline-none focus:border-cyan-500/40"
-                        />
-                        <select value={sortBy} onChange={e => setSortBy(e.target.value as any)}
-                            className="bg-slate-900/50 border border-slate-700/50 rounded px-2 py-1 text-[9px] font-mono text-slate-400 outline-none">
-                            <option value="date">Date</option>
-                            <option value="name">Name</option>
-                            <option value="bpm">BPM</option>
-                        </select>
-                    </div>
-
-                    {/* Categories */}
-                    <div className="flex-none overflow-x-auto px-4 py-2 border-b border-slate-800/30">
-                        <div className="flex gap-1 flex-nowrap">
-                            {CATEGORIES.map(cat => (
-                                <button key={cat.id} onClick={() => setActiveCategory(cat.id)}
-                                    className={`px-2 py-0.5 rounded text-[9px] font-mono whitespace-nowrap transition-all ${activeCategory === cat.id
-                                        ? 'bg-cyan-500/15 border border-cyan-500/30 text-cyan-400'
-                                        : 'border border-slate-800 text-slate-500 hover:text-slate-400 hover:border-slate-700'
-                                    }`}>
-                                    {cat.label}
-                                </button>
-                            ))}
-                        </div>
-                    </div>
-
-                    {/* Sample list */}
-                    <div className="flex-1 overflow-y-auto">
-                        {filteredSamples.length === 0 ? (
-                            <div className="flex flex-col items-center justify-center h-full text-slate-600">
-                                <svg className="w-12 h-12 mb-3 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1}>
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                                </svg>
-                                <p className="text-[10px] font-mono">No samples yet</p>
-                                <p className="text-[8px] mt-1">EDIT a stem → Save to Sample Bank</p>
-                            </div>
-                        ) : (
-                            filteredSamples.map((sample, i) => (
-                                <motion.div
-                                    key={sample.id}
-                                    initial={{ opacity: 0, x: 20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: i * 0.02 }}
-                                    className={`flex items-center gap-3 px-4 py-2.5 border-b border-slate-800/20 hover:bg-cyan-500/5 cursor-pointer transition-all group ${selectedSamples.has(sample.id) ? 'bg-cyan-500/8' : ''}
-                                        ${previewSample === sample.id && previewPlaying ? 'bg-cyan-500/10 border-l-2 border-l-cyan-400' : ''}`}
-                                    onClick={() => onSelectSample?.(sample)}
-                                >
-                                    {/* Select checkbox */}
-                                    <button onClick={e => handleToggleSelect(sample.id, e)}
-                                        className={`w-4 h-4 rounded border ${selectedSamples.has(sample.id) ? 'bg-cyan-500 border-cyan-500' : 'border-slate-700'} flex items-center justify-center`}>
-                                        {selectedSamples.has(sample.id) && (
-                                            <svg className="w-2.5 h-2.5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M9 16.2L4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4L9 16.2z"/></svg>
-                                        )}
-                                    </button>
-
-                                    {/* Preview button */}
-                                    <button onClick={(e) => { e.stopPropagation(); handlePreview(sample); }}
-                                        className={`w-7 h-7 rounded-full flex items-center justify-center transition-all ${previewSample === sample.id && previewPlaying
-                                            ? 'bg-cyan-500 text-white' : 'bg-slate-800/50 text-slate-400 group-hover:text-cyan-400 group-hover:bg-cyan-500/20'}`}>
-                                        {previewSample === sample.id && previewPlaying ? (
-                                            <svg className="w-2.5 h-2.5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
-                                        ) : (
-                                            <svg className="w-2.5 h-2.5 ml-0.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
-                                        )}
-                                    </button>
-
-                                    {/* Info */}
-                                    <div className="flex-1 min-w-0">
-                                        <div className="text-[10px] font-mono text-slate-300 truncate">{sample.name}</div>
-                                        <div className="flex items-center gap-2 mt-0.5">
-                                            <span className="text-[8px] text-slate-500">{formatTime(sample.duration)}</span>
-                                            <span className="text-[8px] text-cyan-500/50">{sample.bpm} BPM</span>
-                                            <span className="text-[8px] text-purple-500/50">{sample.key}</span>
-                                            <span className="text-[8px] text-slate-600">{sample.stemType}</span>
+            <div className="px-4 py-3 border-b border-white/5">
+                <div className="text-[9px] font-mono tracking-[0.18em] text-cyan-500/80 uppercase mb-2">Split History</div>
+                {history.length === 0 ? (
+                    <p className="text-[10px] text-slate-600 font-mono">Completed splits will show up here with every stem file.</p>
+                ) : (
+                    <div className="space-y-1 max-h-64 overflow-y-auto pr-1">
+                        {history.map(entry => {
+                            const open = !!expanded[entry.id];
+                            const availableCount = entry.files.filter(file => file.available).length;
+                            return (
+                                <div key={entry.id} className="rounded-lg border border-white/5 bg-white/[0.02]">
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleEntry(entry.id)}
+                                        className="w-full flex items-start gap-2 px-2.5 py-2 text-left hover:bg-white/[0.04]"
+                                    >
+                                        <span className={`mt-0.5 text-cyan-400 text-[10px] transition-transform ${open ? 'rotate-90' : ''}`}>▶</span>
+                                        <div className="min-w-0 flex-1">
+                                            <div className="text-[11px] text-slate-200 truncate">{entry.title}</div>
+                                            <div className="text-[9px] text-slate-500 font-mono">
+                                                {formatHistoryDate(entry.createdAt)} · {availableCount}/{entry.files.length} files
+                                                {entry.model ? ` · ${entry.model}` : ''}
+                                            </div>
                                         </div>
-                                    </div>
-
-                                    {/* Category badge */}
-                                    <span className="text-[7px] px-1.5 py-0.5 rounded font-mono border border-slate-700/50 text-slate-500">
-                                        {CATEGORIES.find(c => c.id === sample.category)?.label || sample.category}
-                                    </span>
-                                </motion.div>
-                            ))
-                        )}
+                                    </button>
+                                    {open && (
+                                        <div className="px-2 pb-2 space-y-1">
+                                            {entry.files.map(file => (
+                                                <button
+                                                    key={`${entry.id}-${file.path}`}
+                                                    type="button"
+                                                    disabled={!file.available}
+                                                    onClick={() => file.available && onOpenHistoryFile?.(file, entry)}
+                                                    className={`w-full flex items-center justify-between gap-2 rounded px-2 py-1.5 text-left ${
+                                                        file.available
+                                                            ? 'hover:bg-cyan-500/10 text-slate-300'
+                                                            : 'text-slate-600 cursor-not-allowed'
+                                                    }`}
+                                                >
+                                                    <span className="text-[10px] font-mono truncate">
+                                                        {(file.stemType || file.name).toUpperCase()}
+                                                    </span>
+                                                    <span className="text-[9px] font-mono">
+                                                        {file.available ? 'Open in editor' : 'Unavailable'}
+                                                    </span>
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
+                )}
+            </div>
 
-                    {/* Footer */}
-                    <div className="px-4 py-2 border-t border-slate-800/50 text-[8px] font-mono text-slate-600 flex items-center justify-between">
-                        <span>{filteredSamples.length} of {samples.length} samples</span>
-                        <span>Ctrl+Click to multi-select</span>
+            <div className="flex gap-1 px-4 py-2 border-b border-white/5 overflow-x-auto">
+                {categories.map(cat => (
+                    <button
+                        key={cat}
+                        onClick={() => setFilter(cat)}
+                        className={`px-2 py-0.5 rounded text-[9px] font-mono uppercase tracking-wider shrink-0 transition-colors ${
+                            filter === cat ? 'bg-cyan-500/20 text-cyan-300 border border-cyan-500/30' : 'text-slate-500 hover:text-slate-300'
+                        }`}
+                    >
+                        {cat}
+                    </button>
+                ))}
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-2 space-y-1">
+                {filtered.length === 0 && (
+                    <div className="text-center py-8 text-slate-600 text-[10px] font-mono">
+                        No samples yet. Drag on a waveform in the editor and save the selection here.
                     </div>
-                </motion.div>
-            )}
-        </AnimatePresence>
+                )}
+                {filtered.map(sample => (
+                    <div
+                        key={sample.id}
+                        onClick={() => onSelectSample(sample)}
+                        className="group flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/5 cursor-pointer transition-colors border border-transparent hover:border-white/5"
+                    >
+                        <div className={`w-1.5 h-8 rounded-full ${
+                            sample.stemType === 'drums' ? 'bg-red-500' :
+                            sample.stemType === 'bass' ? 'bg-orange-500' :
+                            sample.stemType === 'vocals' ? 'bg-pink-500' :
+                            'bg-cyan-500'
+                        }`} />
+                        <div className="flex-1 min-w-0">
+                            <div className="text-[11px] text-slate-200 truncate">{sample.name}</div>
+                            <div className="text-[9px] text-slate-500 font-mono">
+                                {sample.bpm > 0 ? `${Math.round(sample.bpm)} BPM` : '---'}
+                                {sample.key ? ` · ${sample.key}` : ''}
+                                {' · '}{sample.duration.toFixed(1)}s
+                            </div>
+                        </div>
+                        <button
+                            onClick={(e) => revealInFolder(sample.path, e)}
+                            className="opacity-0 group-hover:opacity-100 text-slate-500 hover:text-cyan-400 text-[10px]"
+                            title="Show in folder"
+                        >
+                            Folder
+                        </button>
+                        <button
+                            onClick={(e) => handleDelete(sample.id, e)}
+                            className="opacity-0 group-hover:opacity-100 text-slate-600 hover:text-red-400 text-xs"
+                        >
+                            &times;
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
     );
 };
 
-export type { SampleEntry };
 export default SampleBank;

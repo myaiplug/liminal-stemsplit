@@ -3,6 +3,19 @@
 All notable changes to Liminal StemSplit. Versions follow SemVer; the single source of truth is
 `stemsplit-desktop_app/StemSplit1-main/VERSION` (propagated by `scripts/sync_version.py`).
 
+## 0.8.0
+
+### Added
+- **Mini-BS-RoFormer V2.5** (MIT GGUF via CrispASR) as a first-use-download 4-stem engine. Fits an 8 GB GPU; Q8 is about 50 MB.
+- **KARA2 Student** lead / backing / instrumental split (Apache-2.0 ONNX). Host-side STFT (`n_fft=2048`, hop `441`, `T=1100`) applies the documented mask math: vocals = mix × mask 0, backing = vocals × mask 1, lead = vocals − backing, instrumental = mix − vocals.
+- **Remix kit** written next to every completed split (when not in fast mode): `SONG_INFO.txt`, `chords.json`, and a `.mid` sketch per stem. Chord detection is local chroma templates — it does **not** use CrispASR `--chords` (those weights are CC-BY-NC-SA). MIDI uses a built-in SMF writer, or Basic Pitch if a CrispASR binary is already present.
+- **Split history** in the Sample Bank: each completed split is stored with an expandable file list. Click a stem to open it in the sample editor. Missing files show as unavailable.
+- **Click-and-drag waveform selection** in the sample editor (plain click still seeks). Save the selected region to the sample library as before.
+
+### Notes
+- Voice tags / LinnetTTS are still not included. The Linnet weights license requires written permission for downloadable TTS and for voice cloning.
+- Windows installer and in-app updater remain the 0.7.0 draft-release flow. This feature set ships as **0.8.0**.
+
 ## 0.7.0
 
 ### Added

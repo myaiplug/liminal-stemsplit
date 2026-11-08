@@ -20,7 +20,9 @@ import ModelCatalogPanel from './ModelCatalogPanel';
 import EngineSettingsPanel from './EngineSettingsPanel';
 import { RecoveryBanner, RecoveryOutcome } from './RecoveryNotice';
 import { syncInstalledModels } from '@/lib/model-library';
-import SampleBank, { type SampleEntry } from './SampleBank';
+import SampleBank, { type SampleEntry, type SplitHistoryFile } from './SampleBank';
+import SurgicalEditor from './SurgicalEditor';
+import { invoke } from '@tauri-apps/api/core';
 
 import {
     DEFAULT_MODEL_BY_ENGINE,
@@ -696,6 +698,14 @@ const ReactorZone: React.FC = () => {
     const [showYouTubeModal, setShowYouTubeModal] = useState(false);
     const [showWhisperModal, setShowWhisperModal] = useState(false);
     const [showSampleBank, setShowSampleBank] = useState(false);
+    const [bankEditor, setBankEditor] = useState<{ filePath: string; stemName: string } | null>(null);
+    const historyMetaRef = useRef({
+        sourceTitle: null as string | null,
+        loadedFilePath: null as string | null,
+        splitEngine: 'spleeter' as string,
+        splitModelVariant: '',
+    });
+
 
     const [splitEngine, setSplitEngine] = useState<SeparationEngine>('spleeter');
     const [splitModelVariant, setSplitModelVariant] = useState(DEFAULT_MODEL_BY_ENGINE.demucs);
@@ -709,6 +719,12 @@ const ReactorZone: React.FC = () => {
     const [customOutputDir, setCustomOutputDir] = useState<string | null>(null);
     const [loadedFilePath, setLoadedFilePath] = useState<string | null>(null);
     const [sourceTitle, setSourceTitle] = useState<string | null>(null);
+    historyMetaRef.current = {
+        sourceTitle,
+        loadedFilePath,
+        splitEngine,
+        splitModelVariant,
+    };
     const [youtubeUrl, setYouTubeUrl] = useState('');
     const [youtubeMode, setYouTubeMode] = useState<string>(FREE_YOUTUBE_MODE);
     const [youtubeProgress, setYouTubeProgress] = useState<{ message: string; percent: number } | null>(null);
@@ -905,6 +921,20 @@ const ReactorZone: React.FC = () => {
                     // Open the folder in the default file manager once completion happens!
                     console.log('Attempting to open folder:', result.output_directory);
                     openResultsFolder(result.output_directory).catch(e => console.error('Folder open failed:', e));
+                    const meta = historyMetaRef.current;
+                    const files = Object.entries(result.stems).map(([name, info]) => ({
+                        name,
+                        path: info.file_path,
+                        stemType: name,
+                    }));
+                    invoke('record_split_history', {
+                        title: meta.sourceTitle || (meta.loadedFilePath || '').split(/[\\/]/).pop() || 'Untitled split',
+                        sourcePath: meta.loadedFilePath || '',
+                        outputDirectory: result.output_directory,
+                        engine: meta.splitEngine,
+                        model: meta.splitModelVariant,
+                        files,
+                    }).catch((err) => console.warn('Failed to record split history:', err));
                 } else {
                     console.warn('Completion signaled but output_directory missing in result');
                 }
@@ -1039,7 +1069,7 @@ const ReactorZone: React.FC = () => {
             setModelPickerCategory('drums');
         } else if (lower === 'vocals' || lower.includes('vocal') || lower === 'lead' || lower === 'back' || lower === 'backing') {
             setSplitEngine('karaoke');
-            setSplitModelVariant('karaoke_mvsep_team');
+            setSplitModelVariant('kara2_student');
             setSplitStems('3');
             setModelPickerCategory('karaoke');
         } else {
@@ -1798,17 +1828,24 @@ const ReactorZone: React.FC = () => {
             <SampleBank
                 isOpen={showSampleBank}
                 onClose={() => setShowSampleBank(false)}
-                onSelectSample={async (sample: SampleEntry) => {
-                    const folder = sample.path.replace(/[\\/][^\\/]+$/, '');
-                    if (folder) {
-                        try {
-                            await openResultsFolder(folder);
-                        } catch {
-                            /* ignore */
-                        }
-                    }
+                onSelectSample={(sample: SampleEntry) => {
+                    setBankEditor({ filePath: sample.path, stemName: sample.stemType || sample.name });
+                    setShowSampleBank(false);
+                }}
+                onOpenHistoryFile={(file: SplitHistoryFile) => {
+                    if (!file.available) return;
+                    setBankEditor({ filePath: file.path, stemName: file.stemType || file.name });
+                    setShowSampleBank(false);
                 }}
             />
+            {bankEditor && (
+                <SurgicalEditor
+                    filePath={bankEditor.filePath}
+                    stemName={bankEditor.stemName}
+                    isOpen={true}
+                    onClose={() => setBankEditor(null)}
+                />
+            )}
 
             {showModelLibrary && (
                 <ModelCatalogPanel
@@ -2680,19 +2717,19 @@ const ReactorZone: React.FC = () => {
             {/* Footer - shift up when player is showing */}
             <footer className={`absolute transition-all duration-300 flex items-end justify-center gap-4 ${loadedFilePath ? 'bottom-[72px]' : 'bottom-6'}`}>
                 <span className="text-[9px] font-mono text-slate-500 tracking-[0.15em] uppercase select-none">LIMINAL&trade;</span>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.7.0/NoDAW.Liminal_0.7.0_x64-setup.exe"
-                   download="NoDAW.Liminal_0.7.0_x64-setup.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.0/NoDAW.Liminal_0.8.0_x64-setup.exe"
+                   download="NoDAW.Liminal_0.8.0_x64-setup.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Full Installer
                 </a>
-                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.7.0/Liminal-StemSplit-Setup-v0.7.0-Windows-x64-Online.exe"
-                   download="Liminal-StemSplit-Setup-v0.7.0-Windows-x64-Online.exe"
+                <a href="https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.0/Liminal-StemSplit-Setup-v0.8.0-Windows-x64-Online.exe"
+                   download="Liminal-StemSplit-Setup-v0.8.0-Windows-x64-Online.exe"
                    target="_blank" rel="noopener noreferrer"
                    className="text-[9px] text-cyan-500/50 hover:text-cyan-300 transition-colors font-mono tracking-wider">
                     ⬇ Online Installer
                 </a>
-                <span className="text-[9px] text-slate-600 font-mono">v0.7.0</span>
+                <span className="text-[9px] text-slate-600 font-mono">v0.8.0</span>
             </footer>
         </div>
     );
