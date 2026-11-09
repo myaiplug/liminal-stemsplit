@@ -3,6 +3,12 @@
 All notable changes to Liminal StemSplit. Versions follow SemVer; the single source of truth is
 `stemsplit-desktop_app/StemSplit1-main/VERSION` (propagated by `scripts/sync_version.py`).
 
+## 0.8.1
+
+### Changed
+- Windows installers are now built with signed Tauri updater artifacts (`.sig`) and the release ships `latest.json`, so the in-app updater can install new versions automatically, including updating 0.8.0 installs.
+- Release CI no longer fails when the macOS build is unavailable; Windows assets still publish.
+
 ## 0.8.0
 
 ### Added
