@@ -72,4 +72,3 @@ Parity of the full browser path against the author's PyTorch inference: 64.0 dB 
 `scripts/e2e-stem-studio/t_htr_vocals.mjs drums`.
 
 **Licence:** none published, so it is treated as all rights reserved. Get the author's written permission before hosting or selling it.
-
