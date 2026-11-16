@@ -1,12 +1,16 @@
 /** Main-thread controller for the deeper drum split: talks to drum-worker.js and adds the results to the studio engine. */
 import { resampleStereo } from '../engine.js';
-import { drumModel } from './drum-models.js';
+import { drumModel, drumModelById } from './drum-models.js';
+
+/** Workers cannot see the page URL, so forward its query string (?drummodel=, ?drummodel_htr=, ?karaokemodel= overrides). */
+const withPageQuery = (u) => { u.search = globalThis.location?.search || ''; return u.href; };
+
 
 const MODEL_SR = 44100;
 const fit = (a, n) => { if (a.length === n) return a; const o = new Float32Array(n); o.set(a.subarray(0, Math.min(n, a.length))); return o; };
 
 export class DrumSplitter {
-  constructor(workerUrl = new URL('./drum-worker.js', import.meta.url).href) { this.workerUrl = workerUrl; this.worker = null; this.rid = 0; this.pending = new Map(); }
+  constructor(workerUrl = withPageQuery(new URL('./drum-worker.js', import.meta.url))) { this.workerUrl = workerUrl; this.worker = null; this.rid = 0; this.pending = new Map(); }
   _w() {
     if (!this.worker) {
       this.worker = new Worker(this.workerUrl, { type: 'module' });
@@ -17,7 +21,7 @@ export class DrumSplitter {
   }
   _call(msg, transfer, onProgress) { const rid = ++this.rid; return new Promise((resolve, reject) => { this.pending.set(rid, { resolve, reject, onProgress }); this._w().postMessage({ ...msg, rid }, transfer || []); }); }
   /** is the ML model file reachable? */
-  async probe() { try { return await this._call({ op: 'probe' }); } catch { return { available: false, url: drumModel().files[0].url }; } }
+  async probe(model = 'drumsep-v2-w10') { try { return await this._call({ op: 'probe', model }); } catch { return { available: false, url: drumModelById(model).files[0].url }; } }
   cancel() { this.worker?.postMessage({ op: 'cancel' }); }
   terminate() { this.worker?.terminate(); this.worker = null; for (const p of this.pending.values()) p.reject(new Error('cancelled')); this.pending.clear(); }
   split(msg, onProgress) { const tr = [msg.L.buffer, msg.R.buffer, ...(msg.bass ? [msg.bass[0].buffer, msg.bass[1].buffer] : [])]; return this._call({ op: 'split', ...msg }, tr, onProgress); }
@@ -38,7 +42,7 @@ export async function splitDrumTrack(eng, splitter, drum, o, onProgress = () => 
   const prep = async (ch) => (sr === useSr ? [ch[0].slice(), ch[1].slice()] : (await resampleStereo(ch[0], ch[1], sr, useSr)).map((a) => Float32Array.from(a)));
   const L0 = await prep(drum.orig), bass = o.sub808 && bassT ? await prep(bassT.orig) : null;
   const text = { download: 'downloading model', verify: 'verifying model', init: 'starting the model', separate: 'separating', dsp: 'analysing', post: 'splitting hats and 808' };
-  const res = await splitter.split({ L: L0[0], R: L0[1], bass, mode: o.mode, sr: useSr, device: o.device || 'wasm', opts: { splitHats: o.hats, sub808: o.sub808, fc: o.fc, minTailMs: o.minTailMs } },
+  const res = await splitter.split({ L: L0[0], R: L0[1], bass, mode: o.mode, sr: useSr, device: o.device || 'wasm', model: o.model || 'drumsep-v2-w10', opts: { splitHats: o.hats, sub808: o.sub808, fc: o.fc, minTailMs: o.minTailMs } },
     (m) => { const base = { download: [0, 0.3], verify: [0.3, 0.32], init: [0.32, 0.35], separate: [0.35, 0.92], dsp: [0.05, 0.92], post: [0.93, 0.96] }[m.phase] || [0, 1]; onProgress(base[0] + (base[1] - base[0]) * (m.fraction || 0), text[m.phase] + (m.phase === 'download' ? ` ${Math.round((m.fraction || 0) * 100)}%` : m.phase === 'separate' ? ` ${Math.round((m.fraction || 0) * 100)}%` : '')); });
   const made = [];
   for (const p of res.parts) {

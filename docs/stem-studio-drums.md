@@ -30,6 +30,7 @@ The published ONNX has a fixed 40 s window (4–6 GB of RAM in a tab) and fp16 d
 | gridshiftstudio DrumSep v2 | MIT | **used**, with the caveat below |
 | inagoy/drumsep | MIT | upstream of the above |
 | MDX23C DrumSep (jarredou) | no licence stated | rejected (all rights reserved) |
+| DrumSep HT-RoFormer (Sucial) | no licence stated (weights and code) | built and wired as an optional 6-stem model, **not hosted** until the author grants permission (see below) |
 | LarsNet (polimi) | CC BY-NC | rejected (non-commercial) |
 | Timbrica | CC BY-NC-SA 4.0 | rejected |
 
@@ -58,3 +59,17 @@ Kick < 150 Hz, snare = mid-band percussive part, toms/body = mid-band sustained 
 
 ## Tests
 `test/stem-studio-drumsep.test.mjs` (STFT/iSTFT parity vs torch, window plan, overlap-add exactness with a mock model, cancellation), `test/stem-studio-drum-dsp.test.mjs` (hats vs crash wash, kick ring-time, 808 routing and conservation, DSP split partition, `buildParts` conservation). End to end in headless Chrome: `scripts/e2e-stem-studio/t_drums.mjs` (UI split in both modes, sum = original at 149 dB, undo) and `t_drums2.mjs` (export mix with split stems equals the pre-split mix at 142 dB, session restore keeps the parent links).
+
+## Optional model: DrumSep HT-RoFormer (6 stems, not hosted)
+`drums/htr.js` runs Sucial's hybrid BS-RoFormer + time U-Net (kick, snare, hi-hat, toms, cymbals, other) with host-side
+STFT (n_fft 2048, hop 1024, window 266,240 samples, 50 % overlap with linear fades, as in MSST). Each stem is
+`iSTFT(mask × spec) + residual`. In the UI it appears under **Drums → AI model → HT-RoFormer 6-stem**. Hi-hats come
+straight from the model (the hats heuristic is hidden), "other" becomes **Percussion (other)**, and the remainder is
+computed the same way, so the children still sum to the drum stem. The option is disabled while
+`DRUM_HTR_DEFAULT_URL` is `null`; testers can pass `?drummodel_htr=<url>`. Build steps are in `scripts/drumsep/README.md`.
+Parity of the full browser path against the author's PyTorch inference: 64.0 dB SNR with fp16 weights. Headless Chrome
+(wasm, 20 s clip): about 74 s including model load. Tests: `test/stem-studio-htr-karaoke.test.mjs`; end to end:
+`scripts/e2e-stem-studio/t_htr_vocals.mjs drums`.
+
+**Licence:** none published, so it is treated as all rights reserved. Get the author's written permission before hosting or selling it.
+

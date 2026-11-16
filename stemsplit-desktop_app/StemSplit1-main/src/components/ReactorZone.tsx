@@ -846,10 +846,10 @@ const ReactorZone: React.FC = () => {
 
     const isStemOptionDisabled = useCallback((count: number) => {
         if (isFreeMode && count !== 2) return true;
-        if (splitEngine === 'karaoke' && count !== 3) return true;
+        if (splitEngine === 'karaoke' && count !== (splitModelVariant === 'mbr_karaoke_lead_backing' ? 2 : 3)) return true;
         if (!selectedModel) return true;
         return !supportsStems(selectedModel, count);
-    }, [isFreeMode, splitEngine, selectedModel]);
+    }, [isFreeMode, splitEngine, splitModelVariant, selectedModel]);
 
     // Track finished stems individually for UI glow
     const [finishedStems, setFinishedStems] = useState<Set<string>>(new Set());
@@ -875,8 +875,12 @@ const ReactorZone: React.FC = () => {
         if (splitEngine === 'instrument') {
             return getInstrumentStemLabels(splitModelVariant);
         }
-        if (splitEngine === 'karaoke') return ['lead', 'backing', 'instrumental'];
+        if (splitEngine === 'karaoke') {
+            if (splitModelVariant === 'mbr_karaoke_lead_backing') return ['lead', 'backing'];
+            return ['lead', 'backing', 'instrumental'];
+        }
         if (splitEngine === 'drumsep') {
+            if (splitModelVariant === 'drumsep_ht_roformer') return ['kick', 'snare', 'hh', 'toms', 'cymbals', 'perc'];
             if (splitStems === '7' || splitStems === '6' || splitModelVariant.startsWith('drumsep_mdx23c_'))
                 return ['kick', 'snare', 'toms', 'hh', 'ride', 'crash'];
             return ['kick', 'snare', 'toms', 'cymbals'];
@@ -1064,7 +1068,7 @@ const ReactorZone: React.FC = () => {
         const lower = stemName.toLowerCase();
         if (lower === 'drums' || lower.includes('drum')) {
             setSplitEngine('drumsep');
-            setSplitModelVariant('drumsep_mdx23c_6');
+            setSplitModelVariant(DEFAULT_MODEL_BY_ENGINE.drumsep);
             setSplitStems('6');
             setModelPickerCategory('drums');
         } else if (lower === 'vocals' || lower.includes('vocal') || lower === 'lead' || lower === 'back' || lower === 'backing') {
@@ -1944,6 +1948,9 @@ const ReactorZone: React.FC = () => {
                                             if (modelId.startsWith('drumsep_mdx23c_') || modelId === 'drumsep_49469') {
                                                 setSplitStems(modelId === 'drumsep_mdx23c_5' ? '5' : '6');
                                             }
+                                            if (modelId === 'drumsep_ht_roformer') setSplitStems('6');
+                                            if (modelId === 'mbr_karaoke_lead_backing') setSplitStems('2');
+                                            if (modelId === 'kara2_student') setSplitStems('3');
                                         }}
                                         onPlaySound={(name) => play(name as SoundEffect)}
                                     />
@@ -1984,8 +1991,12 @@ const ReactorZone: React.FC = () => {
                                             {selectedModel?.name ?? 'This model'} cannot produce {requestedStemCount} stems.
                                         </span>
                                     )}
-                                    {splitEngine === 'drumsep' && <span className="text-[10px] text-orange-400 mt-1 block">MDX23C Drumsep splits into kick, snare, toms, hi-hat, ride, and crash. Use 6/7-stem mode.</span>}
-                                    {splitEngine === 'karaoke' && <span className="text-[10px] text-pink-300 mt-1 block">Karaoke mode returns lead vocals, backing vocals, and instrumental.</span>}
+                                    {splitEngine === 'drumsep' && (splitModelVariant === 'drumsep_ht_roformer'
+                                        ? <span className="text-[10px] text-orange-400 mt-1 block">HT-RoFormer splits a drum stem into kick, snare, hi-hat, toms, cymbals and percussion. About 750 MB downloads on first use. The author has not published a license yet.</span>
+                                        : <span className="text-[10px] text-orange-400 mt-1 block">MDX23C Drumsep splits into kick, snare, toms, hi-hat, ride, and crash. Use 6/7-stem mode.</span>)}
+                                    {splitEngine === 'karaoke' && (splitModelVariant === 'mbr_karaoke_lead_backing'
+                                        ? <span className="text-[10px] text-pink-300 mt-1 block">Mel-Band karaoke returns lead and backing (input minus lead). Run it on a vocals stem for lead / backing vocals.</span>
+                                        : <span className="text-[10px] text-pink-300 mt-1 block">Karaoke mode returns lead vocals, backing vocals, and instrumental.</span>)}
                                     {splitEngine === 'instrument' && (
                                         <span className="text-[10px] text-lime-300 mt-1 block">
                                             Instrument mode isolates a target stem + other. Best workflow: 4-stem first, then re-run on guitar/piano/other.

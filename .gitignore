@@ -30,3 +30,4 @@ tmp/
 dist-stem-demo/
 public/stem-studio/drums/models/*.onnx
 public/__fix/
+public/stem-studio/vocals/models/*.onnx

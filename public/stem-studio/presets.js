@@ -66,8 +66,9 @@ export const STEM_KINDS = {
   other: { label: 'Other', chain: 'other' }, instrumental: { label: 'Instrumental', chain: 'other' }, guitar: { label: 'Guitar', chain: 'guitar' }, piano: { label: 'Piano', chain: 'piano' },
   kick: { label: 'Kick', chain: 'kick' }, snare: { label: 'Snare / clap', chain: 'snare' }, hats: { label: 'Hi-hats', chain: 'hh' }, toms: { label: 'Toms', chain: 'toms' },
   cymbals: { label: 'Cymbals', chain: 'cymbals' }, ride: { label: 'Ride', chain: 'ride' }, crash: { label: 'Crash', chain: 'crash' }, 'sub808': { label: '808 / sub', chain: 'bass' },
+  perc: { label: 'Percussion', chain: 'drums' }, lead: { label: 'Lead vocal', chain: 'vocals' }, backing: { label: 'Backing vocals', chain: 'vocals' },
 };
-export const DRUM_KINDS = ['kick', 'snare', 'hats', 'toms', 'cymbals', 'ride', 'crash', 'sub808'];
+export const DRUM_KINDS = ['kick', 'snare', 'hats', 'toms', 'cymbals', 'ride', 'crash', 'sub808', 'perc'];
 
 /** Map any stem name ("Vocals", "hi-hat", "808", "lead vocal") to a STEM_KINDS id. */
 export function stemKind(name) {
