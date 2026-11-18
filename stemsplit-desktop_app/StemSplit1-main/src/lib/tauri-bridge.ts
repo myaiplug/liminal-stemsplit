@@ -427,6 +427,14 @@ export interface YouTubeDownloadProgress {
   percent: number;
 }
 
+export interface YouTubeImportedFile {
+  file_path: string;
+  title: string;
+  output_directory: string;
+  duration_seconds: number;
+  webpage_url?: string | null;
+}
+
 export interface YouTubeDownloadResult {
   status: string;
   file_path: string;
@@ -437,6 +445,13 @@ export interface YouTubeDownloadResult {
   webpage_url?: string | null;
   mode_used: string;
   formats_available: string[];
+  files?: YouTubeImportedFile[];
+  warning?: string | null;
+  playlist_title?: string | null;
+  playlist_total?: number;
+  playlist_imported?: number;
+  playlist_failed?: number;
+  playlist_truncated?: number;
 }
 
 export interface WhisperProgress {

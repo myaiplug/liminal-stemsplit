@@ -70,8 +70,9 @@ export default function SalesModal({ isOpen, onClose }: SalesModalProps) {
                 <h3 className="font-mono text-xl text-amber-200 mt-2">Trial</h3>
                 <ul className="mt-4 space-y-2 text-xs text-slate-400 font-mono">
                   <li>Unlimited Spleeter 2-stem splits</li>
-                  <li>MP3 output only</li>
-                  <li>Advanced engines locked</li>
+                  <li>First 3 minutes, MP3, one file at a time</li>
+                  <li>YouTube import as MP3 192</li>
+                  <li>5-second FX preview</li>
                 </ul>
               </div>
 
@@ -82,10 +83,11 @@ export default function SalesModal({ isOpen, onClose }: SalesModalProps) {
                 <p className="font-mono text-[10px] tracking-[0.2em] uppercase text-emerald-300">One-Time</p>
                 <h3 className="font-mono text-xl text-emerald-200 mt-2">Creator Pro</h3>
                 <ul className="mt-4 space-y-2 text-xs text-slate-200 font-mono">
-                  <li>Demucs, MDX, DrumSep, Spleeter</li>
+                  <li>Demucs, MDX, DrumSep, Spleeter, Roformer</li>
                   <li>Unlimited splits + batch mode</li>
-                  <li>FX rack and VST preview</li>
+                  <li>14-module FX rack and VST hosting</li>
                   <li>WAV export and multi-pass quality</li>
+                  <li>YouTube import: WAV/FLAC/video, playlists up to 25</li>
                 </ul>
               </div>
             </div>

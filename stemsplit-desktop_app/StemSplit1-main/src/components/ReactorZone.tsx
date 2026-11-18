@@ -1137,23 +1137,47 @@ const ReactorZone: React.FC = () => {
                 setYouTubeProgress(progress);
             });
 
+            const importedPaths = (result.files && result.files.length > 0)
+                ? result.files.map((file) => file.file_path).filter(Boolean)
+                : (result.file_path ? [result.file_path] : []);
+            const importedCount = result.playlist_imported || importedPaths.length || 0;
+            const notice = result.warning || null;
+
             if (isYouTubeVideoMode) {
-                setYouTubeProgress({ message: `Video saved to ${result.output_directory}`, percent: 100 });
+                const where = result.output_directory || 'the imports folder';
+                const message = importedCount > 1
+                    ? `${importedCount} videos saved to ${where}`
+                    : `Video saved to ${where}`;
+                setYouTubeProgress({ message, percent: 100 });
+                if (notice) setUiError(notice);
                 play('success_chime');
                 return;
             }
 
-            setPendingFiles([]);
-            setPendingFilePath(result.file_path);
-            setSourceTitle(result.title);
+            if (importedPaths.length === 0) {
+                throw new Error('YouTube import completed but no audio file path was returned.');
+            }
+
             setShowYouTubeModal(false);
             setYouTubeUrl('');
             setYouTubeProgress(null);
+            setSourceTitle(result.playlist_title || result.title);
+            // Defer the bottom player so settings open first (instant mount was crashing WebView).
+            if (isFreeMode && importedPaths.length > 1) {
+                setUiError(notice || 'Free mode allows single-file processing only. Additional files were ignored.');
+                setPendingFiles([]);
+            } else if (importedPaths.length > 1) {
+                setPendingFiles(importedPaths);
+                if (notice) setUiError(notice);
+            } else {
+                setPendingFiles([]);
+                if (notice) setUiError(notice);
+            }
+            setPendingFilePath(importedPaths[0]);
             setShowSettings(true);
             play('success_chime');
-            // Defer bottom player so settings modal opens first (instant mount was crashing WebView).
             window.setTimeout(() => {
-                setLoadedFilePath(result.file_path);
+                setLoadedFilePath(importedPaths[0]);
             }, 1200);
         } catch (err) {
             const detail = err instanceof Error ? err.message : String(err);
@@ -1163,7 +1187,7 @@ const ReactorZone: React.FC = () => {
         } finally {
             setIsDownloadingYouTube(false);
         }
-    }, [play, youtubeUrl, youtubeMode, isYouTubeVideoMode]);
+    }, [play, youtubeUrl, youtubeMode, isYouTubeVideoMode, isFreeMode]);
 
     const handleOpenWhisper = useCallback(() => {
         if (!loadedFilePath && !pendingFilePath) {
@@ -2237,7 +2261,7 @@ const ReactorZone: React.FC = () => {
                                         ▸ YT
                                     </button>
                                     </div>
-                                    <p className="mt-2 text-[10px] text-slate-500">Paste a single video URL or a playlist link. Videos import one-by-one into the queue.</p>
+                                    <p className="mt-2 text-[10px] text-slate-500">Paste a video or playlist URL. Audio is imported locally, then split settings open — it does not auto-split. Free: first video as MP3 192. Pro: up to 25 videos, plus WAV/FLAC and video downloads.</p>
                                 </div>
 
                                 <div className="rounded-xl border border-slate-700/50 bg-slate-900 p-4 shadow-[0_0_10px_rgba(34,211,238,0.08)]">
