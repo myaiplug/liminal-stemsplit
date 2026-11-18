@@ -42,6 +42,24 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
         'license': 'MIT (ONNX re-export); original aufr33/viperx checkpoint has no stated license',
         'runtime_download': True,
     },
+    # ── demix-rs (Rust / Candle, optional; needs the `demix` binary, see scripts/demix/) ──
+    'demix_bs_roformer_viperx317': {
+        'backend': 'demix_rs',
+        'demix_variant': 'viperx317',
+        'filename': 'bs-roformer-viperx-317-q8_0.gguf',
+        'stems': 2,
+        # viperx weights: published in the UVR model repo without any licence. Downloaded on first use, never bundled.
+        'license': 'UNLICENSED weights (viperx, no terms published); demix-rs code Apache-2.0',
+        'runtime_download': True,
+    },
+    'demix_bs_roformer_sw': {
+        'backend': 'demix_rs',
+        'demix_variant': 'sw',
+        'filename': 'BS-Roformer-SW.ckpt',
+        'stems': 6,
+        # Converted locally from the BS-Roformer-SW checkpoint the audio-separator engine already downloads.
+        'license': 'same as BS-Roformer-SW (re-host without a stated upstream licence)',
+    },
     # ── Demucs ──────────────────────────────────────────────
     'demucs_htdemucs': {'backend': 'demucs', 'model': 'htdemucs'},
     'demucs_htdemucs_ft': {'backend': 'demucs', 'model': 'htdemucs_ft'},
