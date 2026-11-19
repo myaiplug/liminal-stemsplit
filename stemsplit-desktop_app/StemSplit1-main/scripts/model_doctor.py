@@ -286,6 +286,9 @@ def try_hf_bundle(bundle_id: str, model_dir: Optional[Path] = None) -> Dict[str,
     if not bundle:
         return {"ok": False, "detail": f"unknown HF bundle {bundle_id}"}
     model_dir = Path(model_dir or audio_separator_model_dir())
+    if bundle.get("mirrored"):
+        from model_mirrors import ensure_bundle
+        return ensure_bundle(model_dir, bundle_id, downloader=try_download)
     errors: List[str] = []
     for cache_name, remote_name in bundle["files"].items():
         target = model_dir / cache_name

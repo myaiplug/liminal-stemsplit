@@ -133,6 +133,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'roformer_bs_sw_6s': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'roformer',
         'stems': ['vocals', 'bass', 'drums', 'guitar', 'piano', 'other'],
         'note': 'jarredou BS-Roformer SW — 6-stem guitar/piano SOTA',
@@ -220,6 +221,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_bs_roformer_sw': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'mode': 'multistem',
         'stems': ['vocals', 'bass', 'drums', 'guitar', 'piano', 'other'],
@@ -241,6 +243,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_guitar_sw': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'guitar',
         'mode': 'extract',
@@ -248,6 +251,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_piano': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'piano',
         'mode': 'extract',
@@ -255,6 +259,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_piano_sw': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'piano',
         'mode': 'extract',
@@ -276,6 +281,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_bass_sw': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'bass',
         'mode': 'extract',
@@ -283,6 +289,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_drums_sw': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'drums',
         'mode': 'extract',
@@ -341,6 +348,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_keys': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'piano',
         'mode': 'extract',
@@ -357,6 +365,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_violin': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'other',
         'mode': 'extract',
@@ -365,6 +374,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_cello': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'other',
         'mode': 'extract',
@@ -372,6 +382,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_viola': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'other',
         'mode': 'extract',
@@ -408,6 +419,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_organ': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'piano',
         'mode': 'extract',
@@ -416,6 +428,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_synth': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'other',
         'mode': 'extract',
@@ -423,6 +436,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_percussion': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'drums',
         'mode': 'extract',
@@ -430,6 +444,7 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
     'inst_harp': {
         'backend': 'audio_separator',
         'filename': 'BS-Roformer-SW.ckpt',
+        'hf_bundle': 'BS-Roformer-SW',
         'engine': 'instrument',
         'target': 'other',
         'mode': 'extract',
@@ -582,13 +597,14 @@ INSTRUMENT_HF_BUNDLES: Dict[str, Dict[str, Any]] = {
             'config_melband_roformer_guitar_becruily.yaml': 'config_guitar_becruily.yaml',
         },
     },
+    # The original host (HF jarredou/BS-Roformer-SW) was deleted and returns 401/404. Files now come from
+    # checksum-pinned mirrors in model_mirrors.MIRRORED_BUNDLES (same SHA-256 as the original release).
     'BS-Roformer-SW': {
-        'repo_id': 'jarredou/BS-Roformer-SW',
+        'mirrored': True,
         'files': {
             'BS-Roformer-SW.ckpt': 'BS-Roformer-SW.ckpt',
             'BS-Roformer-SW.yaml': 'BS-Roformer-SW.yaml',
         },
-        'optional': True,
     },
 }
 

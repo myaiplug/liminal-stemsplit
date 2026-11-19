@@ -3638,16 +3638,17 @@
       "files": [
         {
           "name": "BS-Roformer-SW.ckpt",
-          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/BS-Roformer-SW.ckpt",
-          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.ckpt"
+          "url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.ckpt",
+          "fallback_url": "https://huggingface.co/enerjazzer/BS-ROFO-SW-Fixed/resolve/a443a2985534b3bc815ef54a5d446c6a0390f974/BS-Rofo-SW-Fixed.ckpt",
+          "sha256": "24e7d35ee9c64415673d3fd33e06a67cac2c103c5df6267ba1576459c775916e"
         },
         {
           "name": "BS-Roformer-SW.yaml",
-          "url": "https://github.com/TRvlvr/model_repo/releases/download/all_public_uvr_models/mdx_model_data/mdx_c_configs/BS-Roformer-SW.yaml",
-          "fallback_url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.yaml"
+          "url": "https://github.com/nomadkaraoke/python-audio-separator/releases/download/model-configs/BS-Roformer-SW.yaml",
+          "sha256": "b558996f1e25eb48798bd6502505a5de94c4f966d6edfb1a0420f06cc40b501a"
         }
       ],
-      "license": "open (UVR / community)"
+      "license": "no licence stated upstream (weights re-hosted; download on first use only)"
     }
   ]
 }
