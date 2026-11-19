@@ -520,6 +520,14 @@ def ensure_instrument_hf_bundle(model_dir: Path, bundle_id: str) -> None:
         return
 
     model_dir.mkdir(parents=True, exist_ok=True)
+    if bundle.get('mirrored'):
+        # Checksum-verified multi-mirror download (original HF host is gone).
+        from model_mirrors import ensure_bundle
+        result = ensure_bundle(model_dir, bundle_id)
+        if not result['ok']:
+            # Leave the final word to audio-separator's own downloader, which may still succeed.
+            logger.warning(f"Mirrored bundle {bundle_id} unavailable: {result['detail']}")
+        return
     all_present = all((model_dir / cache_name).is_file() for cache_name in bundle['files'])
     if all_present:
         return
