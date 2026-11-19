@@ -216,7 +216,7 @@ const LandingHero: React.FC = () => {
             { title: 'Transcription', desc: 'Transcribe vocals and speech with Whisper AI — lyrics, podcasts, interviews.', icon: '🎤' },
             { title: 'FX Processing', desc: 'Apply EQ, reverb, compression, and spatial effects to individual stems.', icon: '🎛️' },
             { title: 'Mastering Chain', desc: 'Auto-master your mixes through a professional pedalboard processing chain.', icon: '🎚️' },
-            { title: 'YouTube Import', desc: 'Download audio directly from YouTube links for instant separation.', icon: '📥' },
+            { title: 'YouTube Import', desc: 'Paste a YouTube link to import audio locally, then pick an engine and split.', icon: '📥' },
           ].map((feat) => (
             <div
               key={feat.title}

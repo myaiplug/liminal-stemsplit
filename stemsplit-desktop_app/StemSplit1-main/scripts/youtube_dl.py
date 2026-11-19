@@ -72,6 +72,33 @@ def allocate_title_workspace(base_dir: Path, title: str) -> tuple[Path, str]:
     return candidate_dir, candidate_name
 
 
+
+def collect_playlist_video_urls(info: dict) -> list[str]:
+    """Return watch URLs for playlist entries. Prefers webpage_url or video id over format URLs."""
+    entries = info.get("entries") or []
+    urls: list[str] = []
+    seen = set()
+    for entry in entries:
+        if not entry:
+            continue
+        url = ""
+        webpage = entry.get("webpage_url") or ""
+        video_id = entry.get("id") or ""
+        raw = entry.get("url") or ""
+        if isinstance(webpage, str) and webpage.startswith("http"):
+            url = webpage
+        elif video_id and "playlist" not in str(entry.get("ie_key") or "").lower():
+            url = f"https://www.youtube.com/watch?v={video_id}"
+        elif isinstance(raw, str) and raw.startswith("http") and ("youtube.com/" in raw or "youtu.be/" in raw):
+            url = raw
+        url = url.strip()
+        if not url or url in seen:
+            continue
+        seen.add(url)
+        urls.append(url)
+    return urls
+
+
 def progress_hook(data):
     status = data.get("status")
     if status == "downloading":
@@ -104,25 +131,16 @@ def download_youtube(url: str, output_dir: Path, mode: str = "audio_mp3_320", em
     emit("progress", message=f"Resolving ({cfg['desc']})...", percent=5)
 
     try:
-        probe_opts = {"quiet": True, "no_warnings": True, "skip_download": True, "extract_flat": False,
-                      "js_runtimes": detect_js_runtimes()}
+        probe_opts = {"quiet": True, "no_warnings": True, "skip_download": True,
+                      "extract_flat": "in_playlist", "js_runtimes": detect_js_runtimes()}
         with yt_dlp.YoutubeDL(probe_opts) as ydl:
             info = ydl.extract_info(url, download=False)
 
-        # Detect playlist — if multiple entries, return the list for batch import
-        entries = info.get("entries")
-        if entries and len(entries) > 1:
+        # Detect playlist — return the watch URL list so the app can import each video.
+        video_urls = collect_playlist_video_urls(info)
+        if len(video_urls) > 1:
             playlist_title = info.get("title", "Playlist")
-            playlist_count = len(entries)
-            emit("progress", message=f"Playlist: {playlist_title} ({playlist_count} videos)", percent=8)
-            video_urls = []
-            for idx, entry in enumerate(entries):
-                if entry and entry.get("url"):
-                    video_urls.append(entry["url"])
-                elif entry and entry.get("id"):
-                    video_urls.append(f"https://www.youtube.com/watch?v={entry['id']}")
-                else:
-                    video_urls.append(entry.get("webpage_url", f"https://www.youtube.com/watch?v={entry.get('id', '')}"))
+            emit("progress", message=f"Playlist: {playlist_title} ({len(video_urls)} videos)", percent=8)
             emit("playlist", urls=video_urls, title=playlist_title, count=len(video_urls))
             return
 

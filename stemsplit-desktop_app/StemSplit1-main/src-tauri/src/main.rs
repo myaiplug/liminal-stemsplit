@@ -9,6 +9,7 @@
 mod hardware;
 mod downloader;
 mod engine;
+mod youtube_import;
 
 use hmac::{Hmac, Mac};
 use serde::{Deserialize, Serialize};
@@ -19,6 +20,7 @@ use std::sync::{Arc, Mutex};
 use std::path::{Path, PathBuf};
 use tauri::{Emitter, Manager};
 use tokio::time::{sleep, Duration};
+use youtube_import::{merge_playlist_warnings, plan_playlist_import, playlist_overall_percent};
 
 #[cfg(target_os = "windows")]
 use std::os::windows::process::CommandExt;
@@ -2720,6 +2722,29 @@ pub struct YouTubeDownloadResult {
     pub webpage_url: Option<String>,
     pub mode_used: String,
     pub formats_available: Vec<String>,
+    #[serde(default)]
+    pub files: Vec<YouTubeImportedFile>,
+    #[serde(default)]
+    pub warning: Option<String>,
+    #[serde(default)]
+    pub playlist_title: Option<String>,
+    #[serde(default)]
+    pub playlist_total: u32,
+    #[serde(default)]
+    pub playlist_imported: u32,
+    #[serde(default)]
+    pub playlist_failed: u32,
+    #[serde(default)]
+    pub playlist_truncated: u32,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct YouTubeImportedFile {
+    pub file_path: String,
+    pub title: String,
+    pub output_directory: String,
+    pub duration_seconds: f64,
+    pub webpage_url: Option<String>,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
@@ -4016,47 +4041,61 @@ fn collect_process_stdout_lines(
     Ok(lines)
 }
 
-#[tauri::command]
-async fn download_youtube_audio(
-    request: YouTubeDownloadRequest,
-    window: tauri::Window,
-) -> Result<YouTubeDownloadResult, String> {
-    let mode = enforce_youtube_download_mode(&request.mode)?;
+fn default_youtube_result_extras() -> (
+    Vec<YouTubeImportedFile>,
+    Option<String>,
+    Option<String>,
+    u32,
+    u32,
+    u32,
+    u32,
+) {
+    (Vec::new(), None, None, 0, 0, 0, 0)
+}
 
-    let python_exe = get_python_executable().ok_or_else(|| {
-        "Python runtime is not available. Run the built-in environment setup first.".to_string()
-    })?;
-    let env_dir = get_python_env_dir();
-    let script_path = resolve_python_script_path("youtube_dl.py");
-    if !script_path.exists() {
-        return Err(format!("youtube_dl.py not found at {}", script_path.display()));
+fn youtube_imported_file(result: &YouTubeDownloadResult) -> YouTubeImportedFile {
+    YouTubeImportedFile {
+        file_path: result.file_path.clone(),
+        title: result.title.clone(),
+        output_directory: result.output_directory.clone(),
+        duration_seconds: result.duration_seconds,
+        webpage_url: result.webpage_url.clone(),
     }
+}
 
-    if !detect_missing_python_modules(&python_exe, &["yt_dlp"]).is_empty() {
-        let _ = window.emit("youtube-download-progress", serde_json::json!({
-            "message": "Installing YouTube import runtime...",
-            "percent": 4
-        }));
-        install_python_packages(&python_exe, &env_dir, "Install yt-dlp", &["yt-dlp"])?;
+fn attach_single_import(mut result: YouTubeDownloadResult) -> YouTubeDownloadResult {
+    if result.files.is_empty() && !result.file_path.trim().is_empty() {
+        result.files.push(youtube_imported_file(&result));
+        result.playlist_imported = 1;
+        result.playlist_total = 1;
     }
+    result
+}
 
-    let output_dir = dirs::data_local_dir()
-        .unwrap_or_else(|| PathBuf::from("."))
-        .join("StemSplit")
-        .join("imports");
-    std::fs::create_dir_all(&output_dir)
-        .map_err(|e| format!("Failed to create YouTube import directory: {}", e))?;
+enum YouTubeDlOutcome {
+    File(YouTubeDownloadResult),
+    Playlist { urls: Vec<String>, title: String },
+}
 
-    let mut cmd = Command::new(&python_exe);
+fn run_youtube_dl_job(
+    url: &str,
+    mode: &str,
+    window: &tauri::Window,
+    python_exe: &PathBuf,
+    script_path: &PathBuf,
+    output_dir: &PathBuf,
+    mut on_progress: impl FnMut(u32, &str),
+) -> Result<YouTubeDlOutcome, String> {
+    let mut cmd = Command::new(python_exe);
     cmd.args(&[
         "-u".to_string(),
         script_path.to_string_lossy().to_string(),
         "--url".to_string(),
-        request.url.clone(),
+        url.to_string(),
         "--output".to_string(),
         output_dir.to_string_lossy().to_string(),
         "--mode".to_string(),
-        mode.clone(),
+        mode.to_string(),
     ])
     .stdout(Stdio::piped())
     .stderr(Stdio::piped());
@@ -4081,10 +4120,7 @@ async fn download_youtube_audio(
         }
     });
 
-    let _ = window.emit("youtube-download-progress", serde_json::json!({
-        "message": "Booting import pipeline...",
-        "percent": 2
-    }));
+    on_progress(2, "Booting import pipeline...");
 
     let status = child.wait().map_err(|e| format!("Failed to await YouTube downloader: {}", e))?;
     let stdout_lines = stdout_handle
@@ -4093,6 +4129,7 @@ async fn download_youtube_audio(
     let stderr_output = stderr_handle.join().unwrap_or_default();
 
     let mut final_result: Option<YouTubeDownloadResult> = None;
+    let mut playlist: Option<(Vec<String>, String)> = None;
     let mut last_error: Option<String> = None;
 
     for line in stdout_lines {
@@ -4104,16 +4141,33 @@ async fn download_youtube_audio(
             Some("progress") => {
                 let percent = payload.get("percent").and_then(|value| value.as_u64()).unwrap_or(0) as u32;
                 let message = payload.get("message").and_then(|value| value.as_str()).unwrap_or("Downloading audio...");
-                let _ = window.emit("youtube-download-progress", serde_json::json!({
-                    "message": message,
-                    "percent": percent
-                }));
+                on_progress(percent, message);
+            }
+            Some("playlist") => {
+                let urls: Vec<String> = payload
+                    .get("urls")
+                    .and_then(|value| value.as_array())
+                    .map(|arr| {
+                        arr.iter()
+                            .filter_map(|value| value.as_str())
+                            .map(str::to_string)
+                            .collect()
+                    })
+                    .unwrap_or_default();
+                let title = payload
+                    .get("title")
+                    .and_then(|value| value.as_str())
+                    .unwrap_or("Playlist")
+                    .to_string();
+                playlist = Some((urls, title));
             }
             Some("result") => {
                 let formats_available: Vec<String> = payload.get("formats_available")
                     .and_then(|v| v.as_array())
                     .map(|arr| arr.iter().filter_map(|v| v.as_str()).map(String::from).collect())
                     .unwrap_or_default();
+                let (files, warning, playlist_title, playlist_total, playlist_imported, playlist_failed, playlist_truncated) =
+                    default_youtube_result_extras();
 
                 final_result = Some(YouTubeDownloadResult {
                     status: "ok".to_string(),
@@ -4129,12 +4183,25 @@ async fn download_youtube_audio(
                     webpage_url: payload.get("webpage_url").and_then(|value| value.as_str()).map(|value| value.to_string()),
                     mode_used: payload.get("mode_used").and_then(|value| value.as_str()).unwrap_or("audio_mp3_192").to_string(),
                     formats_available,
+                    files,
+                    warning,
+                    playlist_title,
+                    playlist_total,
+                    playlist_imported,
+                    playlist_failed,
+                    playlist_truncated,
                 });
             }
             Some("error") => {
                 last_error = payload.get("message").and_then(|value| value.as_str()).map(|value| value.to_string());
             }
             _ => {}
+        }
+    }
+
+    if let Some((urls, title)) = playlist {
+        if !urls.is_empty() {
+            return Ok(YouTubeDlOutcome::Playlist { urls, title });
         }
     }
 
@@ -4169,15 +4236,152 @@ async fn download_youtube_audio(
         return Err("YouTube import completed but no output file path was returned.".to_string());
     }
 
-    let _ = window.emit("youtube-download-progress", serde_json::json!({
-        "message": "Audio imported successfully.",
-        "percent": 100
-    }));
+    Ok(YouTubeDlOutcome::File(attach_single_import(result)))
+}
+
+#[tauri::command]
+async fn download_youtube_audio(
+    request: YouTubeDownloadRequest,
+    window: tauri::Window,
+) -> Result<YouTubeDownloadResult, String> {
+    let mode = enforce_youtube_download_mode(&request.mode)?;
+    let is_trial = get_license_status().is_trial;
+
+    let python_exe = get_python_executable().ok_or_else(|| {
+        "Python runtime is not available. Run the built-in environment setup first.".to_string()
+    })?;
+    let env_dir = get_python_env_dir();
+    let script_path = resolve_python_script_path("youtube_dl.py");
+    if !script_path.exists() {
+        return Err(format!("youtube_dl.py not found at {}", script_path.display()));
+    }
+
+    if !detect_missing_python_modules(&python_exe, &["yt_dlp"]).is_empty() {
+        let _ = window.emit("youtube-download-progress", serde_json::json!({
+            "message": "Installing YouTube import runtime...",
+            "percent": 4
+        }));
+        install_python_packages(&python_exe, &env_dir, "Install yt-dlp", &["yt-dlp"])?;
+    }
+
+    let output_dir = dirs::data_local_dir()
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("StemSplit")
+        .join("imports");
+    std::fs::create_dir_all(&output_dir)
+        .map_err(|e| format!("Failed to create YouTube import directory: {}", e))?;
+
+    let emit_progress = |percent: u32, message: &str| {
+        let _ = window.emit("youtube-download-progress", serde_json::json!({
+            "message": message,
+            "percent": percent
+        }));
+    };
+
+    emit_progress(2, "Booting import pipeline...");
+
+    let outcome = run_youtube_dl_job(
+        &request.url,
+        &mode,
+        &window,
+        &python_exe,
+        &script_path,
+        &output_dir,
+        |percent, message| emit_progress(percent, message),
+    )?;
+
+    let result = match outcome {
+        YouTubeDlOutcome::File(result) => result,
+        YouTubeDlOutcome::Playlist { urls, title } => {
+            let plan = plan_playlist_import(&urls, is_trial);
+            if plan.urls.is_empty() {
+                return Err("This playlist has no downloadable videos.".to_string());
+            }
+
+            let total = plan.urls.len();
+            emit_progress(
+                0,
+                &format!("Importing playlist \"{}\" ({} video(s))...", title, total),
+            );
+
+            let mut imported: Vec<YouTubeDownloadResult> = Vec::new();
+            let mut failed = 0usize;
+            let mut last_error = String::new();
+
+            for (index, item_url) in plan.urls.iter().enumerate() {
+                let label = format!("Importing {} of {}: ", index + 1, total);
+                match run_youtube_dl_job(
+                    item_url,
+                    &mode,
+                    &window,
+                    &python_exe,
+                    &script_path,
+                    &output_dir,
+                    |percent, message| {
+                        let overall = playlist_overall_percent(index, total, percent);
+                        emit_progress(overall, &format!("{label}{message}"));
+                    },
+                ) {
+                    Ok(YouTubeDlOutcome::File(item)) => imported.push(item),
+                    Ok(YouTubeDlOutcome::Playlist { .. }) => {
+                        failed += 1;
+                        last_error = format!("Nested playlist skipped for {}", item_url);
+                    }
+                    Err(error) => {
+                        failed += 1;
+                        last_error = error;
+                    }
+                }
+            }
+
+            if imported.is_empty() {
+                return Err(if last_error.is_empty() {
+                    "YouTube playlist import failed: no videos could be imported.".to_string()
+                } else {
+                    format!("YouTube playlist import failed: {}", last_error)
+                });
+            }
+
+            let first = imported[0].clone();
+            let files: Vec<YouTubeImportedFile> = imported.iter().map(youtube_imported_file).collect();
+            let warning = merge_playlist_warnings(plan.warning, failed, imported.len());
+            YouTubeDownloadResult {
+                status: "ok".to_string(),
+                file_path: first.file_path,
+                title: title.clone(),
+                duration_seconds: first.duration_seconds,
+                output_directory: first.output_directory,
+                uploader: first.uploader,
+                webpage_url: first.webpage_url,
+                mode_used: first.mode_used,
+                formats_available: first.formats_available,
+                files,
+                warning,
+                playlist_title: Some(title),
+                playlist_total: plan.source_count as u32,
+                playlist_imported: imported.len() as u32,
+                playlist_failed: failed as u32,
+                playlist_truncated: plan.truncated as u32,
+            }
+        }
+    };
+
+    if result.file_path.trim().is_empty() {
+        return Err("YouTube import completed but no output file path was returned.".to_string());
+    }
+
+    let done_message = if result.playlist_imported > 1 {
+        format!("Imported {} videos.", result.playlist_imported)
+    } else {
+        "Audio imported successfully.".to_string()
+    };
+    emit_progress(100, &done_message);
 
     Ok(result)
 }
 
 #[tauri::command]
+
 async fn transcribe_audio(
     request: WhisperTranscriptionRequest,
     window: tauri::Window,
