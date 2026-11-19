@@ -14,7 +14,7 @@
 <meta name="twitter:image" content="https://liminal-stemsplit.onrender.com/assets/og-social-card.png?v=20260610d">
 <link rel="icon" href="/assets/liminal.png" type="image/png">
 <link rel="preload" href="/assets/hero-bg.jpg?v=20260610d" as="image">
-<link rel="preload" href="/assets/liminal.png?v=20260610d" as="image">
+<link rel="preload" href="/assets/liminal-wordmark.png?v=20261118h" as="image">
 <link rel="preload" href="/stems/drums.wav" as="audio" crossorigin>
 <link rel="preload" href="/stems/bass.wav" as="audio" crossorigin>
 <link rel="preload" href="/stems/other.wav" as="audio" crossorigin>
@@ -85,7 +85,7 @@ nav.scrolled{background:rgba(2,6,23,0.92);backdrop-filter:blur(20px);border-bott
 }
 .hero-layer--base{
   background:
-    linear-gradient(180deg,rgba(2,6,23,0.08) 0%,rgba(2,6,23,0.22) 50%,rgba(2,6,23,0.55) 100%);
+    linear-gradient(180deg,rgba(2,6,23,0.42) 0%,rgba(2,6,23,0.58) 48%,rgba(2,6,23,0.86) 100%);
 }
 .hero-layer--wormhole{
   top:50%;left:50%;width:min(140vw,1100px);height:min(140vw,1100px);
@@ -118,21 +118,28 @@ nav.scrolled{background:rgba(2,6,23,0.92);backdrop-filter:blur(20px);border-bott
   animation:fog-drift-violet 28s ease-in-out infinite;
 }
 .hero-fx-canvas{position:absolute;inset:0;width:100%;height:100%;z-index:1;pointer-events:none;opacity:0.08}
-.hero-logo-stage{position:relative;display:flex;justify-content:center;margin:0 auto 2rem}
+.hero-logo-stage{position:relative;display:flex;justify-content:center;margin:0 auto 1.25rem}
 .hero-logo-glow{
-  position:absolute;top:50%;left:50%;width:min(88vw,760px);height:min(36vw,220px);
+  position:absolute;top:48%;left:50%;width:min(90vw,520px);height:min(48vw,280px);
   transform:translate(-50%,-50%);pointer-events:none;z-index:0;
   background:
-    radial-gradient(ellipse 55% 70% at 50% 50%,rgba(0,212,255,0.42) 0%,transparent 58%),
-    radial-gradient(ellipse 85% 95% at 50% 50%,rgba(168,85,247,0.22) 0%,transparent 72%),
-    radial-gradient(ellipse 100% 100% at 50% 50%,rgba(214,243,255,0.08) 0%,transparent 80%);
-  filter:blur(22px);
+    radial-gradient(ellipse 55% 70% at 50% 50%,rgba(0,212,255,0.18) 0%,transparent 62%),
+    radial-gradient(ellipse 85% 95% at 50% 50%,rgba(168,85,247,0.12) 0%,transparent 74%);
+  filter:blur(28px);
   animation:logo-glow-pulse 7s ease-in-out infinite;
 }
 .hero-logo{
-  position:relative;z-index:1;display:block;width:min(94vw,820px);max-height:280px;
+  position:relative;z-index:1;display:block;width:min(82vw,440px);height:auto;
   object-fit:contain;
-  filter:brightness(1.3) contrast(1.04) drop-shadow(0 0 28px rgba(0,212,255,0.35)) drop-shadow(0 0 64px rgba(168,85,247,0.18));
+  filter:drop-shadow(0 10px 28px rgba(0,0,0,0.45));
+}
+.hero-cta-row{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;gap:0.85rem;margin-top:2rem}
+.hero-cta-row .btn-primary,.hero-cta-row .btn-secondary{min-width:220px;justify-content:center}
+@media (max-width:640px){
+  .hero-section{padding:6.25rem 1.1rem 3rem;min-height:100svh}
+  .hero-logo{width:min(86vw,340px)}
+  .hero-cta-row{flex-direction:column;width:100%}
+  .hero-cta-row .btn-primary,.hero-cta-row .btn-secondary{width:100%;max-width:320px}
 }
 @keyframes wormhole-breathe{0%,100%{transform:translate(-50%,-58%) scale(1);opacity:0.5}50%{transform:translate(-50%,-58%) scale(1.04);opacity:0.62}}
 @keyframes portal-pulse{0%,100%{opacity:0.75;transform:translate(-50%,-72%) scale(1)}50%{opacity:1;transform:translate(-50%,-72%) scale(1.03)}}
@@ -272,7 +279,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
 
 @media(max-width:768px){
   .hero-section{padding:4.75rem 1rem 3.25rem}
-  .hero-logo{max-height:200px}
+  .hero-logo{max-height:none}
   .hero-logo-glow{filter:blur(14px)}
   .glass,.glass-strong,.stem-container,.email-bar,.toast{backdrop-filter:none;-webkit-backdrop-filter:none}
   .app-window-body{min-height:0}
@@ -336,6 +343,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <a href="#app-showcase" class="text-sm text-white/50 hover:text-white transition-colors">See App</a>
       <a href="#features" class="text-sm text-white/50 hover:text-white transition-colors">Features</a>
       <a href="#download" class="text-sm text-white/50 hover:text-white transition-colors">Download</a>
+      <a href="/releases/" class="text-sm text-white/50 hover:text-white transition-colors">Releases</a>
       <a href="#pricing" class="text-sm text-white/50 hover:text-white transition-colors">Pricing</a>
       <a href="#faq" class="text-sm text-white/50 hover:text-white transition-colors">FAQ</a>
     </div>
@@ -352,6 +360,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
   <a href="#app-showcase" data-nav-close>See App</a>
   <a href="#demo" data-nav-close>Interactive Demo</a>
   <a href="#download" data-nav-close>Download</a>
+  <a href="/releases/" data-nav-close>Releases</a>
   <a href="#pricing" data-nav-close>Pricing</a>
   <a href="#features" data-nav-close>Features</a>
   <a href="#faq" data-nav-close>FAQ</a>
@@ -365,54 +374,44 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
   <div class="hero-atmosphere" aria-hidden="true">
     <div class="hero-layer hero-layer--photo"></div>
     <div class="hero-layer hero-layer--base"></div>
-
   </div>
   <canvas id="hero-fx-canvas" class="hero-fx-canvas"></canvas>
-  <div class="relative z-10 max-w-5xl mx-auto">
+  <div class="relative z-10 max-w-5xl mx-auto w-full">
     <div class="hero-logo-stage">
       <div class="hero-logo-glow" aria-hidden="true"></div>
       <img
-        src="/assets/liminal.png?v=20260610d"
-        alt="Liminal STEM SPLIT"
+        src="/assets/liminal-wordmark.png?v=20261118h"
+        alt="Liminal"
         class="hero-logo"
-        width="820"
-        height="280"
+        width="509"
+        height="348"
         fetchpriority="high"
       />
     </div>
 
     <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full glass text-xs text-liminal-300 mb-6 font-medium tracking-wide">
       <span class="w-2 h-2 rounded-full bg-liminal-400 animate-pulse"></span>
-      AI-Powered Stem Separation • 100% Local • No Subscription
+      Windows desktop • 100% local • No subscription
     </div>
 
-    <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tighter leading-none mb-6">
-      <span class="gradient-text">Isolate</span> Any<br>
-      <span class="text-white/90">Stem. Instantly.</span>
+    <h1 class="text-4xl sm:text-6xl md:text-7xl font-black tracking-tighter leading-[0.95] mb-5">
+      <span class="gradient-text">Isolate any stem.</span><br>
+      <span class="text-white/90">On your own PC.</span>
     </h1>
-    <p class="text-lg sm:text-xl text-white/40 max-w-2xl mx-auto mb-4 font-light">
-      Separate vocals, drums, bass, and other instruments from any song.<br>
-      <span class="text-white/60">No cloud. No uploads. No monthly fees.</span>
+    <p class="text-base sm:text-xl text-white/55 max-w-2xl mx-auto mb-1 font-light leading-relaxed">
+      Separate vocals, drums, bass, and other instruments from any song.<br class="hidden sm:block">
+      <span class="text-white/75">No cloud. No uploads. No monthly fees.</span>
     </p>
 
-    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mt-8">
-      <a href="#app-showcase" class="btn-primary text-base" onclick="trackClick('hero_showcase')">
-        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
-        See Real App Screenshots
+    <div class="hero-cta-row">
+      <a href="#download" class="btn-primary text-base" onclick="trackClick('hero_free_demo')">
+        Download free demo
       </a>
-      <a href="#split" class="btn-secondary text-base" onclick="trackClick('hero_split')">
-        Split 20 seconds
-      </a>
-      <a href="#demo" class="btn-secondary text-base" onclick="trackClick('hero_demo')">
-        Hear the Demo ↓
-      </a>
-      <a href="#pricing" class="btn-secondary text-base hidden sm:inline-flex" onclick="trackClick('hero_pricing')">
-        See Plans
-        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 14l-7 7m0 0l-7-7m7 7V3"/></svg>
+      <a href="#pricing" class="btn-secondary text-base" onclick="trackClick('hero_pro')">
+        Liminal Pro — $29
       </a>
     </div>
 
-    <div class="scroll-indicator">Scroll to try the demo</div>
   </div>
 </section>
 
@@ -628,7 +627,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
         </div>
       </div>
     </div>
-    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Liminal processes all audio locally on your machine — no cloud uploads. Windows may show a SmartScreen notice for new independent software. Choose "More info" → "Run anyway". Verify the SHA-256 checksum from the <a data-liminal-release href="https://github.com/myaiplug/liminal-stemsplit/releases/latest" class="text-liminal-400 hover:text-liminal-300 underline" target="_blank" rel="noopener">GitHub release (<span data-liminal-version>latest</span>)</a>. macOS and Linux versions coming soon.</p>
+    <p class="text-center text-xs text-white/30 mt-6 max-w-xl mx-auto">Liminal processes all audio locally on your machine — no cloud uploads. Windows may show a SmartScreen notice for new independent software. Choose "More info" → "Run anyway". Verify the SHA-256 checksum on the <a href="/releases/" class="text-liminal-400 hover:text-liminal-300 underline">releases page</a> or the <a data-liminal-release href="https://github.com/myaiplug/liminal-stemsplit/releases/latest" class="text-liminal-400 hover:text-liminal-300 underline" target="_blank" rel="noopener">GitHub release (<span data-liminal-version>latest</span>)</a>. Every published installer is listed there. macOS and Linux are not officially supported yet.</p>
   </div>
 </section>
 
@@ -702,7 +701,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">What are the system requirements? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Windows 10 or later (64-bit). macOS and Linux are not available yet. 8 GB RAM recommended (16 GB for large batches). An NVIDIA GPU with 4 GB+ VRAM is fastest; CPU-only mode works but is slower. The app auto-detects your hardware and chooses the best settings.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Is it really one-time payment? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Yes. $29 one-time, with no subscription. That includes the updates we publish for the major version you buy. No "Pro+" tiers or recurring fees.</div></div>
     <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Can I get a refund? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">Yes. 30-day money-back guarantee. Email <a href="mailto:NoDAW@nodawlabs.com" class="text-liminal-400">NoDAW@nodawlabs.com</a> within 30 days of purchase. See our <a href="/refund.html" class="text-liminal-400">refund policy</a>.</div></div>
-    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Windows shows a security warning on install? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">New independent Windows apps may trigger Microsoft SmartScreen until reputation builds. Liminal is not signed with an EV certificate yet. The installer does not bundle third-party offers. Click More info → Run anyway. Download only from liminal-stemsplit.onrender.com/downloads and verify the SHA-256 checksum published alongside the installer.</div></div>
+    <div class="faq-item"><div class="faq-question" onclick="toggleFaq(this.parentElement)">Windows shows a security warning on install? <span class="text-white/30 text-xl">+</span></div><div class="faq-answer">New independent Windows apps may trigger Microsoft SmartScreen until reputation builds. Liminal is not signed with an EV certificate yet. The installer does not bundle third-party offers. Click More info → Run anyway. Download only from liminal-stemsplit.onrender.com/downloads or /releases and verify the SHA-256 checksum published alongside the installer.</div></div>
   </div>
 </section>
 
@@ -721,7 +720,7 @@ html.js .reveal.visible{opacity:1;transform:translateY(0)}
       <a href="/browser-split.html" class="hover:text-liminal-400 transition-colors">Browser Split</a>
       <a href="/marketing-plan.html" class="hover:text-liminal-400 transition-colors">Pricing</a>
       <a href="mailto:NoDAW@nodawlabs.com" class="hover:text-liminal-400 transition-colors">Support</a>
-      <a href="https://github.com/myaiplug/StemSplit1/releases" target="_blank" rel="noopener" class="hover:text-liminal-400 transition-colors">Downloads</a>
+      <a href="/releases/" class="hover:text-liminal-400 transition-colors">Releases</a>
     </div>
     <p class="text-white/20 text-xs">© 2026 Liminal by <a href="https://myaiplug.com" class="text-liminal-400/50 hover:text-liminal-400 transition-colors">MyAiPlug</a>. Built for producers who own their tools.</p>
   </div>
@@ -743,7 +742,7 @@ window.addEventListener('unhandledrejection', revealAllNow);
 function trackClick(label) { try { localStorage.setItem('liminal_click_' + Date.now(), label); } catch(e) {} }
 
 const SUPPORT_EMAIL = 'NoDAW@nodawlabs.com';
-const RELEASES_URL = 'https://github.com/myaiplug/StemSplit1/releases/latest';
+const RELEASES_URL = '/releases/';
 
 function isMobileViewport() {
   return window.matchMedia('(max-width: 768px)').matches;

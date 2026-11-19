@@ -1,0 +1,268 @@
+{
+  "generated_at": "2026-11-18T23:55:00-05:00",
+  "source": "https://api.github.com/repos/myaiplug/liminal-stemsplit/releases",
+  "releases": [
+    {
+      "tag_name": "v0.8.1",
+      "name": "Liminal StemSplit v0.8.1",
+      "prerelease": false,
+      "published_at": "2026-11-09T14:46:52Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.8.1",
+      "body": "**Full Changelog**: https://github.com/myaiplug/liminal-stemsplit/compare/v0.8.0...v0.8.1",
+      "assets": [
+        {
+          "name": "checksums-windows.sha256",
+          "size": 323,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/checksums-windows.sha256"
+        },
+        {
+          "name": "latest.json",
+          "size": 1992,
+          "content_type": "application/json",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/latest.json"
+        },
+        {
+          "name": "Liminal-StemSplit-Setup-v0.8.1-Windows-x64-Online.exe",
+          "size": 9716813,
+          "content_type": "application/x-msdos-program",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/Liminal-StemSplit-Setup-v0.8.1-Windows-x64-Online.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.8.1_x64-setup.exe",
+          "size": 7771826,
+          "content_type": "application/x-msdos-program",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/NoDAW.Liminal_0.8.1_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.8.1_x64-setup.exe.sig",
+          "size": 444,
+          "content_type": "application/pgp-signature",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/NoDAW.Liminal_0.8.1_x64-setup.exe.sig"
+        },
+        {
+          "name": "NoDAW.Liminal_0.8.1_x64_en-US.msi",
+          "size": 9113600,
+          "content_type": "application/x-msdownload",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/NoDAW.Liminal_0.8.1_x64_en-US.msi"
+        },
+        {
+          "name": "NoDAW.Liminal_0.8.1_x64_en-US.msi.sig",
+          "size": 444,
+          "content_type": "application/pgp-signature",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.1/NoDAW.Liminal_0.8.1_x64_en-US.msi.sig"
+        }
+      ]
+    },
+    {
+      "tag_name": "v0.8.0",
+      "name": "Liminal StemSplit v0.8.0",
+      "prerelease": false,
+      "published_at": "2026-11-09T05:39:26Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.8.0",
+      "body": "NoDAW Liminal StemSplit v0.8.0\n\n- Mini-BS-RoFormer V2.5 four-stem engine (about 50 MB, fits an 8 GB GPU)\n- KARA2 Student lead / backing / instrumental split\n- Remix kit written after each split (chords and MIDI sketches)\n- Split history in the Sample Bank, with files that open in the sample editor\n- Click-and-drag waveform selection to save clips\n\nWindows downloads:\n- `NoDAW.Liminal_0.8.0_x64-setup.exe` (recommended)\n- `NoDAW.Liminal_0.8.0_x64_en-US.msi`\n- `Liminal-StemSplit-Setup-v0.8.0-Windows-x64-Online.exe`\n\nThis release is Windows-only; the macOS installer job could not run on GitHub\u2019s current runners. The installer is unsigned, same as v0.5.1.\n",
+      "assets": [
+        {
+          "name": "checksums-windows.sha256",
+          "size": 320,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.0/checksums-windows.sha256"
+        },
+        {
+          "name": "Liminal-StemSplit-Setup-v0.8.0-Windows-x64-Online.exe",
+          "size": 9719258,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.0/Liminal-StemSplit-Setup-v0.8.0-Windows-x64-Online.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.8.0_x64-setup.exe",
+          "size": 7767111,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.0/NoDAW.Liminal_0.8.0_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.8.0_x64_en-US.msi",
+          "size": 9113600,
+          "content_type": "application/x-msi",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.8.0/NoDAW.Liminal_0.8.0_x64_en-US.msi"
+        }
+      ]
+    },
+    {
+      "tag_name": "v0.5.1",
+      "name": "Liminal StemSplit v0.5.1",
+      "prerelease": false,
+      "published_at": "2026-10-08T08:32:37Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.5.1",
+      "body": "**Full Changelog**: https://github.com/myaiplug/liminal-stemsplit/compare/v0.5.0...v0.5.1",
+      "assets": [
+        {
+          "name": "checksums-mac.sha256",
+          "size": 167,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/checksums-mac.sha256"
+        },
+        {
+          "name": "checksums-windows.sha256",
+          "size": 323,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/checksums-windows.sha256"
+        },
+        {
+          "name": "Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online.exe",
+          "size": 9188931,
+          "content_type": "application/x-msdos-program",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/Liminal-StemSplit-Setup-v0.5.1-Windows-x64-Online.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.5.1_aarch64.dmg",
+          "size": 7912857,
+          "content_type": "application/x-apple-diskimage",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/NoDAW.Liminal_0.5.1_aarch64.dmg"
+        },
+        {
+          "name": "NoDAW.Liminal_0.5.1_x64-setup.exe",
+          "size": 7199970,
+          "content_type": "application/x-msdos-program",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/NoDAW.Liminal_0.5.1_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.5.1_x64_en-US.msi",
+          "size": 8323072,
+          "content_type": "application/x-msdownload",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.1/NoDAW.Liminal_0.5.1_x64_en-US.msi"
+        }
+      ]
+    },
+    {
+      "tag_name": "v0.5.0",
+      "name": "Liminal StemSplit v0.5.0",
+      "prerelease": false,
+      "published_at": "2026-06-28T09:31:13Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.5.0",
+      "body": "**Full Changelog**: https://github.com/myaiplug/liminal-stemsplit/compare/v0.4.9...v0.5.0",
+      "assets": [
+        {
+          "name": "checksums-mac.sha256",
+          "size": 167,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/checksums-mac.sha256"
+        },
+        {
+          "name": "checksums-windows.sha256",
+          "size": 323,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/checksums-windows.sha256"
+        },
+        {
+          "name": "Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online.exe",
+          "size": 9219516,
+          "content_type": "application/x-msdos-program",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/Liminal-StemSplit-Setup-v0.5.0-Windows-x64-Online.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.5.0_aarch64.dmg",
+          "size": 7942221,
+          "content_type": "application/x-apple-diskimage",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_aarch64.dmg"
+        },
+        {
+          "name": "NoDAW.Liminal_0.5.0_x64-setup.exe",
+          "size": 7233320,
+          "content_type": "application/x-msdos-program",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.5.0_x64_en-US.msi",
+          "size": 8392704,
+          "content_type": "application/x-msdownload",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.5.0/NoDAW.Liminal_0.5.0_x64_en-US.msi"
+        }
+      ]
+    },
+    {
+      "tag_name": "v0.4.9",
+      "name": "v0.4.9",
+      "prerelease": false,
+      "published_at": "2026-06-19T19:53:14Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.4.9",
+      "body": "",
+      "assets": [
+        {
+          "name": "NoDAW.Liminal_0.4.9_aarch64.dmg",
+          "size": 5899186,
+          "content_type": "application/x-apple-diskimage",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_aarch64.dmg"
+        },
+        {
+          "name": "NoDAW.Liminal_0.4.9_amd64.AppImage",
+          "size": 91728376,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_amd64.AppImage"
+        },
+        {
+          "name": "NoDAW.Liminal_0.4.9_amd64.deb",
+          "size": 6021926,
+          "content_type": "application/x-debian-package",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_amd64.deb"
+        },
+        {
+          "name": "NoDAW.Liminal_0.4.9_x64-setup.exe",
+          "size": 78068409,
+          "content_type": "application/x-msdownload",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.4.9_x64_en-US.msi",
+          "size": 80035840,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.9/NoDAW.Liminal_0.4.9_x64_en-US.msi"
+        }
+      ]
+    },
+    {
+      "tag_name": "v0.4.8",
+      "name": "v0.4.8 \u2014 Stable reverted frontend",
+      "prerelease": false,
+      "published_at": "2026-06-17T10:04:34Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.4.8",
+      "body": "## What's Fixed\n\n- **Reverted DeepSplit frontend** to the stable, proven UI\n- Fixed ReactorZone animation performance\n- Restored LandingHero component\n- Updated CI/CD workflow (npx \u2192 cargo tauri build)\n- All existing features preserved\n\n[Download v0.4.8](https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.4.8)",
+      "assets": [
+        {
+          "name": "NoDAW.Liminal_0.4.8_x64-setup.exe",
+          "size": 78076941,
+          "content_type": "application/x-msdownload",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.8/NoDAW.Liminal_0.4.8_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.4.8_x64_en-US.msi",
+          "size": 80031744,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.8/NoDAW.Liminal_0.4.8_x64_en-US.msi"
+        }
+      ]
+    },
+    {
+      "tag_name": "v0.4.7",
+      "name": "v0.4.7",
+      "prerelease": false,
+      "published_at": "2026-06-15T06:30:52Z",
+      "html_url": "https://github.com/myaiplug/liminal-stemsplit/releases/tag/v0.4.7",
+      "body": "### v0.4.7\n\n- Landing page hero section (DeepSplit merge)\n- Canvas waveform fallback\n- GPU/CPU toggle\n- Recommended Mode + Advanced Models\n- SEO landing pages\n- Whisper auto-repair\n- Fixed installer download URLs",
+      "assets": [
+        {
+          "name": "NoDAW.Liminal_0.4.7_x64-setup.exe",
+          "size": 78077924,
+          "content_type": "application/x-msdownload",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW.Liminal_0.4.7_x64-setup.exe"
+        },
+        {
+          "name": "NoDAW.Liminal_0.4.7_x64_en-US.msi",
+          "size": 80039936,
+          "content_type": "application/octet-stream",
+          "browser_download_url": "https://github.com/myaiplug/liminal-stemsplit/releases/download/v0.4.7/NoDAW.Liminal_0.4.7_x64_en-US.msi"
+        }
+      ]
+    }
+  ]
+}
