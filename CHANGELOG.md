@@ -3,6 +3,15 @@
 All notable changes to Liminal StemSplit. Versions follow SemVer; the single source of truth is
 `stemsplit-desktop_app/StemSplit1-main/VERSION` (propagated by `scripts/sync_version.py`).
 
+## Unreleased
+
+### Added
+- **DrumSep HT-RoFormer** (Sucial) six-stem drum split (kick, snare, hi-hat, toms, cymbals, other→perc). Desktop: new `drumsep_ht_roformer` engine, now the default for drum re-splits. It downloads on first use from a pinned Hugging Face commit and checks every file's SHA-256. Browser Stem Studio: optional "HT-RoFormer 6-stem" model in the Drums tab, disabled until it is hosted. **The author has published no licence. Get permission before release.**
+- **Mel-Band RoFormer Karaoke** lead / backing split. Desktop: `mbr_karaoke_lead_backing`, an option next to KARA2 (KARA2 stays the default). Browser Stem Studio: new **Vocals** tab that splits a vocal stem into "Lead vocal" and "Backing vocals" (WebGPU with CPU fallback). Lead + backing add back up to the stem exactly. MIT ONNX, with a caveat about the upstream checkpoint.
+
+### Fixed
+- Stem Studio workers now see the page's `?drummodel=` / `?drummodel_htr=` / `?karaokemodel=` overrides. Before this fix, workers read their own URL, so the overrides were ignored.
+
 ## 0.8.1
 
 ### Changed

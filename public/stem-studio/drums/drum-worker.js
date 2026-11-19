@@ -4,12 +4,13 @@
  */
 import { ORT_MODULE_URL, ORT_WASM_BASE, ORT_CDN_MODULE_URL, ORT_CDN_BASE } from '../../roformer-web/models.js';
 import { getModelFiles } from '../../roformer-web/model-store.js';
-import { drumModel } from './drum-models.js';
+import { drumModel, drumModelById } from './drum-models.js';
 import { separateLong } from './hdemucs.js';
+import { separateHtr, HTR_CHUNK, HTR_BINS, HTR_FRAMES } from './htr.js';
 import { dspDrumSplit } from './drum-dsp.js';
 import { buildParts } from './pipeline.js';
 
-let ortP = null, session = null, backend = null, cancelled = false;
+let ortP = null, session = null, sessionModel = null, backend = null, cancelled = false;
 const post = (m, tr = []) => self.postMessage(m, tr);
 
 async function importOrt() {
@@ -29,19 +30,35 @@ const loadOrt = () => (ortP ||= importOrt().then((ort) => {
   ort.env.wasm.proxy = false; ort.env.logLevel = 'error'; return ort;
 }));
 
-async function ensureSession(rid, device) {
-  if (session) return;
-  const ort = await loadOrt(), model = drumModel();
+async function ensureSession(rid, device, modelId) {
+  if (session && sessionModel === modelId) return;
+  if (session) { try { await session.release?.(); } catch { /* ignore */ } session = null; }
+  const ort = await loadOrt(), model = drumModelById(modelId);
+  if (!model.files[0].url) throw new Error('The HT-RoFormer drum model is not hosted yet (its author has not published a licence).');
   const files = await getModelFiles(model, (p) => post({ type: 'progress', rid, phase: p.verifying ? 'verify' : 'download', fraction: p.total ? p.loaded / p.total : 0, fromCache: !!p.fromCache, notice: p.notice }));
   post({ type: 'progress', rid, phase: 'init', fraction: 0 });
   const bytes = files[model.files[0].name];
   const mk = (ep) => ort.InferenceSession.create(bytes, { executionProviders: [ep], graphOptimizationLevel: 'all', logSeverityLevel: 3 });
   if (device === 'webgpu' && self.navigator?.gpu) { try { session = await mk({ name: 'webgpu' }); backend = 'webgpu'; } catch (e) { post({ type: 'progress', rid, phase: 'init', fraction: 0, notice: `WebGPU unavailable (${e.message || e}); using CPU.` }); } }
   if (!session) { session = await mk('wasm'); backend = 'wasm'; }
+  sessionModel = modelId;
 }
 
-async function mlSeparate(rid, L, R, device) {
-  await ensureSession(rid, device);
+async function htrSeparate(rid, L, R, device) {
+  await ensureSession(rid, device, 'drumsep-ht-roformer');
+  const ort = await loadOrt();
+  const run = async (audio, spec) => {
+    const res = await session.run({ audio: new ort.Tensor('float32', audio, [1, 2, HTR_CHUNK]), spec: new ort.Tensor('float32', spec, [1, 2, HTR_BINS, HTR_FRAMES, 2]) });
+    const m = res.mask.data, r = res.residual.data;
+    return { mask: m instanceof Float32Array ? m : Float32Array.from(m), residual: r instanceof Float32Array ? r : Float32Array.from(r) };
+  };
+  const st = await separateHtr({ L, R, run, isCancelled: () => cancelled, onProgress: (f) => post({ type: 'progress', rid, phase: 'separate', fraction: f, backend }) });
+  return { kick: st[0], snare: st[1], hihat: st[2], toms: st[3], cymbals: st[4], other: st[5] };
+}
+
+async function mlSeparate(rid, L, R, device, modelId) {
+  if (modelId === 'drumsep-ht-roformer') return htrSeparate(rid, L, R, device);
+  await ensureSession(rid, device, 'drumsep-v2-w10');
   const ort = await loadOrt(), model = drumModel(), W = model.window;
   const run = async (mix, mag, le) => {
     const res = await session.run({ mix: new ort.Tensor('float32', mix, [1, 2, W]), mag: new ort.Tensor('float32', mag, [1, 4, 2048, le]) });
@@ -59,7 +76,7 @@ async function split(m) {
   const bass = m.bass || null;
   const step = (phase, fraction = 0) => post({ type: 'progress', rid, phase, fraction, backend });
   let ml = null, dsp = null;
-  if (mode === 'ml') ml = await mlSeparate(rid, L, R, m.device); else { step('dsp'); dsp = dspDrumSplit(L, R, sr, { onProgress: (f) => step('dsp', f) }); }
+  if (mode === 'ml') ml = await mlSeparate(rid, L, R, m.device, m.model || 'drumsep-v2-w10'); else { step('dsp'); dsp = dspDrumSplit(L, R, sr, { onProgress: (f) => step('dsp', f) }); }
   step('post');
   const out = buildParts({ drums, bass, ml, dsp, sr, ...opts, onProgress: (p) => step('post') });
   const parts = out.parts.map((p) => ({ key: p.key, name: p.name, kind: p.kind, parent: p.parent, rmsDb: p.rmsDb, L: p.audio[0], R: p.audio[1] }));
@@ -70,7 +87,11 @@ self.onmessage = async (ev) => {
   const m = ev.data;
   if (m.op === 'cancel') { cancelled = true; return; }
   try {
-    if (m.op === 'probe') { const model = drumModel(); const r = await fetch(model.files[0].url, { method: 'HEAD' }).catch(() => null); post({ type: 'done', rid: m.rid, available: !!r?.ok, url: model.files[0].url }); }
+    if (m.op === 'probe') {
+      const model = drumModelById(m.model), url = model.files[0].url;
+      if (!url) post({ type: 'done', rid: m.rid, available: false, url: '', reason: 'not-hosted' });
+      else { const r = await fetch(url, { method: 'HEAD' }).catch(() => null); post({ type: 'done', rid: m.rid, available: !!r?.ok, url }); }
+    }
     else if (m.op === 'split') await split(m);
   } catch (e) { post({ type: 'error', rid: m.rid, message: e?.name === 'CancelledError' ? 'cancelled' : (e?.message || String(e)) }); }
 };

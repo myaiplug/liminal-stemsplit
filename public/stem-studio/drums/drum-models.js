@@ -48,3 +48,53 @@ export function drumModel() {
     },
   };
 }
+
+/**
+ * HT-RoFormer 6-stem drum model (Sucial/drumsep-ht-roformer): kick, snare, hi-hat, toms, cymbals, other.
+ *
+ * LICENCE: the author has published NO licence for these weights (checked 2026-11-16), so the browser build is
+ * NOT hosted by us and this option stays "unavailable" until a URL is configured. The ONNX is produced locally from the
+ * author's checkpoint with scripts/drumsep/htr_export.py + f16w.py (host-side STFT, fp16-stored weights, 377.5 MB).
+ * Once the author grants permission, upload that exact file somewhere CORS-enabled (e.g. a Hugging Face repo) and set
+ * DRUM_HTR_DEFAULT_URL below (or pass ?drummodel_htr=<url> / globalThis.STEM_STUDIO_DRUM_HTR_URL). The worker checks the
+ * SHA-256, so a file exported with a different torch version needs DRUM_HTR_SHA256 / DRUM_HTR_BYTES updated too.
+ */
+export const DRUM_HTR_FILE = 'drumsep_htr_core_f16w.onnx';
+export const DRUM_HTR_DEFAULT_URL = null; // set after the author grants permission to redistribute
+export const DRUM_HTR_SHA256 = 'f1802cfb113ef4b13fd3be5ac4130517b22247bab6138421e24f322a5dbcc008';
+export const DRUM_HTR_BYTES = 377528839;
+
+export function drumHtrUrl() {
+  try {
+    const q = new URLSearchParams(globalThis.location?.search || '').get('drummodel_htr');
+    if (q) return new URL(q, globalThis.location.href).href;
+  } catch { /* ignore */ }
+  if (globalThis.STEM_STUDIO_DRUM_HTR_URL) return new URL(globalThis.STEM_STUDIO_DRUM_HTR_URL, globalThis.location?.href || import.meta.url).href;
+  return DRUM_HTR_DEFAULT_URL;
+}
+
+export function drumModelHtr() {
+  const url = drumHtrUrl();
+  return {
+    id: 'drumsep-ht-roformer',
+    adapter: 'ht-roformer-drums',
+    label: 'HT-RoFormer (kick · snare · hi-hat · toms · cymbals · perc)',
+    stems: ['kick', 'snare', 'hihat', 'tom', 'cymbal', 'other'],
+    sampleRate: 44100,
+    window: 266240,
+    overlap: 0.5,
+    sizeBytes: DRUM_HTR_BYTES,
+    configured: !!url,
+    files: [{ role: 'model', name: DRUM_HTR_FILE, url: url || '', bytes: DRUM_HTR_BYTES, sha256: DRUM_HTR_SHA256 }],
+    license: {
+      spdx: 'NONE',
+      name: 'No licence published (Sucial/drumsep-ht-roformer)',
+      url: 'https://huggingface.co/Sucial/drumsep-ht-roformer',
+      note: 'The author has not published a licence for the weights. Treat as all rights reserved: personal testing only until the author gives written permission to redistribute it and to use it in a paid product.',
+      caveat: 'no licence; needs the author\'s permission before it is hosted or sold',
+    },
+  };
+}
+
+/** model descriptor by id ('drumsep-v2-w10' default, 'drumsep-ht-roformer') */
+export const drumModelById = (id) => (id === 'drumsep-ht-roformer' ? drumModelHtr() : drumModel());

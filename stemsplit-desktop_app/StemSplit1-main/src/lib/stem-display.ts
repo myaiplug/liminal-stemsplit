@@ -1,14 +1,14 @@
 import type { StemInfo } from './tauri-bridge';
 
 export const DRUM_MICRO_STEMS = new Set([
-  'kick', 'snare', 'toms', 'hh', 'ride', 'crash', 'cymbals', 'overheads',
+  'kick', 'snare', 'toms', 'hh', 'ride', 'crash', 'cymbals', 'overheads', 'perc',
 ]);
 
 export const VOCAL_MICRO_STEMS = new Set(['lead', 'back', 'backing', 'adlibs']);
 
 export const STEM_DISPLAY_ORDER = [
   'vocals', 'lead', 'back', 'backing', 'adlibs',
-  'drums', 'kick', 'snare', 'toms', 'hh', 'ride', 'crash', 'cymbals', 'overheads',
+  'drums', 'kick', 'snare', 'toms', 'hh', 'ride', 'crash', 'cymbals', 'overheads', 'perc',
   'bass', 'guitar', 'piano', 'other', 'instrumental',
 ];
 

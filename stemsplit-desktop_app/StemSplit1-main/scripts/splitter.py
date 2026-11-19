@@ -1170,6 +1170,10 @@ class AudioSeparator:
                 self.engine = 'crisp'
             elif variant_meta.get('backend') == 'kara2':
                 self.engine = 'kara2'
+            elif variant_meta.get('backend') == 'drumsep_htr':
+                self.engine = 'drumsep_htr'
+            elif variant_meta.get('backend') == 'karaoke_mbr':
+                self.engine = 'karaoke_mbr'
             elif variant_meta.get('backend') == 'drumsep':
                 self.engine = 'drumsep' if self.model_variant == 'drumsep_49469' else 'drumsep_mdx'
             elif self.model_variant.startswith('drumsep_mdx23c_'):
@@ -2803,7 +2807,7 @@ class AudioSeparator:
     def _validate_stem_output(self, stems: Dict[str, np.ndarray]) -> None:
         """Fail fast if the model did not produce the requested number of stems."""
         engine = getattr(self, 'engine', '')
-        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke', 'kara2', 'postfx', 'analyze', 'crisp'):
+        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'drumsep_htr', 'karaoke', 'kara2', 'karaoke_mbr', 'postfx', 'analyze', 'crisp'):
             return
         requested = getattr(self, 'stems_count', None)
         if not requested:
@@ -2835,6 +2839,19 @@ class AudioSeparator:
     def _separate_kara2(self, input_file: str, audio, sr, progress_hook=None):
         from kara2_separate import separate_kara2
         return separate_kara2(audio, sr, progress_hook=progress_hook)
+
+    def _separate_drumsep_htr(self, input_file: str, audio, sr, progress_hook=None):
+        """HT-RoFormer 6-stem drum split (weights downloaded on first use; see drumsep_htr_separate)."""
+        from drumsep_htr_separate import separate_drums, LIMINAL_STEM_NAMES
+        device = 'cuda' if getattr(self, 'device', 'cpu') == 'cuda' else 'cpu'
+        stems = separate_drums(audio, sr, progress_hook=progress_hook, device=device)
+        # Liminal's drum micro-stem names (kick, snare, hh, toms, cymbals, perc)
+        return {LIMINAL_STEM_NAMES[name]: wave for name, wave in stems.items()}
+
+    def _separate_karaoke_mbr(self, input_file: str, audio, sr, progress_hook=None):
+        """Mel-Band RoFormer karaoke: lead vocals + backing (input minus lead)."""
+        from karaoke_mbr_separate import separate_lead_backing
+        return separate_lead_backing(audio, sr, progress_hook=progress_hook)
 
     def separate(
         self,
@@ -2907,7 +2924,7 @@ class AudioSeparator:
             engine_with_real_progress = None
             if hasattr(self, 'engine'):
                 eng = self.engine
-                if eng in ('mdx', 'ensemble', 'karaoke', 'kara2', 'crisp', 'drumsep_mdx', 'mdx_net', 'instrument', 'vr', 'roformer'):
+                if eng in ('mdx', 'ensemble', 'karaoke', 'kara2', 'karaoke_mbr', 'crisp', 'drumsep_mdx', 'drumsep_htr', 'mdx_net', 'instrument', 'vr', 'roformer'):
                     engine_with_real_progress = eng
 
             is_cpu = self.device == 'cpu'
@@ -2952,6 +2969,10 @@ class AudioSeparator:
                 stems = self._separate_crisp(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'drumsep_mdx':
                 stems = self._separate_drumsep_mdx(input_file, audio, sr, progress_hook)
+            elif engine_with_real_progress == 'drumsep_htr':
+                stems = self._separate_drumsep_htr(input_file, audio, sr, progress_hook)
+            elif engine_with_real_progress == 'karaoke_mbr':
+                stems = self._separate_karaoke_mbr(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'mdx_net':
                 stems = self._separate_mdx_net(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'instrument':
@@ -2974,7 +2995,7 @@ class AudioSeparator:
             if progress_hook:
                 progress_hook(3, 5, " Stem separation complete", 91)
                 
-            if not self.fast_mode and 'vocals' in stems and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx'):
+            if not self.fast_mode and 'vocals' in stems and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx', 'drumsep_htr', 'karaoke_mbr'):
                 # First try applying sophisticated UVR denoise if the model is present
                 uvr_denoiser_path = find_vr_model_file('UVR-DeNoise-Lite.pth') or ''
                 
@@ -3009,7 +3030,7 @@ class AudioSeparator:
             if (
                 hasattr(self, 'stems_count')
                 and self.stems_count == 2
-                and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx', 'karaoke', 'kara2')
+                and getattr(self, 'engine', '') not in ('instrument', 'drumsep', 'drumsep_mdx', 'drumsep_htr', 'karaoke', 'kara2', 'karaoke_mbr')
             ):
                 if 'vocals' in stems:
                     # Create 2 stems: vocals + instrumental (everything else)
@@ -3191,7 +3212,7 @@ def main():
     parser.add_argument('--emit-json', action='store_true', help='Emit manifest JSON to stdout')
     parser.add_argument('--engine', type=str, default='demucs',
                         choices=['demucs', 'spleeter', 'mdx', 'mdx_net', 'roformer', 'vr',
-                                 'ensemble', 'karaoke', 'kara2', 'crisp', 'drumsep', 'postfx', 'instrument', 'analyze'],
+                                 'ensemble', 'karaoke', 'kara2', 'karaoke_mbr', 'crisp', 'drumsep', 'drumsep_htr', 'postfx', 'instrument', 'analyze'],
                         help='Separation engine to use or analyze')
     parser.add_argument('--model-variant', type=str, default=None,
                         help='Model variant ID from the Liminal model catalog')

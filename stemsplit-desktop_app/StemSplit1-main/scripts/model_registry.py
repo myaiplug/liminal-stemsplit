@@ -27,6 +27,21 @@ MODEL_VARIANTS: Dict[str, Dict[str, Any]] = {
         'stems': 3,
         'license': 'Apache-2.0',
     },
+    'drumsep_ht_roformer': {
+        'backend': 'drumsep_htr',
+        'filename': 'drumsep_ht_roformer.ckpt',
+        'stems': 6,
+        # No license published by the author. Downloaded at runtime from the author's HF repo, never bundled.
+        'license': 'UNLICENSED (author permission required before selling)',
+        'runtime_download': True,
+    },
+    'mbr_karaoke_lead_backing': {
+        'backend': 'karaoke_mbr',
+        'filename': 'model.onnx',
+        'stems': 2,
+        'license': 'MIT (ONNX re-export); original aufr33/viperx checkpoint has no stated license',
+        'runtime_download': True,
+    },
     # ── Demucs ──────────────────────────────────────────────
     'demucs_htdemucs': {'backend': 'demucs', 'model': 'htdemucs'},
     'demucs_htdemucs_ft': {'backend': 'demucs', 'model': 'htdemucs_ft'},

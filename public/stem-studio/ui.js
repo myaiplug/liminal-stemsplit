@@ -16,7 +16,7 @@ const el = (tag, attrs, ...kids) => {
   for (const c of kids.flat()) if (c != null && c !== false) n.append(c.nodeType ? c : document.createTextNode(c));
   return n;
 };
-const KIND_COLOR = { vocals: '#22d3ee', drums: '#f97316', bass: '#a855f7', other: '#22c55e', kick: '#fb923c', snare: '#f43f5e', hats: '#facc15', toms: '#ec4899', cymbals: '#fde047', sub808: '#8b5cf6', guitar: '#34d399', piano: '#60a5fa', instrumental: '#22c55e', ride: '#fcd34d', crash: '#fbbf24' };
+const KIND_COLOR = { vocals: '#22d3ee', drums: '#f97316', bass: '#a855f7', other: '#22c55e', kick: '#fb923c', snare: '#f43f5e', hats: '#facc15', toms: '#ec4899', cymbals: '#fde047', sub808: '#8b5cf6', guitar: '#34d399', piano: '#60a5fa', instrumental: '#22c55e', ride: '#fcd34d', crash: '#fbbf24', perc: '#fb7185', lead: '#67e8f9', backing: '#a5b4fc' };
 const fmtT = (s) => { s = Math.max(0, s || 0); const m = Math.floor(s / 60); return `${m}:${(s - m * 60).toFixed(1).padStart(4, '0')}`; };
 const fmtDb = (v, d = 1) => (Number.isFinite(v) ? v.toFixed(d) : '—');
 const dec = (step) => (String(step).includes('.') ? String(step).split('.')[1].length : 0);
@@ -213,7 +213,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
     catch (e) { console.error(e); busyTxt.textContent = `${label} failed: ${e.message || e}`; announce(`${label} failed.`); await new Promise((r) => setTimeout(r, 3000)); }
     finally { ui.busy = null; busyBox.hidden = true; }
   }
-  const TABS = [['fx', 'Effects'], ['clean', 'Clean-up'], ['loud', 'Loudness'], ['drums', 'Drums']];
+  const TABS = [['fx', 'Effects'], ['clean', 'Clean-up'], ['loud', 'Loudness'], ['drums', 'Drums'], ['vocals', 'Vocals']];
   const tabsEl = el('div', { class: 'tabs', role: 'tablist', 'aria-label': 'Stem tools' }); const paneEl = el('div', { class: 'pane', role: 'tabpanel', id: 'pane' });
   const inspTitle = el('h3', { class: 'sr' });
   for (const [id, label] of TABS) tabsEl.append(el('button', { type: 'button', role: 'tab', id: `tab-${id}`, 'aria-controls': 'pane', 'aria-selected': String(id === ui.tab), text: label, onclick: () => { ui.tab = id; renderInspector(); } }));
@@ -225,7 +225,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
     const t = eng.trackById(eng.selected); paneEl.textContent = ''; paneEl.setAttribute('aria-labelledby', `tab-${ui.tab}`);
     if (!t) { paneEl.append(el('p', { class: 'muted', text: 'Load some stems to start.' })); return; }
     paneEl.append(el('h3', { text: `${t.name} · ${STEM_KINDS[t.kind]?.label || t.kind}` }));
-    ({ fx: renderFx, clean: renderClean, loud: renderLoud, drums: renderDrums })[ui.tab](t);
+    ({ fx: renderFx, clean: renderClean, loud: renderLoud, drums: renderDrums, vocals: renderVocals })[ui.tab](t);
   }
 
   /* ---- effects ---- */
@@ -312,6 +312,13 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
     else paneEl.append(el('p', { class: 'muted', text: 'Drum split module is loading…' }));
   }
 
+  /* ---- vocals: lead / backing ---- */
+  function renderVocals(t) {
+    if (t.kind !== 'vocals') { paneEl.append(el('div', { class: 'warn-note', text: 'Select the Vocals stem (or set a stem’s type to Vocals) to split lead from backing vocals.' })); return; }
+    if (ui.vocalsMount) ui.vocalsMount(paneEl, t, { eng, withBusy, announce, el, renderInspector, KIND_COLOR });
+    else paneEl.append(el('p', { class: 'muted', text: 'Vocal split module is loading…' }));
+  }
+
   /* ================= 4. export ================= */
   const exFormat = el('select', { 'aria-label': 'Format', id: 'ex-format' }, [['pcm24', 'WAV 24-bit'], ['float32', 'WAV 32-bit float'], ['pcm16', 'WAV 16-bit'], ['mp3', 'MP3 (LAME)']].map(([v, l]) => el('option', { value: v, text: l })));
   const exNorm = el('select', { 'aria-label': 'Normalise', id: 'ex-norm' }, [['off', 'Off — render exactly what you hear'], ['mix', 'Mix to target (stems keep their balance)'], ['each', 'Every stem to target']].map(([v, l]) => el('option', { value: v, text: l })));
@@ -384,6 +391,7 @@ export async function mountStudio(root, { brand = BRAND_LIMINAL, appName = 'Stem
   try { await mountSplitSource(splitHost, addStems, { appTitle: appName }); }
   catch (e) { splitHost.append(el('p', { class: 'warn-note', text: `The in-browser splitter could not start (${e.message || e}). You can still import stems or audio files.` })); }
   try { const m = await import('./drums-ui.js'); ui.drumsMount = m.mountDrums; } catch { /* drum module not present yet */ }
+  try { const m = await import('./vocals-ui.js'); ui.vocalsMount = m.mountVocals; } catch { /* vocal module not present yet */ }
   refreshSessions(); renderInspector(); requestAnimationFrame(tick);
   window.__studioUi = api;
   return api;
