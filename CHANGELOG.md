@@ -6,6 +6,7 @@ All notable changes to Liminal StemSplit. Versions follow SemVer; the single sou
 ## Unreleased
 
 ### Added
+- **Optional Rust / Candle separation engine (demix-rs, Apache-2.0).** Two new models: "Studio Vocals · Rust engine" (viperx BS-RoFormer 317, 171 MB Q8 GGUF downloaded on first use) and "BS-Roformer SW 6-Stem · Rust engine" (a one-time local conversion of the existing SW checkpoint). Both need the `demix` binary from `scripts/demix/build_demix.ps1` / `.sh`. The binary is not in the installer because it statically links symphonia (MPL-2.0). On CPU it is about 4x slower than the Python engine, with matching output (about 30 dB agreement). It is not the default. **The viperx weights have no published licence.**
 - **DrumSep HT-RoFormer** (Sucial) six-stem drum split (kick, snare, hi-hat, toms, cymbals, other→perc). Desktop: new `drumsep_ht_roformer` engine, now the default for drum re-splits. It downloads on first use from a pinned Hugging Face commit and checks every file's SHA-256. Browser Stem Studio: optional "HT-RoFormer 6-stem" model in the Drums tab, disabled until it is hosted. **The author has published no licence. Get permission before release.**
 - **Mel-Band RoFormer Karaoke** lead / backing split. Desktop: `mbr_karaoke_lead_backing`, an option next to KARA2 (KARA2 stays the default). Browser Stem Studio: new **Vocals** tab that splits a vocal stem into "Lead vocal" and "Backing vocals" (WebGPU with CPU fallback). Lead + backing add back up to the stem exactly. MIT ONNX, with a caveat about the upstream checkpoint.
 

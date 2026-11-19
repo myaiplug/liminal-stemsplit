@@ -150,6 +150,48 @@ export const SEPARATION_MODELS: SeparationModel[] = [
     vramGb: 4,
   },
   {
+    id: 'demix_bs_roformer_viperx317',
+    engine: 'roformer',
+    category: 'vocal',
+    name: 'Studio Vocals · Rust engine (demix-rs)',
+    tagline: 'viperx BS-RoFormer 317 on Candle, no Python',
+    filename: 'bs-roformer-viperx-317-q8_0.gguf',
+    description:
+      'Optional Rust / Candle backend (demix-rs, Apache-2.0) running the viperx BS-RoFormer ep 317 vocal model from a 171 MB Q8 GGUF that downloads on first use. Output matches the Python engine within ~30 dB. On CPU it is about 4x slower than the Python engine; the CUDA build is untested here. Needs the demix binary (scripts/demix/build_demix.ps1). viperx published no license for these weights.',
+    stems: [2],
+    tier: 'specialty',
+    accent: '#f97316',
+    glow: 'rgba(249,115,22,0.45)',
+    glyph: '⚙',
+    tags: ['roformer', 'rust', 'candle', 'experimental', 'download-on-use', 'license-pending'],
+    recommendedFor: ['vocal / instrumental', 'Python-free installs', 'GPU testing'],
+    speed: 'slow',
+    quality: 90,
+    sizeMb: 171,
+    vramGb: 2,
+  },
+  {
+    id: 'demix_bs_roformer_sw',
+    engine: 'instrument',
+    category: 'multistem',
+    name: 'BS-Roformer SW 6-Stem · Rust engine (demix-rs)',
+    tagline: 'vocals · bass · drums · guitar · piano · other on Candle',
+    filename: 'BS-Roformer-SW.ckpt',
+    description:
+      'The same BS-Roformer SW checkpoint as the 6-stem instrument model, converted once to a demix-rs GGUF (Q8, ~187 MB, a few seconds, no extra download) and run by the Rust / Candle backend. About 3.5x slower than the Python engine on CPU. Needs the demix binary (scripts/demix/build_demix.ps1).',
+    stems: [6],
+    tier: 'specialty',
+    accent: '#fb923c',
+    glow: 'rgba(251,146,60,0.45)',
+    glyph: '⚙',
+    tags: ['6-stem', 'rust', 'candle', 'experimental'],
+    recommendedFor: ['band mixes', 'Python-free installs', 'GPU testing'],
+    speed: 'slow',
+    quality: 92,
+    sizeMb: 187,
+    vramGb: 2,
+  },
+  {
     id: 'kara2_student',
     engine: 'karaoke',
     category: 'karaoke',
@@ -929,7 +971,7 @@ export function stemCountLabel(count: number, engine: SeparationEngine): string 
 
 /** Expected output stem labels for instrument engine variants. */
 export function getInstrumentStemLabels(modelId: string): string[] {
-  if (modelId === 'inst_bs_roformer_sw') {
+  if (modelId === 'inst_bs_roformer_sw' || modelId === 'demix_bs_roformer_sw') {
     return ['vocals', 'bass', 'drums', 'guitar', 'piano', 'other'];
   }
   if (modelId === 'inst_choir' || modelId === 'inst_choir_mf' || modelId === 'inst_choir_aufr33') {

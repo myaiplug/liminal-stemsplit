@@ -33,6 +33,18 @@ SHA-256 of the vendored ORT files (npm `onnxruntime-web@1.30.0`, unmodified):
 | DrumSep HT-RoFormer (6 drum stems: kick, snare, hi-hat, toms, cymbals, other) | https://huggingface.co/Sucial/drumsep-ht-roformer @ 403f3a0 (checkpoint 746,878,931 B + `infer/` code) | **No licence published** (weights *and* inference code; checked 2026-11-16) | 746,878,931 B (desktop); browser derivative 377,528,839 B (sha256 f1802cfb…cc008) | **Not redistributed.** Desktop: downloaded on first use from the pinned HF commit, every file SHA-256 checked (`scripts/drumsep_htr_separate.py`); the inference code is fetched with the weights and never vendored. Browser: the derived ONNX is **not hosted** (`DRUM_HTR_DEFAULT_URL = null`), so the option is disabled for users. Treat as all rights reserved: **written permission from the author (Sucial) is needed before it is hosted or sold in Liminal.** |
 | Mel-Band RoFormer Karaoke (lead / backing), WebGPU ONNX re-export | https://huggingface.co/Acapellas/mel-band-roformer-karaoke-webgpu @ b29e3d0 | MIT (model card) | 460,432,035 B (fp16) / 918,421,248 B (fp32) | Downloaded at runtime, SHA-256 checked (desktop `scripts/karaoke_mbr_separate.py`, browser `vocals/karaoke-models.js`). **Provenance caveat:** MIT covers the ONNX re-export; the original aufr33 / viperx karaoke checkpoint was shared without a stated licence (same situation as BS-RoFormer-SW). |
 
+## Desktop: optional demix-rs (Rust / Candle) engine
+
+Not bundled. `stemsplit-desktop_app/StemSplit1-main/scripts/demix_rs_separate.py` calls a `demix` binary the user builds
+with `scripts/demix/build_demix.ps1` / `build_demix.sh` (pinned to rzafiamy/demix-rs @ 4b9c6fd).
+
+| Component | Source | License | Notes |
+| --- | --- | --- | --- |
+| demix-rs (`demix` CLI and library) | https://github.com/rzafiamy/demix-rs @ 4b9c6fd | Apache-2.0 (checked: LICENSE, Cargo.toml) | `scripts/ref/` holds MIT code from Music-Source-Separation-Training, used only for upstream parity tests |
+| Its Rust dependencies (cargo metadata, 247 crates) | crates.io | Mostly MIT / Apache-2.0, plus Zlib, Unicode-3.0, BSL-1.0, Unlicense, BSD and **14 symphonia crates under MPL-2.0** | Because of MPL-2.0, the compiled binary must not go into the installer under the MIT/Apache/BSD-only rule. That is why it is built on the user's machine. |
+| BS-RoFormer viperx ep 317 weights, demix GGUF | https://huggingface.co/rleo/BS-RoFormer-viperx-317-GGUF @ 8c15929 (q8_0 171,169,984 B, sha256 26014042…8a1; f16 320,085,184 B, sha256 173ed1be…a4f) | **No licence.** The card says `other` / "upstream-viperx". The original `model_bs_roformer_ep_317_sdr_12.9755.ckpt` was published by viperx (GitHub playdasegunda) in the UVR model repository (TRvlvr/model_repo release `all_public_uvr_models`; the repo has no licence) and is linked by Music-Source-Separation-Training (code MIT; nothing there covers the weights). No terms were found anywhere (checked 2026-11-17). | Downloaded on first use, SHA-256 checked, never bundled. Treat as all rights reserved until viperx gives permission. The existing `roformer_bs_317` audio-separator model uses the same checkpoint, so the same flag applies to it. |
+| BS-Roformer-SW, demix GGUF | converted locally from the BS-Roformer-SW.ckpt the instrument engine already uses | Same as BS-Roformer-SW (see above) | No extra download. Note: `jarredou/BS-Roformer-SW`, the HF repo Liminal downloads SW from, now answers 401 and the account is gone (checked 2026-11-17). New installs can't fetch SW from there. |
+
 ## Code consulted / derived
 
 * **elicwhite/bs-roformer-web** (MIT) — https://github.com/elicwhite/bs-roformer-web.

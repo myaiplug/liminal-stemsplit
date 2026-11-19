@@ -1174,6 +1174,8 @@ class AudioSeparator:
                 self.engine = 'drumsep_htr'
             elif variant_meta.get('backend') == 'karaoke_mbr':
                 self.engine = 'karaoke_mbr'
+            elif variant_meta.get('backend') == 'demix_rs':
+                self.engine = 'demix_rs'
             elif variant_meta.get('backend') == 'drumsep':
                 self.engine = 'drumsep' if self.model_variant == 'drumsep_49469' else 'drumsep_mdx'
             elif self.model_variant.startswith('drumsep_mdx23c_'):
@@ -2807,7 +2809,7 @@ class AudioSeparator:
     def _validate_stem_output(self, stems: Dict[str, np.ndarray]) -> None:
         """Fail fast if the model did not produce the requested number of stems."""
         engine = getattr(self, 'engine', '')
-        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'drumsep_htr', 'karaoke', 'kara2', 'karaoke_mbr', 'postfx', 'analyze', 'crisp'):
+        if engine in ('instrument', 'drumsep', 'drumsep_mdx', 'drumsep_htr', 'karaoke', 'kara2', 'karaoke_mbr', 'demix_rs', 'postfx', 'analyze', 'crisp'):
             return
         requested = getattr(self, 'stems_count', None)
         if not requested:
@@ -2852,6 +2854,19 @@ class AudioSeparator:
         """Mel-Band RoFormer karaoke: lead vocals + backing (input minus lead)."""
         from karaoke_mbr_separate import separate_lead_backing
         return separate_lead_backing(audio, sr, progress_hook=progress_hook)
+
+    def _separate_demix_rs(self, input_file: str, audio, sr, progress_hook=None):
+        """Rust / Candle BS-RoFormer via the demix-rs binary (optional engine; see demix_rs_separate)."""
+        from demix_rs_separate import separate as demix_separate
+        meta = resolve_model_variant(getattr(self, 'model_variant', '') or '') or {}
+        variant = meta.get('demix_variant', 'viperx317')
+        search = [Path(get_audio_separator_model_dir())]
+        for alias in ('BS-Roformer-SW.ckpt', 'model_BandSplit-Roformer_SW_by-jarredou.ckpt'):
+            found = resolve_model_file(alias)
+            if found:
+                search.append(Path(found).parent)
+        device = 'cuda' if getattr(self, 'device', 'cpu') == 'cuda' else 'cpu'
+        return demix_separate(variant, audio, sr, device=device, sw_search_dirs=search, progress_hook=progress_hook)
 
     def separate(
         self,
@@ -2924,7 +2939,7 @@ class AudioSeparator:
             engine_with_real_progress = None
             if hasattr(self, 'engine'):
                 eng = self.engine
-                if eng in ('mdx', 'ensemble', 'karaoke', 'kara2', 'karaoke_mbr', 'crisp', 'drumsep_mdx', 'drumsep_htr', 'mdx_net', 'instrument', 'vr', 'roformer'):
+                if eng in ('mdx', 'ensemble', 'karaoke', 'kara2', 'karaoke_mbr', 'demix_rs', 'crisp', 'drumsep_mdx', 'drumsep_htr', 'mdx_net', 'instrument', 'vr', 'roformer'):
                     engine_with_real_progress = eng
 
             is_cpu = self.device == 'cpu'
@@ -2973,6 +2988,8 @@ class AudioSeparator:
                 stems = self._separate_drumsep_htr(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'karaoke_mbr':
                 stems = self._separate_karaoke_mbr(input_file, audio, sr, progress_hook)
+            elif engine_with_real_progress == 'demix_rs':
+                stems = self._separate_demix_rs(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'mdx_net':
                 stems = self._separate_mdx_net(input_file, audio, sr, progress_hook)
             elif engine_with_real_progress == 'instrument':
@@ -3212,7 +3229,7 @@ def main():
     parser.add_argument('--emit-json', action='store_true', help='Emit manifest JSON to stdout')
     parser.add_argument('--engine', type=str, default='demucs',
                         choices=['demucs', 'spleeter', 'mdx', 'mdx_net', 'roformer', 'vr',
-                                 'ensemble', 'karaoke', 'kara2', 'karaoke_mbr', 'crisp', 'drumsep', 'drumsep_htr', 'postfx', 'instrument', 'analyze'],
+                                 'ensemble', 'karaoke', 'kara2', 'karaoke_mbr', 'crisp', 'drumsep', 'drumsep_htr', 'demix_rs', 'postfx', 'instrument', 'analyze'],
                         help='Separation engine to use or analyze')
     parser.add_argument('--model-variant', type=str, default=None,
                         help='Model variant ID from the Liminal model catalog')

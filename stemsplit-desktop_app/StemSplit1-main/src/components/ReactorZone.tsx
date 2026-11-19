@@ -1975,6 +1975,8 @@ const ReactorZone: React.FC = () => {
                                             if (modelId === 'drumsep_ht_roformer') setSplitStems('6');
                                             if (modelId === 'mbr_karaoke_lead_backing') setSplitStems('2');
                                             if (modelId === 'kara2_student') setSplitStems('3');
+                                            if (modelId === 'demix_bs_roformer_viperx317') setSplitStems('2');
+                                            if (modelId === 'demix_bs_roformer_sw') setSplitStems('6');
                                         }}
                                         onPlaySound={(name) => play(name as SoundEffect)}
                                     />
@@ -2021,6 +2023,12 @@ const ReactorZone: React.FC = () => {
                                     {splitEngine === 'karaoke' && (splitModelVariant === 'mbr_karaoke_lead_backing'
                                         ? <span className="text-[10px] text-pink-300 mt-1 block">Mel-Band karaoke returns lead and backing (input minus lead). Run it on a vocals stem for lead / backing vocals.</span>
                                         : <span className="text-[10px] text-pink-300 mt-1 block">Karaoke mode returns lead vocals, backing vocals, and instrumental.</span>)}
+                                    {splitModelVariant.startsWith('demix_') && (
+                                        <span className="text-[10px] text-orange-300 mt-1 block">
+                                            Experimental Rust / Candle engine (demix-rs). Needs the demix binary: run scripts/demix/build_demix.ps1 once, or set LIMINAL_DEMIX_BIN. Slower than the default engine on CPU.
+                                            {splitModelVariant === 'demix_bs_roformer_viperx317' ? ' viperx published no license for these weights: personal use until that is cleared.' : ''}
+                                        </span>
+                                    )}
                                     {splitEngine === 'instrument' && (
                                         <span className="text-[10px] text-lime-300 mt-1 block">
                                             Instrument mode isolates a target stem + other. Best workflow: 4-stem first, then re-run on guitar/piano/other.
